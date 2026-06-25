@@ -1,0 +1,337 @@
+/* ── CCM Tecnologia — Design Tokens ─────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;700;900&display=swap');
+
+:root {
+  --ccm-blue:        #204294;
+  --ccm-blue-light:  #00B0FA;
+  --ccm-teal:        #00C8B4;
+  --ccm-ink:         #0C1921;
+  --ccm-white:       #FFFFFF;
+  --ccm-gray-medium: #C3C3C3;
+  --ccm-gray-dark:   #4A4A4A;
+  --ccm-charcoal:    #2D2D2D;
+  --ccm-bg:          #F0F1F4;
+  --ccm-line:        #D8DBE3;
+  --font: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: var(--font);
+  background: var(--ccm-bg);
+  color: var(--ccm-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Bootstrap overrides ── */
+.btn-ccm-primary {
+  background-color: var(--ccm-blue);
+  border-color: var(--ccm-blue);
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+.btn-ccm-primary:hover,
+.btn-ccm-primary:focus {
+  background-color: #1a3578;
+  border-color: #1a3578;
+  color: #fff;
+}
+.btn-ccm-primary:disabled {
+  background-color: var(--ccm-gray-medium);
+  border-color: var(--ccm-gray-medium);
+}
+
+/* ── Login page ── */
+.login-page {
+  min-height: 100vh;
+  background: var(--ccm-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+.login-page::after {
+  content: '';
+  position: absolute;
+  right: -200px; bottom: -200px;
+  width: 700px; height: 700px;
+  background: radial-gradient(ellipse at center, rgba(0,176,234,0.18) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+.login-card {
+  position: relative;
+  z-index: 1;
+  background: #132230;
+  border: 1px solid #1a3a6e;
+  border-top: 3px solid var(--ccm-blue-light);
+  border-radius: 8px;
+  padding: 48px 48px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.4);
+}
+.login-logo {
+  height: auto;
+  max-height: 32px;
+  max-width: 180px;
+  width: auto;
+  display: block;
+  object-fit: contain;
+  margin: 0 auto 32px;
+}
+.login-title {
+  color: #fff;
+  font-weight: 900;
+  font-size: 18px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  text-align: center;
+  margin-bottom: 4px;
+}
+.login-subtitle {
+  color: var(--ccm-blue-light);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .18em;
+  text-align: center;
+  margin-bottom: 32px;
+}
+.login-label {
+  color: var(--ccm-gray-medium);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .14em;
+  margin-bottom: 6px;
+}
+.login-input {
+  background: var(--ccm-ink) !important;
+  border: 1px solid #1a3a6e !important;
+  color: #fff !important;
+  border-radius: 4px;
+  padding: 12px 14px;
+  font-size: 14px;
+  font-family: var(--font);
+  transition: border-color .2s;
+}
+.login-input:focus {
+  border-color: var(--ccm-blue-light) !important;
+  box-shadow: 0 0 0 3px rgba(0,176,234,.15) !important;
+}
+.login-input::placeholder { color: #4a5a6a; }
+.login-footer-text {
+  text-align: center;
+  font-size: 10px;
+  color: var(--ccm-gray-dark);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-top: 24px;
+}
+
+/* ── Sidebar layout ── */
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+}
+.sidebar {
+  width: 240px;
+  min-width: 240px;
+  background: var(--ccm-ink);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0;
+  height: 100vh;
+  z-index: 100;
+  border-right: 1px solid #1a3a6e;
+  transition: width .25s;
+}
+.sidebar-logo {
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid #1a3a6e;
+}
+.sidebar-logo img {
+  height: auto;
+  max-height: 26px;
+  max-width: 160px;
+  width: auto;
+  object-fit: contain;
+}
+.sidebar-nav {
+  flex: 1;
+  padding: 12px 0;
+  overflow-y: auto;
+}
+.sidebar-section-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: #4a5a6a;
+  padding: 12px 20px 6px;
+}
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  color: #9BA4AB;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  border-left: 3px solid transparent;
+  transition: all .15s;
+}
+.sidebar-link:hover {
+  color: #fff;
+  background: rgba(255,255,255,.05);
+}
+.sidebar-link.active {
+  color: var(--ccm-blue-light);
+  border-left-color: var(--ccm-blue-light);
+  background: rgba(0,176,234,.07);
+}
+.sidebar-link i { font-size: 16px; }
+.sidebar-footer {
+  padding: 16px 20px;
+  border-top: 1px solid #1a3a6e;
+}
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sidebar-avatar {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: var(--ccm-blue);
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.sidebar-user-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sidebar-user-role {
+  font-size: 10px;
+  color: var(--ccm-blue-light);
+  text-transform: uppercase;
+  letter-spacing: .1em;
+}
+
+/* ── Main content ── */
+.main-content {
+  margin-left: 240px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+.topbar {
+  background: #fff;
+  border-bottom: 1px solid var(--ccm-line);
+  padding: 14px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.topbar-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ccm-ink);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+.topbar-eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--ccm-blue);
+  text-transform: uppercase;
+  letter-spacing: .18em;
+}
+.page-body {
+  padding: 28px;
+  flex: 1;
+}
+
+/* ── KPI Cards ── */
+.kpi-card {
+  background: #fff;
+  border-radius: 6px;
+  padding: 20px 22px;
+  border-top: 3px solid var(--ccm-blue);
+  box-shadow: 0 1px 4px rgba(12,25,33,.07);
+}
+.kpi-card.cyan  { border-top-color: var(--ccm-blue-light); }
+.kpi-card.teal  { border-top-color: var(--ccm-teal); }
+.kpi-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .14em;
+  color: var(--ccm-gray-dark);
+  margin-bottom: 8px;
+}
+.kpi-value {
+  font-size: 32px;
+  font-weight: 900;
+  color: var(--ccm-ink);
+  line-height: 1;
+}
+.kpi-sub {
+  font-size: 11px;
+  color: var(--ccm-gray-medium);
+  margin-top: 4px;
+}
+
+/* ── Section titles ── */
+.section-eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .2em;
+  color: var(--ccm-blue);
+  margin-bottom: 4px;
+}
+.section-title {
+  font-size: 20px;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: var(--ccm-ink);
+  margin-bottom: 20px;
+}
+
+/* ── Charts card ── */
+.chart-card {
+  background: #fff;
+  border-radius: 6px;
+  padding: 20px 22px;
+  box-shadow: 0 1px 4px rgba(12,25,33,.07);
+}
+.chart-card-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--ccm-ink);
+  margin-bottom: 16px;
+}
