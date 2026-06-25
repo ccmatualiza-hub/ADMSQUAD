@@ -1,18 +1,17 @@
 # ── Stage 1: build / dependências ─────────────────────────────────────────────
 FROM python:3.12.3-slim-bookworm AS builder
 
-ENV UV_VERSION=0.2.0
 ENV UV_COMPILE_BYTECODE=1
 ENV UV_LINK_MODE=copy
 
 WORKDIR /app
 
-# Instalar uv
-RUN pip install --no-cache-dir uv==${UV_VERSION}
+# Instalar uv (versão recente)
+RUN pip install --no-cache-dir uv
 
 # Copiar manifesto antes do código (cache de layer)
 COPY pyproject.toml .
-RUN uv sync --no-dev --frozen
+RUN uv sync --no-group dev
 
 # Copiar código fonte
 COPY src/ ./src/
