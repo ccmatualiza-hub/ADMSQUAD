@@ -48,24 +48,24 @@ export default function LoginPage() {
           className="login-logo"
         />
 
-        {/* Logo Squad Warriors */}
+        {/* Título */}
+        <div className="login-title">ADMSQUAD</div>
+
+        {/* Logo Squad Warriors — abaixo do título, maior */}
         <img
           src="/logo-squad-warriors.png"
           alt="Squad Warriors"
           style={{
             height: 'auto',
-            maxHeight: '72px',
-            maxWidth: '72px',
+            maxHeight: '110px',
+            maxWidth: '110px',
             width: 'auto',
             display: 'block',
             objectFit: 'contain',
-            margin: '10px auto 18px',
+            margin: '12px auto 24px',
             borderRadius: '6px',
           }}
         />
-
-        <div className="login-title">ADMSQUAD</div>
-        <div className="login-subtitle">CCM Tecnologia</div>
 
         <form onSubmit={handleSubmit(handleLogin)} noValidate>
           {/* E-mail */}
