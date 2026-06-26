@@ -61,8 +61,8 @@ export default function Sidebar() {
             alt="Squad Warriors"
             style={{
               height: 'auto',
-              maxHeight: '72px',
-              maxWidth: '72px',
+              maxHeight: '110px',
+              maxWidth: '110px',
               width: 'auto',
               objectFit: 'contain',
               borderRadius: '6px',
