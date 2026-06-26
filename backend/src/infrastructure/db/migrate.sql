@@ -4,7 +4,7 @@
 CREATE TABLE IF NOT EXISTS users (
   id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   name        VARCHAR(120)         NOT NULL,
-  email       VARCHAR(255)         NOT NULL UNIQUE,
+  email       VARCHAR(191)         NOT NULL UNIQUE COMMENT 'max 191 para utf8mb4 + index',
   password    VARCHAR(255)         NOT NULL COMMENT 'bcrypt hash',
   role        ENUM('admin','user') NOT NULL DEFAULT 'user',
   avatar_url  VARCHAR(500)         NULL,
