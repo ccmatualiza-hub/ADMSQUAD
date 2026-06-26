@@ -119,3 +119,85 @@ async def get_cliente(
         raise HTTPException(status_code=404, detail="Cliente não encontrado")
     keys = list(result.keys())
     return ClienteDetalhe(**dict(zip(keys, row)))
+
+
+# ── Monitor de Atualizações ──────────────────────────────────────────────────
+
+class AtualizacaoItem(BaseModel):
+    cod: int | None = None
+    razao: str | None = None
+    sistema: str | None = None
+    bd: str | None = None
+    versao: str | None = None
+    ticketupdate: str | None = None
+    tipo: str | None = None
+    pacote: str | None = None
+    useragend: str | None = None
+    prioridade: int | None = None
+    horaupdate: str | None = None
+    concluido: str | None = None
+
+
+class AtualizacaoStats(BaseModel):
+    total: int
+    pct_nao_iniciado: float   # concluido = '0'
+    pct_em_andamento: float   # concluido != '0' e != '100'
+    pct_concluido: float      # concluido = '100'
+    nao_iniciado: int
+    em_andamento: int
+    concluido_count: int
+
+
+@router.get("/atualizacoes/stats", response_model=AtualizacaoStats)
+async def atualizacoes_stats(
+    _: Annotated[dict, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> AtualizacaoStats:
+    try:
+        result = await session.execute(
+            text("""
+                SELECT
+                    COUNT(*) as total,
+                    SUM(CASE WHEN TRIM(concluido) = '0' THEN 1 ELSE 0 END) as nao_iniciado,
+                    SUM(CASE WHEN TRIM(concluido) != '0' AND TRIM(concluido) != '100' THEN 1 ELSE 0 END) as em_andamento,
+                    SUM(CASE WHEN TRIM(concluido) = '100' THEN 1 ELSE 0 END) as concluido_count
+                FROM tbl_linx
+                WHERE DATE(STR_TO_DATE(dt_atualiza, '%d/%m/%Y')) = CURDATE()
+                   OR dt_atualiza = DATE_FORMAT(CURDATE(), '%d/%m/%Y')
+            """)
+        )
+        row = result.fetchone()
+        total = int(row[0]) if row and row[0] else 0
+        nao   = int(row[1]) if row and row[1] else 0
+        em    = int(row[2]) if row and row[2] else 0
+        conc  = int(row[3]) if row and row[3] else 0
+        def pct(n): return round(n / total * 100, 1) if total > 0 else 0.0
+        return AtualizacaoStats(
+            total=total, nao_iniciado=nao, em_andamento=em, concluido_count=conc,
+            pct_nao_iniciado=pct(nao), pct_em_andamento=pct(em), pct_concluido=pct(conc)
+        )
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
+@router.get("/atualizacoes", response_model=list[AtualizacaoItem])
+async def list_atualizacoes(
+    _: Annotated[dict, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> list[AtualizacaoItem]:
+    try:
+        result = await session.execute(
+            text("""
+                SELECT cod, razao, sistema, bd, versao, ticketupdate, tipo, pacote,
+                       useragend, prioridade, horaupdate, concluido
+                FROM tbl_linx
+                WHERE DATE(STR_TO_DATE(dt_atualiza, '%d/%m/%Y')) = CURDATE()
+                   OR dt_atualiza = DATE_FORMAT(CURDATE(), '%d/%m/%Y')
+                ORDER BY prioridade ASC, razao ASC
+            """)
+        )
+        rows = result.fetchall()
+        keys = list(result.keys())
+        return [AtualizacaoItem(**dict(zip(keys, r))) for r in rows]
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))

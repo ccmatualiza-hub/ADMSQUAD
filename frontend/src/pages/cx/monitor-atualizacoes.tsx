@@ -1,0 +1,209 @@
+import { useEffect, useState } from 'react';
+import { http } from '../../lib/http-client';
+
+interface Stats {
+  total: number;
+  pct_nao_iniciado: number;
+  pct_em_andamento: number;
+  pct_concluido: number;
+  nao_iniciado: number;
+  em_andamento: number;
+  concluido_count: number;
+}
+
+interface Atualizacao {
+  cod: number | null;
+  razao: string | null;
+  sistema: string | null;
+  bd: string | null;
+  versao: string | null;
+  ticketupdate: string | null;
+  tipo: string | null;
+  pacote: string | null;
+  useragend: string | null;
+  prioridade: number | null;
+  horaupdate: string | null;
+  concluido: string | null;
+}
+
+function concluidoStyle(val: string | null): React.CSSProperties {
+  const v = (val ?? '').trim();
+  if (v === '100') return { background: '#1DB954', color: '#fff', borderRadius: 4, padding: '2px 8px', fontWeight: 700, fontSize: 12, display: 'inline-block' };
+  if (v === '0' || v === '')  return { background: '#fff', color: '#333', borderRadius: 4, padding: '2px 8px', fontWeight: 700, fontSize: 12, display: 'inline-block', border: '1px solid #ddd' };
+  return { background: '#F9E000', color: '#5a4000', borderRadius: 4, padding: '2px 8px', fontWeight: 700, fontSize: 12, display: 'inline-block' };
+}
+
+function StatCard({ label, value, sub, borderColor, loading }: {
+  label: string; value: string; sub: string; borderColor: string; loading?: boolean;
+}) {
+  return (
+    <div style={{ background: '#fff', borderRadius: 6, padding: '18px 20px', borderTop: `3px solid ${borderColor}`, boxShadow: '0 1px 4px rgba(12,25,33,.07)' }}>
+      <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.14em', color: 'var(--ccm-gray-dark)', marginBottom: 8 }}>{label}</div>
+      <div style={{ fontSize: 28, fontWeight: 900, color: 'var(--ccm-ink)', lineHeight: 1 }}>
+        {loading ? <span className="spinner-border spinner-border-sm" style={{ width: 20, height: 20 }} /> : value}
+      </div>
+      <div style={{ fontSize: 11, color: 'var(--ccm-gray-medium)', marginTop: 4 }}>{sub}</div>
+    </div>
+  );
+}
+
+export default function MonitorAtualizacoes({ onBack }: { onBack: () => void }) {
+  const [stats, setStats]       = useState<Stats | null>(null);
+  const [items, setItems]       = useState<Atualizacao[]>([]);
+  const [loading, setLoading]   = useState(true);
+  const [search, setSearch]     = useState('');
+
+  const today = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const [s, d] = await Promise.all([
+        http.get<Stats>('/api/cx/atualizacoes/stats'),
+        http.get<Atualizacao[]>('/api/cx/atualizacoes'),
+      ]);
+      setStats(s);
+      setItems(d);
+    } catch { /* silent */ }
+    finally { setLoading(false); }
+  };
+
+  useEffect(() => { fetchData(); }, []);
+
+  const filtered = items.filter(i =>
+    [i.razao, i.sistema, i.bd, i.ticketupdate, i.useragend].some(v =>
+      (v ?? '').toLowerCase().includes(search.toLowerCase()))
+  );
+
+  const th = { color: '#fff', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.05em', padding: '10px 12px', textAlign: 'left' as const, fontSize: 10, whiteSpace: 'nowrap' as const };
+  const td = { padding: '9px 12px', fontSize: 12, whiteSpace: 'nowrap' as const };
+
+  return (
+    <div>
+      {/* Breadcrumb */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+        <button onClick={onBack} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'var(--ccm-blue)', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.1em' }}>
+          <i className="bi bi-arrow-left me-1" />CX
+        </button>
+        <span style={{ color: 'var(--ccm-gray-medium)', fontSize: 12 }}>/</span>
+        <span style={{ color: 'var(--ccm-gray-dark)', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.1em' }}>Monitor de Atualizações</span>
+      </div>
+      <div className="section-title mb-1" style={{ textAlign: 'center' }}>Monitor de Atualizações</div>
+      <div style={{ textAlign: 'center', fontSize: 12, color: 'var(--ccm-gray-dark)', marginBottom: 20, textTransform: 'capitalize' }}>{today}</div>
+
+      {/* KPI Cards */}
+      <div className="row g-3 mb-4">
+        <div className="col-6 col-lg-3">
+          <StatCard label="Total Agendado" value={String(stats?.total ?? 0)}
+            sub="Atualizações hoje" borderColor="var(--ccm-blue)" loading={loading} />
+        </div>
+        <div className="col-6 col-lg-3">
+          <StatCard label="Não Iniciado"
+            value={`${stats?.pct_nao_iniciado ?? 0}%`}
+            sub={`${stats?.nao_iniciado ?? 0} registros`}
+            borderColor="#C3C3C3" loading={loading} />
+        </div>
+        <div className="col-6 col-lg-3">
+          <StatCard label="Em Andamento"
+            value={`${stats?.pct_em_andamento ?? 0}%`}
+            sub={`${stats?.em_andamento ?? 0} registros`}
+            borderColor="#F9E000" loading={loading} />
+        </div>
+        <div className="col-6 col-lg-3">
+          <StatCard label="Concluído"
+            value={`${stats?.pct_concluido ?? 0}%`}
+            sub={`${stats?.concluido_count ?? 0} registros`}
+            borderColor="#1DB954" loading={loading} />
+        </div>
+      </div>
+
+      {/* Barra de progresso visual */}
+      {stats && stats.total > 0 && (
+        <div style={{ background: '#fff', borderRadius: 6, padding: '14px 20px', marginBottom: 20, boxShadow: '0 1px 4px rgba(12,25,33,.07)' }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--ccm-gray-dark)', textTransform: 'uppercase', letterSpacing: '.1em', marginBottom: 8 }}>Progresso Geral</div>
+          <div style={{ display: 'flex', height: 16, borderRadius: 99, overflow: 'hidden', gap: 2 }}>
+            {stats.pct_nao_iniciado > 0 && <div style={{ width: `${stats.pct_nao_iniciado}%`, background: '#C3C3C3', transition: 'width .5s' }} title={`Não iniciado: ${stats.pct_nao_iniciado}%`} />}
+            {stats.pct_em_andamento > 0 && <div style={{ width: `${stats.pct_em_andamento}%`, background: '#F9E000', transition: 'width .5s' }} title={`Em andamento: ${stats.pct_em_andamento}%`} />}
+            {stats.pct_concluido > 0 && <div style={{ width: `${stats.pct_concluido}%`, background: '#1DB954', transition: 'width .5s' }} title={`Concluído: ${stats.pct_concluido}%`} />}
+          </div>
+          <div style={{ display: 'flex', gap: 16, marginTop: 8, fontSize: 11, color: 'var(--ccm-gray-dark)' }}>
+            <span><span style={{ display: 'inline-block', width: 10, height: 10, background: '#C3C3C3', borderRadius: 2, marginRight: 4 }} />Não Iniciado {stats.pct_nao_iniciado}%</span>
+            <span><span style={{ display: 'inline-block', width: 10, height: 10, background: '#F9E000', borderRadius: 2, marginRight: 4 }} />Em Andamento {stats.pct_em_andamento}%</span>
+            <span><span style={{ display: 'inline-block', width: 10, height: 10, background: '#1DB954', borderRadius: 2, marginRight: 4 }} />Concluído {stats.pct_concluido}%</span>
+          </div>
+        </div>
+      )}
+
+      {/* Tabela */}
+      <div className="table-card">
+        <div style={{ background: 'var(--ccm-ink)', padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderRadius: '6px 6px 0 0' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <i className="bi bi-arrow-repeat" style={{ color: '#00B0FA', fontSize: 16 }} />
+            <span style={{ color: '#fff', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.12em' }}>
+              {filtered.length} atualizações
+            </span>
+          </div>
+          <button className="btn btn-sm" style={{ background: 'rgba(255,255,255,.1)', color: '#fff', fontSize: 11 }} onClick={fetchData}>
+            <i className="bi bi-arrow-clockwise me-1" />Atualizar
+          </button>
+        </div>
+
+        <div style={{ padding: '10px 20px', borderBottom: '1px solid var(--ccm-line)' }}>
+          <input type="text" className="form-control" placeholder="Buscar razão, sistema, ticket ou agendado..."
+            value={search} onChange={e => setSearch(e.target.value)}
+            style={{ maxWidth: 360, fontSize: 13 }} />
+        </div>
+
+        <div style={{ overflowX: 'auto' }}>
+          {loading ? (
+            <div style={{ padding: 32, textAlign: 'center', color: 'var(--ccm-gray-dark)' }}>
+              <span className="spinner-border spinner-border-sm me-2" />Carregando...
+            </div>
+          ) : filtered.length === 0 ? (
+            <div style={{ padding: 48, textAlign: 'center', color: 'var(--ccm-gray-dark)' }}>
+              <i className="bi bi-calendar-check" style={{ fontSize: 32, display: 'block', marginBottom: 12, color: 'var(--ccm-gray-medium)' }} />
+              Nenhuma atualização agendada para hoje
+            </div>
+          ) : (
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ background: 'var(--ccm-blue)' }}>
+                  <th style={th}>Razão Social</th>
+                  <th style={th}>Sistema</th>
+                  <th style={th}>BD</th>
+                  <th style={th}>Versão</th>
+                  <th style={th}>Ticket</th>
+                  <th style={{ ...th, textAlign: 'center' }}>Tipo</th>
+                  <th style={th}>Pacote</th>
+                  <th style={th}>Agendado</th>
+                  <th style={{ ...th, textAlign: 'center' }}>P</th>
+                  <th style={th}>Hora</th>
+                  <th style={{ ...th, textAlign: 'center' }}>%</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((item, i) => (
+                  <tr key={item.cod ?? i} style={{ background: i % 2 === 0 ? '#fff' : '#F7F8FA', borderBottom: '1px solid var(--ccm-line)' }}>
+                    <td style={{ ...td, fontWeight: 600, maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.razao || '—'}</td>
+                    <td style={{ ...td, color: 'var(--ccm-blue)', fontWeight: 600 }}>{item.sistema || '—'}</td>
+                    <td style={td}>{item.bd || '—'}</td>
+                    <td style={td}>{item.versao || '—'}</td>
+                    <td style={{ ...td, color: 'var(--ccm-blue)' }}>{item.ticketupdate || '—'}</td>
+                    <td style={{ ...td, textAlign: 'center', fontWeight: 600 }}>{item.tipo || '—'}</td>
+                    <td style={td}>{item.pacote || '—'}</td>
+                    <td style={td}>{item.useragend || '—'}</td>
+                    <td style={{ ...td, textAlign: 'center', fontWeight: 700 }}>{item.prioridade ?? '—'}</td>
+                    <td style={td}>{item.horaupdate || '—'}</td>
+                    <td style={{ ...td, textAlign: 'center' }}>
+                      <span style={concluidoStyle(item.concluido)}>{(item.concluido ?? '0').trim()}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
