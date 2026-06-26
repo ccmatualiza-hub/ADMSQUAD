@@ -68,7 +68,11 @@ export default function MonitorAtualizacoes({ onBack }: { onBack: () => void }) 
     finally { setLoading(false); }
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => {
+    fetchData();
+    const interval = setInterval(fetchData, 20000);
+    return () => clearInterval(interval);
+  }, []);
 
   const filtered = items.filter(i =>
     [i.razao, i.sistema, i.bd, i.ticketupdate, i.useragend].some(v =>
