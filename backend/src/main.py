@@ -3,11 +3,10 @@ import sys
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.api.routers import auth, user
+from src.api.routers import auth, user, dashboard
 from src.config import settings
 from src.logger import logger
 
-# ── Fail-Fast: validar variáveis obrigatórias ──────────────────────────────────
 REQUIRED = ["db_host", "db_user", "db_password", "db_name", "jwt_secret"]
 for field in REQUIRED:
     if not getattr(settings, field, None):
@@ -22,7 +21,6 @@ app = FastAPI(
     openapi_url="/api/openapi.json",
 )
 
-# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[settings.frontend_url],
@@ -31,9 +29,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Routers
 app.include_router(auth.router)
 app.include_router(user.router)
+app.include_router(dashboard.router)
 
 
 @app.get("/health", tags=["infra"])

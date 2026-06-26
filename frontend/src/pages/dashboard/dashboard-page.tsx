@@ -1,8 +1,11 @@
+import { useEffect, useState } from 'react';
 import {
-  BarChart, Bar, LineChart, Line,
+  LineChart, Line,
+  BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts';
 import { useAuthStore } from '../../store/auth-store';
+import { http } from '../../lib/http-client';
 
 const CCM_COLORS = {
   blue:      '#204294',
@@ -10,14 +13,6 @@ const CCM_COLORS = {
   teal:      '#00C8B4',
   gray:      '#C3C3C3',
 };
-
-// Dados de exemplo — substituir por chamadas reais à API
-const kpiData = [
-  { label: 'Usuários Ativos',    value: '142',   sub: 'Total cadastrados',       variant: ''     },
-  { label: 'Acessos Hoje',       value: '38',    sub: 'Últimas 24 horas',        variant: 'cyan' },
-  { label: 'Taxa de Conclusão',  value: '89,5%', sub: 'Média geral de tarefas',  variant: 'teal' },
-  { label: 'Pendências',         value: '7',     sub: 'Itens aguardando ação',   variant: ''     },
-];
 
 const monthlyData = [
   { mes: 'Jan', acessos: 210, conclusoes: 180 },
@@ -39,10 +34,31 @@ const performanceData = [
 
 export default function DashboardPage() {
   const user = useAuthStore((s) => s.user);
+  const [clientesAtivos, setClientesAtivos] = useState<number | null>(null);
+  const [loadingClientes, setLoadingClientes] = useState(true);
+
+  useEffect(() => {
+    http.get<{ total: number }>('/api/dashboard/clientes-ativos')
+      .then(res => setClientesAtivos(res.total))
+      .catch(() => setClientesAtivos(null))
+      .finally(() => setLoadingClientes(false));
+  }, []);
+
+  const kpiData = [
+    {
+      label: 'Clientes Ativos',
+      value: loadingClientes ? '...' : clientesAtivos !== null ? clientesAtivos.toLocaleString('pt-BR') : '—',
+      sub: 'Status Ativo e Ativo VPU',
+      variant: 'cyan',
+    },
+    { label: 'Média OKR S',        value: '96,8%', sub: '11 colaboradores',       variant: 'green' },
+    { label: 'Média Cursos',       value: '82,2%', sub: 'Média por colaborador',  variant: 'blue'  },
+    { label: 'Aproveitamento PDI', value: '89,5%', sub: 'Média da equipe',        variant: ''      },
+    { label: 'KPIs Média',         value: '90,1%', sub: 'Média da equipe',        variant: ''      },
+  ];
 
   return (
     <>
-      {/* Saudação */}
       <div className="mb-4">
         <div className="section-eyebrow">Bem-vindo de volta</div>
         <div className="section-title">{user?.name ?? 'Usuário'}</div>
@@ -51,10 +67,14 @@ export default function DashboardPage() {
       {/* KPI Cards */}
       <div className="row g-3 mb-4">
         {kpiData.map((kpi) => (
-          <div key={kpi.label} className="col-12 col-sm-6 col-xl-3">
+          <div key={kpi.label} className="col-12 col-sm-6 col-xl">
             <div className={`kpi-card ${kpi.variant}`}>
               <div className="kpi-label">{kpi.label}</div>
-              <div className="kpi-value">{kpi.value}</div>
+              <div className="kpi-value">
+                {kpi.value === '...'
+                  ? <span className="spinner-border spinner-border-sm" style={{ width: 20, height: 20 }} />
+                  : kpi.value}
+              </div>
               <div className="kpi-sub">{kpi.sub}</div>
             </div>
           </div>
@@ -63,7 +83,6 @@ export default function DashboardPage() {
 
       {/* Gráficos */}
       <div className="row g-3">
-        {/* Linha — Acessos vs Conclusões */}
         <div className="col-12 col-lg-7">
           <div className="chart-card">
             <div className="chart-card-title">Acessos vs Conclusões — 2026</div>
@@ -72,9 +91,7 @@ export default function DashboardPage() {
                 <CartesianGrid stroke={CCM_COLORS.gray} strokeDasharray="3 3" />
                 <XAxis dataKey="mes" tick={{ fontSize: 11, fill: '#4A4A4A' }} />
                 <YAxis tick={{ fontSize: 11, fill: '#4A4A4A' }} />
-                <Tooltip
-                  contentStyle={{ background: '#fff', border: '1px solid #C3C3C3', borderRadius: 4, fontSize: 12 }}
-                />
+                <Tooltip contentStyle={{ background: '#fff', border: '1px solid #C3C3C3', borderRadius: 4, fontSize: 12 }} />
                 <Legend wrapperStyle={{ fontSize: 11 }} />
                 <Line type="monotone" dataKey="acessos"    stroke={CCM_COLORS.blue}      strokeWidth={2} dot={{ r: 3 }} name="Acessos" />
                 <Line type="monotone" dataKey="conclusoes" stroke={CCM_COLORS.blueLight}  strokeWidth={2} dot={{ r: 3 }} name="Conclusões" />
@@ -83,7 +100,6 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Barra — Performance por colaborador */}
         <div className="col-12 col-lg-5">
           <div className="chart-card">
             <div className="chart-card-title">Aproveitamento PDI — Equipe</div>
@@ -92,16 +108,9 @@ export default function DashboardPage() {
                 <CartesianGrid stroke={CCM_COLORS.gray} strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="nome" tick={{ fontSize: 10, fill: '#4A4A4A' }} />
                 <YAxis domain={[0, 100]} tick={{ fontSize: 11, fill: '#4A4A4A' }} />
-                <Tooltip
-                  contentStyle={{ background: '#fff', border: '1px solid #C3C3C3', borderRadius: 4, fontSize: 12 }}
-                  formatter={(v: number) => [`${v}%`, 'Aproveitamento']}
-                />
-                <Bar
-                  dataKey="valor"
-                  fill={CCM_COLORS.blue}
-                  radius={[3, 3, 0, 0]}
-                  name="Aproveitamento %"
-                />
+                <Tooltip contentStyle={{ background: '#fff', border: '1px solid #C3C3C3', borderRadius: 4, fontSize: 12 }}
+                  formatter={(v: number) => [`${v}%`, 'Aproveitamento']} />
+                <Bar dataKey="valor" fill={CCM_COLORS.blue} radius={[3, 3, 0, 0]} name="Aproveitamento %" />
               </BarChart>
             </ResponsiveContainer>
           </div>
