@@ -2,8 +2,8 @@ import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './sidebar';
 
 const PAGE_TITLES: Record<string, { eyebrow: string; title: string }> = {
-  '/dashboard':      { eyebrow: 'Visão Geral',   title: 'Dashboard'               },
-  '/cx':             { eyebrow: 'Atendimento',    title: 'CX - Customer Experience' },
+  '/dashboard':      { eyebrow: 'Visão Geral',   title: 'ADMSQUAD - WARRIORS'               },
+  '/cx':             { eyebrow: 'Atendimento',    title: 'CX - Cust. Experience' },
   '/pmo':            { eyebrow: 'Projetos',       title: 'PMO - Implantação'       },
   '/gestao':         { eyebrow: 'Administração',  title: 'Gestão'                  },
   '/configuracoes':  { eyebrow: 'Sistema',        title: 'Configurações'           },
