@@ -112,7 +112,7 @@ export default function UsuariosPage({ onBack }: Props) {
         <span style={{ color: 'var(--ccm-gray-medium)', fontSize: 12 }}>/</span>
         <span style={{ color: 'var(--ccm-gray-dark)', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.1em' }}>Gestão de Usuários</span>
       </div>
-      <div className="section-title mb-4">Gestão de Usuários</div>
+      <div className="section-title mb-4" style={{ textAlign: 'center' }}>Gestão de Usuários</div>
 
       {/* Tabela */}
       <div className="table-card">

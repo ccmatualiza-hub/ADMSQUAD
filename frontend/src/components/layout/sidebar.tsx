@@ -55,8 +55,11 @@ export default function Sidebar() {
       </nav>
 
       <div className="sidebar-footer">
-        {/* Logo Squad Warriors acima do usuário */}
+        {/* Título ADMSQUAD + Logo Squad Warriors acima do usuário */}
         <div style={{ textAlign: 'center', marginBottom: '14px', paddingBottom: '14px', borderBottom: '1px solid #1a3a6e' }}>
+          <div style={{ color: '#fff', fontWeight: 900, fontSize: 13, textTransform: 'uppercase', letterSpacing: '.2em', marginBottom: '8px' }}>
+            ADMSQUAD
+          </div>
           <img
             src="/logo-squad-warriors.png"
             alt="Squad Warriors"
