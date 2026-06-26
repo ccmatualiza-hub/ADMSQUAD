@@ -9,10 +9,11 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { to: '/dashboard',  icon: 'bi-grid-1x2-fill',     label: 'Dashboard'    },
-  { to: '/usuarios',   icon: 'bi-people-fill',        label: 'Usuários'     },
-  { to: '/relatorios', icon: 'bi-bar-chart-line-fill', label: 'Relatórios'  },
-  { to: '/configuracoes', icon: 'bi-gear-fill',       label: 'Configurações'},
+  { to: '/dashboard',  icon: 'bi-grid-1x2-fill',        label: 'Dashboard'              },
+  { to: '/cx',         icon: 'bi-headset',               label: 'CX - Customer Experience' },
+  { to: '/pmo',        icon: 'bi-building',              label: 'PMO - Implantação'      },
+  { to: '/gestao',     icon: 'bi-graph-up-arrow',        label: 'Gestão'                 },
+  { to: '/configuracoes', icon: 'bi-gear-fill',          label: 'Configurações'          },
 ];
 
 export default function Sidebar() {
@@ -34,12 +35,10 @@ export default function Sidebar() {
 
   return (
     <aside className="sidebar">
-      {/* Logo */}
       <div className="sidebar-logo">
         <img src="/logo-ccm-white.png" alt="CCM Tecnologia" />
       </div>
 
-      {/* Navegação */}
       <nav className="sidebar-nav">
         <div className="sidebar-section-label">Menu Principal</div>
         {NAV_ITEMS.map((item) => (
@@ -54,7 +53,6 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      {/* Usuário + logout */}
       <div className="sidebar-footer">
         <div className="sidebar-user mb-2">
           <div className="sidebar-avatar">{initials}</div>

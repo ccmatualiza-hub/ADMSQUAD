@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import LoginPage    from './pages/login/login-page';
+import LoginPage     from './pages/login/login-page';
 import DashboardPage from './pages/dashboard/dashboard-page';
-import AppLayout    from './components/layout/app-layout';
+import AppLayout     from './components/layout/app-layout';
 import ProtectedRoute from './components/ui/protected-route';
 
 export default function App() {
@@ -18,20 +18,21 @@ export default function App() {
       >
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard"     element={<DashboardPage />} />
-        <Route path="usuarios"      element={<PlaceholderPage title="Usuários" />} />
-        <Route path="relatorios"    element={<PlaceholderPage title="Relatórios" />} />
-        <Route path="configuracoes" element={<PlaceholderPage title="Configurações" />} />
+        <Route path="cx"            element={<PlaceholderPage title="CX - Customer Experience" eyebrow="Atendimento" />} />
+        <Route path="pmo"           element={<PlaceholderPage title="PMO - Implantação" eyebrow="Projetos" />} />
+        <Route path="gestao"        element={<PlaceholderPage title="Gestão" eyebrow="Administração" />} />
+        <Route path="configuracoes" element={<PlaceholderPage title="Configurações" eyebrow="Sistema" />} />
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );
 }
 
-function PlaceholderPage({ title }: { title: string }) {
+function PlaceholderPage({ title, eyebrow }: { title: string; eyebrow: string }) {
   return (
     <div className="d-flex align-items-center justify-content-center" style={{ minHeight: 300 }}>
       <div className="text-center">
-        <div className="section-eyebrow mb-1">Em construção</div>
+        <div className="section-eyebrow mb-1">{eyebrow}</div>
         <div className="section-title mb-0">{title}</div>
         <p style={{ color: 'var(--ccm-gray-dark)', fontSize: 13, marginTop: 8 }}>
           Esta seção será desenvolvida na próxima etapa.

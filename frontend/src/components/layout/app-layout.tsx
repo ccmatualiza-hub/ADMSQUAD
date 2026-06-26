@@ -2,10 +2,11 @@ import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './sidebar';
 
 const PAGE_TITLES: Record<string, { eyebrow: string; title: string }> = {
-  '/dashboard':      { eyebrow: 'Visão Geral', title: 'Dashboard' },
-  '/usuarios':       { eyebrow: 'Gestão',      title: 'Usuários'  },
-  '/relatorios':     { eyebrow: 'Dados',        title: 'Relatórios'},
-  '/configuracoes':  { eyebrow: 'Sistema',      title: 'Configurações'},
+  '/dashboard':      { eyebrow: 'Visão Geral',   title: 'Dashboard'               },
+  '/cx':             { eyebrow: 'Atendimento',    title: 'CX - Customer Experience' },
+  '/pmo':            { eyebrow: 'Projetos',       title: 'PMO - Implantação'       },
+  '/gestao':         { eyebrow: 'Administração',  title: 'Gestão'                  },
+  '/configuracoes':  { eyebrow: 'Sistema',        title: 'Configurações'           },
 };
 
 export default function AppLayout() {
@@ -16,7 +17,6 @@ export default function AppLayout() {
     <div className="app-layout">
       <Sidebar />
       <div className="main-content">
-        {/* Topbar */}
         <header className="topbar">
           <div>
             <div className="topbar-eyebrow">{meta.eyebrow}</div>
@@ -26,8 +26,6 @@ export default function AppLayout() {
             {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}
           </div>
         </header>
-
-        {/* Conteúdo das páginas */}
         <main className="page-body">
           <Outlet />
         </main>
