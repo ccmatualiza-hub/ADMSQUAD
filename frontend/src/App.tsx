@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage         from './pages/login/login-page';
 import DashboardPage     from './pages/dashboard/dashboard-page';
+import CxPage            from './pages/cx/cx-page';
 import ConfiguracoesPage from './pages/configuracoes/configuracoes-page';
 import OperacoesPage     from './pages/operacoes/operacoes-page';
 import AppLayout         from './components/layout/app-layout';
@@ -13,7 +14,7 @@ export default function App() {
       <Route path="/" element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard"     element={<DashboardPage />} />
-        <Route path="cx"            element={<PlaceholderPage title="CX - Customer Experience" eyebrow="Atendimento" />} />
+        <Route path="cx"            element={<CxPage />} />
         <Route path="pmo"           element={<PlaceholderPage title="PMO - Implantação" eyebrow="Projetos" />} />
         <Route path="operacoes"     element={<OperacoesPage />} />
         <Route path="gestao"        element={<PlaceholderPage title="Gestão" eyebrow="Administração" />} />
