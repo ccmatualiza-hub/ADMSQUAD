@@ -16,14 +16,14 @@ services:
       - FRONTEND_URL=${FRONTEND_URL}
       - TZ=America/Sao_Paulo
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:3001/health')"]
-      interval: 30s
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:3001/health')"]
+      interval: 15s
       timeout: 10s
-      retries: 3
-      start_period: 15s
+      retries: 5
+      start_period: 30s
     networks:
       - ccm_network
-
+ 
   frontend:
     build:
       context: ./frontend
@@ -43,7 +43,7 @@ services:
       start_period: 10s
     networks:
       - ccm_network
-
+ 
 networks:
   ccm_network:
     driver: bridge
