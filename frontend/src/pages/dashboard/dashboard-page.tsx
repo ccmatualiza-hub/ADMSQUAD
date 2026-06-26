@@ -5,7 +5,6 @@ import {
 } from 'recharts';
 import { useAuthStore } from '../../store/auth-store';
 import { http } from '../../lib/http-client';
-import ClientesPmoLista from './clientes-pmo-lista';
 
 const CCM_COLORS = { blue: '#204294', blueLight: '#00B0FA', teal: '#00C8B4', gray: '#C3C3C3' };
 
@@ -27,47 +26,34 @@ const performanceData = [
   { nome: 'Bruna',     valor: 90.5 },
 ];
 
-function KpiCard({ label, value, sub, borderColor, loading, onClick }: {
-  label: string; value: string | number; sub: string; borderColor: string; loading?: boolean; onClick?: () => void;
+function KpiCard({ label, value, sub, borderColor, loading }: {
+  label: string; value: string | number; sub: string; borderColor: string; loading?: boolean;
 }) {
   return (
-    <div
-      onClick={onClick}
-      style={{
-        background: '#fff', borderRadius: 6, padding: '20px 22px',
-        borderTop: `3px solid ${borderColor}`,
-        boxShadow: '0 1px 4px rgba(12,25,33,.07)',
-        cursor: onClick ? 'pointer' : 'default',
-        transition: onClick ? 'box-shadow .15s, transform .15s' : undefined,
-      }}
-      onMouseEnter={e => onClick && ((e.currentTarget as HTMLDivElement).style.boxShadow = '0 4px 16px rgba(12,25,33,.15)')}
-      onMouseLeave={e => onClick && ((e.currentTarget as HTMLDivElement).style.boxShadow = '0 1px 4px rgba(12,25,33,.07)')}
-    >
+    <div style={{ background: '#fff', borderRadius: 6, padding: '20px 22px', borderTop: `3px solid ${borderColor}`, boxShadow: '0 1px 4px rgba(12,25,33,.07)' }}>
       <div className="kpi-label">{label}</div>
       <div className="kpi-value">
         {loading
           ? <span className="spinner-border spinner-border-sm" style={{ width: 20, height: 20 }} />
           : value}
       </div>
-      <div className="kpi-sub">
-        {sub}
-        {onClick && !loading && <span style={{ marginLeft: 6, fontSize: 10, color: borderColor }}><i className="bi bi-arrow-right" /></span>}
-      </div>
+      <div className="kpi-sub">{sub}</div>
     </div>
   );
 }
 
 export default function DashboardPage() {
   const user = useAuthStore((s) => s.user);
-  const [subPage, setSubPage] = useState<null | 'pmo-lista'>(null);
   const [clientesAtivos,   setClientesAtivos]   = useState<number | null>(null);
   const [clientesCx,       setClientesCx]       = useState<number | null>(null);
   const [clientesPmo,      setClientesPmo]      = useState<number | null>(null);
   const [servidoresAtivos, setServidoresAtivos] = useState<number | null>(null);
+  const [pendencias,       setPendencias]       = useState<number | null>(null);
   const [loadingA,   setLoadingA]   = useState(true);
   const [loadingCx,  setLoadingCx]  = useState(true);
   const [loadingPmo, setLoadingPmo] = useState(true);
   const [loadingSrv, setLoadingSrv] = useState(true);
+  const [loadingPen, setLoadingPen] = useState(true);
 
   useEffect(() => {
     http.get<{ total: number }>('/api/dashboard/clientes-ativos')
@@ -78,11 +64,9 @@ export default function DashboardPage() {
       .then(r => setClientesPmo(r.total)).catch(() => setClientesPmo(null)).finally(() => setLoadingPmo(false));
     http.get<{ total: number }>('/api/dashboard/servidores-ativos')
       .then(r => setServidoresAtivos(r.total)).catch(() => setServidoresAtivos(null)).finally(() => setLoadingSrv(false));
+    http.get<{ total: number }>('/api/dashboard/pendencias-abertas')
+      .then(r => setPendencias(r.total)).catch(() => setPendencias(null)).finally(() => setLoadingPen(false));
   }, []);
-
-  if (subPage === 'pmo-lista') {
-    return <ClientesPmoLista onBack={() => setSubPage(null)} />;
-  }
 
   return (
     <>
@@ -93,44 +77,29 @@ export default function DashboardPage() {
 
       <div className="row g-3 mb-4">
         <div className="col-12 col-sm-6 col-xl">
-          <KpiCard
-            label="Clientes Ativos"
+          <KpiCard label="Clientes Ativos"
             value={clientesAtivos !== null ? clientesAtivos.toLocaleString('pt-BR') : '—'}
-            sub="Ativo, Ativo VPU e Implantação"
-            borderColor="#1DB954"
-            loading={loadingA}
-          />
+            sub="Ativos" borderColor="#1DB954" loading={loadingA} />
         </div>
         <div className="col-12 col-sm-6 col-xl">
-          <KpiCard
-            label="Clientes CX"
+          <KpiCard label="Clientes CX"
             value={clientesCx !== null ? clientesCx.toLocaleString('pt-BR') : '—'}
-            sub="Status Ativo e Ativo VPU"
-            borderColor="#00B0FA"
-            loading={loadingCx}
-          />
+            sub="CX" borderColor="#00B0FA" loading={loadingCx} />
         </div>
         <div className="col-12 col-sm-6 col-xl">
-          <KpiCard
-            label="Clientes PMO"
+          <KpiCard label="Clientes PMO"
             value={clientesPmo !== null ? clientesPmo.toLocaleString('pt-BR') : '—'}
-            sub="Status Implantação — ver lista"
-            borderColor="#F9E000"
-            loading={loadingPmo}
-            onClick={() => setSubPage('pmo-lista')}
-          />
+            sub="PMO" borderColor="#F9E000" loading={loadingPmo} />
         </div>
         <div className="col-12 col-sm-6 col-xl">
-          <KpiCard
-            label="Servidores Ativos"
+          <KpiCard label="Servidores Ativos"
             value={servidoresAtivos !== null ? servidoresAtivos.toLocaleString('pt-BR') : '—'}
-            sub="Ativo, VPU, Implantação e Complemento"
-            borderColor="#7F77DD"
-            loading={loadingSrv}
-          />
+            sub="Servidores" borderColor="#7F77DD" loading={loadingSrv} />
         </div>
         <div className="col-12 col-sm-6 col-xl">
-          <KpiCard label="Pendências / Impedimentos" value="0" sub="Em acompanhamento" borderColor="#C3C3C3" />
+          <KpiCard label="Pendências"
+            value={pendencias !== null ? pendencias.toLocaleString('pt-BR') : '—'}
+            sub="Em aberto" borderColor="#E74C3C" loading={loadingPen} />
         </div>
       </div>
 

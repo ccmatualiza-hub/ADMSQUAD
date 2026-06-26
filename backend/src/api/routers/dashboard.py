@@ -83,3 +83,18 @@ async def servidores_ativos(
     )
     row = result.fetchone()
     return {"total": int(row[0]) if row else 0}
+
+
+@router.get("/pendencias-abertas")
+async def pendencias_abertas(
+    _: Annotated[dict, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> dict:
+    try:
+        result = await session.execute(
+            text("SELECT COUNT(*) FROM tbl_pendencias WHERE status != 'resolvido'")
+        )
+        row = result.fetchone()
+        return {"total": int(row[0]) if row else 0}
+    except Exception:
+        return {"total": 0}
