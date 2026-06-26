@@ -98,3 +98,25 @@ async def pendencias_abertas(
         return {"total": int(row[0]) if row else 0}
     except Exception:
         return {"total": 0}
+
+
+@router.get("/pendencias-por-analista")
+async def pendencias_por_analista(
+    _: Annotated[dict, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> list[dict]:
+    try:
+        result = await session.execute(
+            text("""
+                SELECT analista, COUNT(*) as total
+                FROM tbl_pendencias
+                WHERE status != 'resolvido'
+                  AND analista != ''
+                GROUP BY analista
+                ORDER BY total DESC
+            """)
+        )
+        rows = result.fetchall()
+        return [{"nome": r[0], "valor": int(r[1])} for r in rows]
+    except Exception:
+        return []

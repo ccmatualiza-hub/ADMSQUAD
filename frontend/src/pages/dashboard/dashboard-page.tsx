@@ -17,14 +17,7 @@ const monthlyData = [
   { mes: 'Jun', acessos: 310, conclusoes: 290 },
 ];
 
-const performanceData = [
-  { nome: 'Isabela',   valor: 66.7 },
-  { nome: 'Ana Paula', valor: 87.6 },
-  { nome: 'Higor',     valor: 84.0 },
-  { nome: 'Sabrina',   valor: 84.2 },
-  { nome: 'Gabriel',   valor: 71.0 },
-  { nome: 'Bruna',     valor: 90.5 },
-];
+
 
 function KpiCard({ label, value, sub, borderColor, loading }: {
   label: string; value: string | number; sub: string; borderColor: string; loading?: boolean;
@@ -54,6 +47,7 @@ export default function DashboardPage() {
   const [loadingPmo, setLoadingPmo] = useState(true);
   const [loadingSrv, setLoadingSrv] = useState(true);
   const [loadingPen, setLoadingPen] = useState(true);
+  const [pendenciasAnalista, setPendenciasAnalista] = useState<{ nome: string; valor: number }[]>([]);
 
   useEffect(() => {
     http.get<{ total: number }>('/api/dashboard/clientes-ativos')
@@ -64,6 +58,8 @@ export default function DashboardPage() {
       .then(r => setClientesPmo(r.total)).catch(() => setClientesPmo(null)).finally(() => setLoadingPmo(false));
     http.get<{ total: number }>('/api/dashboard/servidores-ativos')
       .then(r => setServidoresAtivos(r.total)).catch(() => setServidoresAtivos(null)).finally(() => setLoadingSrv(false));
+    http.get<{ nome: string; valor: number }[]>('/api/dashboard/pendencias-por-analista')
+      .then(r => setPendenciasAnalista(r)).catch(() => setPendenciasAnalista([]));
     http.get<{ total: number }>('/api/dashboard/pendencias-abertas')
       .then(r => setPendencias(r.total)).catch(() => setPendencias(null)).finally(() => setLoadingPen(false));
   }, []);
@@ -122,17 +118,23 @@ export default function DashboardPage() {
         </div>
         <div className="col-12 col-lg-5">
           <div className="chart-card">
-            <div className="chart-card-title">Aproveitamento PDI — Equipe</div>
-            <ResponsiveContainer width="100%" height={260}>
-              <BarChart data={performanceData} margin={{ top: 4, right: 12, bottom: 4, left: 0 }}>
-                <CartesianGrid stroke={CCM_COLORS.gray} strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="nome" tick={{ fontSize: 10, fill: '#4A4A4A' }} />
-                <YAxis domain={[0, 100]} tick={{ fontSize: 11, fill: '#4A4A4A' }} />
-                <Tooltip contentStyle={{ background: '#fff', border: '1px solid #C3C3C3', borderRadius: 4, fontSize: 12 }}
-                  formatter={(v: number) => [`${v}%`, 'Aproveitamento']} />
-                <Bar dataKey="valor" fill={CCM_COLORS.blue} radius={[3, 3, 0, 0]} name="Aproveitamento %" />
-              </BarChart>
-            </ResponsiveContainer>
+            <div className="chart-card-title">Pendências por Analista — Em Aberto</div>
+            {pendenciasAnalista.length === 0 ? (
+              <div style={{ height: 260, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ccm-gray-dark)', fontSize: 13 }}>
+                Nenhuma pendência em aberto
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={260}>
+                <BarChart data={pendenciasAnalista} margin={{ top: 4, right: 12, bottom: 4, left: 0 }}>
+                  <CartesianGrid stroke={CCM_COLORS.gray} strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="nome" tick={{ fontSize: 10, fill: '#4A4A4A' }} />
+                  <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: '#4A4A4A' }} />
+                  <Tooltip contentStyle={{ background: '#fff', border: '1px solid #C3C3C3', borderRadius: 4, fontSize: 12 }}
+                    formatter={(v: number) => [v, 'Pendências']} />
+                  <Bar dataKey="valor" fill="#E74C3C" radius={[3, 3, 0, 0]} name="Pendências" />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
       </div>
