@@ -162,8 +162,7 @@ async def atualizacoes_stats(
                     SUM(CASE WHEN TRIM(concluido) != '0' AND TRIM(concluido) != '100' THEN 1 ELSE 0 END) as em_andamento,
                     SUM(CASE WHEN TRIM(concluido) = '100' THEN 1 ELSE 0 END) as concluido_count
                 FROM tbl_linx
-                WHERE DATE(STR_TO_DATE(dt_atualiza, '%d/%m/%Y')) = CURDATE()
-                   OR dt_atualiza = DATE_FORMAT(CURDATE(), '%d/%m/%Y')
+                WHERE dt_atualiza = DATE_FORMAT(CURDATE(), '%d/%m/%Y')
             """)
         )
         row = result.fetchone()
@@ -191,8 +190,7 @@ async def list_atualizacoes(
                 SELECT cod, razao, sistema, bd, versao, ticketupdate, tipo, pacote,
                        useragend, prioridade, horaupdate, concluido
                 FROM tbl_linx
-                WHERE DATE(STR_TO_DATE(dt_atualiza, '%d/%m/%Y')) = CURDATE()
-                   OR dt_atualiza = DATE_FORMAT(CURDATE(), '%d/%m/%Y')
+                WHERE dt_atualiza = DATE_FORMAT(CURDATE(), '%d/%m/%Y')
                 ORDER BY prioridade ASC, razao ASC
             """)
         )
