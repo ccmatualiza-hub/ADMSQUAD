@@ -63,11 +63,14 @@ async def list_users(
 ) -> list[UserOut]:
     if current_user.get("role") not in ("admin", "gestor"):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso negado")
-    result = await session.execute(select(UserModel).order_by(UserModel.name))
-    users = result.scalars().all()
-    return [UserOut(id=u.id, name=u.name, email=u.email, role=u.role,
-                    active=u.active, created_at=u.created_at, last_login=u.last_login)
-            for u in users]
+    try:
+        result = await session.execute(select(UserModel).order_by(UserModel.name))
+        users = result.scalars().all()
+        return [UserOut(id=u.id, name=u.name, email=u.email, role=str(u.role),
+                        active=bool(u.active), created_at=u.created_at, last_login=u.last_login)
+                for u in users]
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Erro interno: {str(exc)}")
 
 
 @router.post("/", response_model=UserOut, status_code=status.HTTP_201_CREATED)

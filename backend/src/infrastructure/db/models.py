@@ -14,7 +14,7 @@ class UserModel(Base):
     email: Mapped[str] = mapped_column(String(191), nullable=False, unique=True, index=True)
     password: Mapped[str] = mapped_column(String(255), nullable=False)
     role: Mapped[str] = mapped_column(
-        Enum("admin", "user", name="user_role"), nullable=False, default="user"
+        Enum("admin", "gestor", "operador_cx", "operador_pmo", "user", name="user_role"), nullable=False, default="operador_cx"
     )
     avatar_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
