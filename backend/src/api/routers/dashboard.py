@@ -58,3 +58,16 @@ async def debug_status(
     )
     rows = result.fetchall()
     return {"por_status": [{"status": r[0], "total": int(r[1])} for r in rows]}
+
+
+@router.get("/clientes-pmo-lista")
+async def clientes_pmo_lista(
+    _: Annotated[dict, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> dict:
+    result = await session.execute(
+        text("SELECT * FROM tbl_linx WHERE status = 0 ORDER BY 1 LIMIT 200")
+    )
+    rows = result.fetchall()
+    cols = result.keys()
+    return {"total": len(rows), "clientes": [dict(zip(cols, r)) for r in rows]}
