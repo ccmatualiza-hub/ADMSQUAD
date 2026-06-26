@@ -1,8 +1,9 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import LoginPage     from './pages/login/login-page';
-import DashboardPage from './pages/dashboard/dashboard-page';
-import AppLayout     from './components/layout/app-layout';
-import ProtectedRoute from './components/ui/protected-route';
+import LoginPage         from './pages/login/login-page';
+import DashboardPage     from './pages/dashboard/dashboard-page';
+import ConfiguracoesPage from './pages/configuracoes/configuracoes-page';
+import AppLayout         from './components/layout/app-layout';
+import ProtectedRoute    from './components/ui/protected-route';
 
 export default function App() {
   return (
@@ -22,7 +23,7 @@ export default function App() {
         <Route path="pmo"           element={<PlaceholderPage title="PMO - Implantação" eyebrow="Projetos" />} />
         <Route path="operacoes"     element={<PlaceholderPage title="Operações" eyebrow="Operações" />} />
         <Route path="gestao"        element={<PlaceholderPage title="Gestão" eyebrow="Administração" />} />
-        <Route path="configuracoes" element={<PlaceholderPage title="Configurações" eyebrow="Sistema" />} />
+        <Route path="configuracoes" element={<ConfiguracoesPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>

@@ -38,3 +38,7 @@ def require_admin(current_user: Annotated[dict, Depends(get_current_user)]) -> d
     if current_user.get("role") != "admin":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin only")
     return current_user
+
+
+# Re-export get_db for convenience
+__all__ = ["get_current_user", "require_admin", "get_repository", "get_db"]
