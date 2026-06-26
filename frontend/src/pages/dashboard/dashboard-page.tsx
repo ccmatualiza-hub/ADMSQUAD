@@ -60,12 +60,14 @@ function KpiCard({ label, value, sub, borderColor, loading, onClick }: {
 export default function DashboardPage() {
   const user = useAuthStore((s) => s.user);
   const [subPage, setSubPage] = useState<null | 'pmo-lista'>(null);
-  const [clientesAtivos, setClientesAtivos] = useState<number | null>(null);
-  const [clientesCx,     setClientesCx]     = useState<number | null>(null);
-  const [clientesPmo,    setClientesPmo]    = useState<number | null>(null);
+  const [clientesAtivos,   setClientesAtivos]   = useState<number | null>(null);
+  const [clientesCx,       setClientesCx]       = useState<number | null>(null);
+  const [clientesPmo,      setClientesPmo]      = useState<number | null>(null);
+  const [servidoresAtivos, setServidoresAtivos] = useState<number | null>(null);
   const [loadingA,   setLoadingA]   = useState(true);
   const [loadingCx,  setLoadingCx]  = useState(true);
   const [loadingPmo, setLoadingPmo] = useState(true);
+  const [loadingSrv, setLoadingSrv] = useState(true);
 
   useEffect(() => {
     http.get<{ total: number }>('/api/dashboard/clientes-ativos')
@@ -74,6 +76,8 @@ export default function DashboardPage() {
       .then(r => setClientesCx(r.total)).catch(() => setClientesCx(null)).finally(() => setLoadingCx(false));
     http.get<{ total: number }>('/api/dashboard/clientes-pmo')
       .then(r => setClientesPmo(r.total)).catch(() => setClientesPmo(null)).finally(() => setLoadingPmo(false));
+    http.get<{ total: number }>('/api/dashboard/servidores-ativos')
+      .then(r => setServidoresAtivos(r.total)).catch(() => setServidoresAtivos(null)).finally(() => setLoadingSrv(false));
   }, []);
 
   if (subPage === 'pmo-lista') {
@@ -117,10 +121,16 @@ export default function DashboardPage() {
           />
         </div>
         <div className="col-12 col-sm-6 col-xl">
-          <KpiCard label="Aproveitamento PDI" value="89,5%" sub="Média da equipe" borderColor="#00C8B4" />
+          <KpiCard
+            label="Servidores Ativos"
+            value={servidoresAtivos !== null ? servidoresAtivos.toLocaleString('pt-BR') : '—'}
+            sub="Ativo, VPU, Implantação e Complemento"
+            borderColor="#7F77DD"
+            loading={loadingSrv}
+          />
         </div>
         <div className="col-12 col-sm-6 col-xl">
-          <KpiCard label="KPIs Média" value="90,1%" sub="Média da equipe" borderColor="#C3C3C3" />
+          <KpiCard label="Pendências / Impedimentos" value="0" sub="Em acompanhamento" borderColor="#C3C3C3" />
         </div>
       </div>
 

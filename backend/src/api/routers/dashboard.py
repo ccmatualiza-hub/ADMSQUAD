@@ -71,3 +71,15 @@ async def debug_status(
     )
     rows = result.fetchall()
     return {"por_status": [{"status": r[0], "total": int(r[1])} for r in rows]}
+
+
+@router.get("/servidores-ativos")
+async def servidores_ativos(
+    _: Annotated[dict, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> dict:
+    result = await session.execute(
+        text("SELECT COUNT(*) FROM tbl_linx WHERE status IN ('6 - ATIVO', '7 - ATIVO VPU', '0 - IMPLANTAÇÃO', 'X - ATIVO COMPLEMENTO')")
+    )
+    row = result.fetchone()
+    return {"total": int(row[0]) if row else 0}
