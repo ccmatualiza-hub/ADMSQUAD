@@ -14,8 +14,19 @@ async def clientes_ativos(
     session: Annotated[AsyncSession, Depends(get_db)],
 ) -> dict:
     result = await session.execute(
+        text("SELECT COUNT(*) as total FROM tbl_linx WHERE status IN (0, 6, 7)")
+    )
+    row = result.fetchone()
+    return {"total": row[0] if row else 0}
+
+
+@router.get("/clientes-cx")
+async def clientes_cx(
+    _: Annotated[dict, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> dict:
+    result = await session.execute(
         text("SELECT COUNT(*) as total FROM tbl_linx WHERE status IN (6, 7)")
     )
     row = result.fetchone()
-    total = row[0] if row else 0
-    return {"total": total}
+    return {"total": row[0] if row else 0}

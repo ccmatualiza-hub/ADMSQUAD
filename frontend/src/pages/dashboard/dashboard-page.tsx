@@ -1,18 +1,12 @@
 import { useEffect, useState } from 'react';
 import {
-  LineChart, Line,
-  BarChart, Bar,
+  LineChart, Line, BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts';
 import { useAuthStore } from '../../store/auth-store';
 import { http } from '../../lib/http-client';
 
-const CCM_COLORS = {
-  blue:      '#204294',
-  blueLight: '#00B0FA',
-  teal:      '#00C8B4',
-  gray:      '#C3C3C3',
-};
+const CCM_COLORS = { blue: '#204294', blueLight: '#00B0FA', teal: '#00C8B4', gray: '#C3C3C3' };
 
 const monthlyData = [
   { mes: 'Jan', acessos: 210, conclusoes: 180 },
@@ -32,30 +26,40 @@ const performanceData = [
   { nome: 'Bruna',     valor: 90.5 },
 ];
 
+function KpiCard({ label, value, sub, borderColor, loading }: {
+  label: string; value: string | number; sub: string; borderColor: string; loading?: boolean;
+}) {
+  return (
+    <div style={{ background: '#fff', borderRadius: 6, padding: '20px 22px', borderTop: `3px solid ${borderColor}`, boxShadow: '0 1px 4px rgba(12,25,33,.07)' }}>
+      <div className="kpi-label">{label}</div>
+      <div className="kpi-value">
+        {loading
+          ? <span className="spinner-border spinner-border-sm" style={{ width: 20, height: 20 }} />
+          : value}
+      </div>
+      <div className="kpi-sub">{sub}</div>
+    </div>
+  );
+}
+
 export default function DashboardPage() {
   const user = useAuthStore((s) => s.user);
   const [clientesAtivos, setClientesAtivos] = useState<number | null>(null);
-  const [loadingClientes, setLoadingClientes] = useState(true);
+  const [clientesCx,     setClientesCx]     = useState<number | null>(null);
+  const [loadingA, setLoadingA] = useState(true);
+  const [loadingCx, setLoadingCx] = useState(true);
 
   useEffect(() => {
     http.get<{ total: number }>('/api/dashboard/clientes-ativos')
-      .then(res => setClientesAtivos(res.total))
+      .then(r => setClientesAtivos(r.total))
       .catch(() => setClientesAtivos(null))
-      .finally(() => setLoadingClientes(false));
-  }, []);
+      .finally(() => setLoadingA(false));
 
-  const kpiData = [
-    {
-      label: 'Clientes Ativos',
-      value: loadingClientes ? '...' : clientesAtivos !== null ? clientesAtivos.toLocaleString('pt-BR') : '—',
-      sub: 'Status Ativo e Ativo VPU',
-      variant: 'cyan',
-    },
-    { label: 'Média OKR S',        value: '96,8%', sub: '11 colaboradores',       variant: 'green' },
-    { label: 'Média Cursos',       value: '82,2%', sub: 'Média por colaborador',  variant: 'blue'  },
-    { label: 'Aproveitamento PDI', value: '89,5%', sub: 'Média da equipe',        variant: ''      },
-    { label: 'KPIs Média',         value: '90,1%', sub: 'Média da equipe',        variant: ''      },
-  ];
+    http.get<{ total: number }>('/api/dashboard/clientes-cx')
+      .then(r => setClientesCx(r.total))
+      .catch(() => setClientesCx(null))
+      .finally(() => setLoadingCx(false));
+  }, []);
 
   return (
     <>
@@ -66,19 +70,42 @@ export default function DashboardPage() {
 
       {/* KPI Cards */}
       <div className="row g-3 mb-4">
-        {kpiData.map((kpi) => (
-          <div key={kpi.label} className="col-12 col-sm-6 col-xl">
-            <div className={`kpi-card ${kpi.variant}`}>
-              <div className="kpi-label">{kpi.label}</div>
-              <div className="kpi-value">
-                {kpi.value === '...'
-                  ? <span className="spinner-border spinner-border-sm" style={{ width: 20, height: 20 }} />
-                  : kpi.value}
-              </div>
-              <div className="kpi-sub">{kpi.sub}</div>
-            </div>
-          </div>
-        ))}
+        {/* Card 1 — Clientes Ativos (verde) */}
+        <div className="col-12 col-sm-6 col-xl">
+          <KpiCard
+            label="Clientes Ativos"
+            value={clientesAtivos !== null ? clientesAtivos.toLocaleString('pt-BR') : '—'}
+            sub="Ativo, Ativo VPU e Implantação"
+            borderColor="#1DB954"
+            loading={loadingA}
+          />
+        </div>
+
+        {/* Card 2 — Clientes CX (azul claro) */}
+        <div className="col-12 col-sm-6 col-xl">
+          <KpiCard
+            label="Clientes CX"
+            value={clientesCx !== null ? clientesCx.toLocaleString('pt-BR') : '—'}
+            sub="Status Ativo e Ativo VPU"
+            borderColor="#00B0FA"
+            loading={loadingCx}
+          />
+        </div>
+
+        {/* Card 3 */}
+        <div className="col-12 col-sm-6 col-xl">
+          <KpiCard label="Média Cursos"       value="82,2%" sub="Média por colaborador" borderColor="#204294" />
+        </div>
+
+        {/* Card 4 */}
+        <div className="col-12 col-sm-6 col-xl">
+          <KpiCard label="Aproveitamento PDI" value="89,5%" sub="Média da equipe"       borderColor="#00C8B4" />
+        </div>
+
+        {/* Card 5 */}
+        <div className="col-12 col-sm-6 col-xl">
+          <KpiCard label="KPIs Média"         value="90,1%" sub="Média da equipe"       borderColor="#C3C3C3" />
+        </div>
       </div>
 
       {/* Gráficos */}
