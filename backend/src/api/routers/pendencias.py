@@ -59,7 +59,7 @@ async def list_pendencias(
 ) -> list[PendenciaOut]:
     try:
         result = await session.execute(
-            text("SELECT id, cliente, ticket, descritivo, analista, status, data, dias, created_at FROM tbl_pendencias ORDER BY data DESC, id DESC")
+            text("SELECT id, cliente, ticket, descritivo, analista, status, data, DATEDIFF(CURDATE(), data) as dias, created_at FROM tbl_pendencias ORDER BY data DESC, id DESC")
         )
         rows = result.fetchall()
         keys = list(result.keys())
@@ -118,7 +118,7 @@ async def create_pendencia(
         await session.commit()
         new_id = result.lastrowid
         result2 = await session.execute(
-            text("SELECT id, cliente, ticket, descritivo, analista, status, data, dias, created_at FROM tbl_pendencias WHERE id = :id"),
+            text("SELECT id, cliente, ticket, descritivo, analista, status, data, DATEDIFF(CURDATE(), data) as dias, created_at FROM tbl_pendencias WHERE id = :id"),
             {"id": new_id}
         )
         row = result2.fetchone()
@@ -146,7 +146,7 @@ async def update_pendencia(
     await session.execute(text(f"UPDATE tbl_pendencias SET {', '.join(sets)} WHERE id = :id"), params)
     await session.commit()
     result = await session.execute(
-        text("SELECT id, cliente, ticket, descritivo, analista, status, data, dias, created_at FROM tbl_pendencias WHERE id = :id"),
+        text("SELECT id, cliente, ticket, descritivo, analista, status, data, DATEDIFF(CURDATE(), data) as dias, created_at FROM tbl_pendencias WHERE id = :id"),
         {"id": pendencia_id}
     )
     row = result.fetchone()
