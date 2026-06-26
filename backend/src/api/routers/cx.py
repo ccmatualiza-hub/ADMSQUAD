@@ -135,7 +135,7 @@ class AtualizacaoItem(BaseModel):
     useragend: str | None = None
     prioridade: int | None = None
     horaupdate: str | None = None
-    concluido: str | None = None
+    concluido: str | int | None = None
 
 
 class AtualizacaoStats(BaseModel):
@@ -158,9 +158,9 @@ async def atualizacoes_stats(
             text("""
                 SELECT
                     COUNT(*) as total,
-                    SUM(CASE WHEN TRIM(concluido) = '0' THEN 1 ELSE 0 END) as nao_iniciado,
-                    SUM(CASE WHEN TRIM(concluido) != '0' AND TRIM(concluido) != '100' THEN 1 ELSE 0 END) as em_andamento,
-                    SUM(CASE WHEN TRIM(concluido) = '100' THEN 1 ELSE 0 END) as concluido_count
+                    SUM(CASE WHEN (TRIM(CAST(concluido AS CHAR)) = '0' OR concluido = 0) THEN 1 ELSE 0 END) as nao_iniciado,
+                    SUM(CASE WHEN (TRIM(CAST(concluido AS CHAR)) NOT IN ('0','100') AND concluido NOT IN (0,100)) THEN 1 ELSE 0 END) as em_andamento,
+                    SUM(CASE WHEN (TRIM(CAST(concluido AS CHAR)) = '100' OR concluido = 100) THEN 1 ELSE 0 END) as concluido_count
                 FROM tbl_linx
                 WHERE dt_atualiza = DATE_FORMAT(CURDATE(), '%d/%m/%Y')
             """)

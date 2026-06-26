@@ -23,11 +23,11 @@ interface Atualizacao {
   useragend: string | null;
   prioridade: number | null;
   horaupdate: string | null;
-  concluido: string | null;
+  concluido: string | number | null;
 }
 
-function concluidoStyle(val: string | null): React.CSSProperties {
-  const v = (val ?? '').trim();
+function concluidoStyle(val: string | number | null): React.CSSProperties {
+  const v = String(val ?? '0').trim();
   if (v === '100') return { background: '#1DB954', color: '#fff', borderRadius: 4, padding: '2px 8px', fontWeight: 700, fontSize: 12, display: 'inline-block' };
   if (v === '0' || v === '')  return { background: '#fff', color: '#333', borderRadius: 4, padding: '2px 8px', fontWeight: 700, fontSize: 12, display: 'inline-block', border: '1px solid #ddd' };
   return { background: '#F9E000', color: '#5a4000', borderRadius: 4, padding: '2px 8px', fontWeight: 700, fontSize: 12, display: 'inline-block' };
@@ -199,7 +199,7 @@ export default function MonitorAtualizacoes({ onBack }: { onBack: () => void }) 
                     <td style={{ ...td, textAlign: 'center', fontWeight: 700 }}>{item.prioridade ?? '—'}</td>
                     <td style={td}>{item.horaupdate || '—'}</td>
                     <td style={{ ...td, textAlign: 'center' }}>
-                      <span style={concluidoStyle(item.concluido)}>{(item.concluido ?? '0').trim()}</span>
+                      <span style={concluidoStyle(item.concluido)}>{String(item.concluido ?? '0').trim()}</span>
                     </td>
                   </tr>
                 ))}
