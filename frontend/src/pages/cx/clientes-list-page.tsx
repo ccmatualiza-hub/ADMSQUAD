@@ -248,7 +248,7 @@ export default function ClientesListPage({ onBack }: { onBack: () => void }) {
                   </div>
 
                   {/* Implantação */}
-                  {(detalhe.implat || detalhe.stimplant) && <>
+                  {detalhe.implat && <>
                     <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.15em', color: '#00B0FA', borderBottom: '1px solid var(--ccm-line)', paddingBottom: 6, marginBottom: 14, marginTop: 8 }}>Implantação</div>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0 24px' }}>
                       <Field label="Implantador" value={detalhe.implat} />
