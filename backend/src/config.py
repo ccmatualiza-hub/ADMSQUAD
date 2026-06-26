@@ -1,3 +1,4 @@
+from urllib.parse import quote_plus
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -21,8 +22,10 @@ class Settings(BaseSettings):
 
     @property
     def database_url(self) -> str:
+        # quote_plus escapa caracteres especiais como @ na senha
+        password = quote_plus(self.db_password)
         return (
-            f"mysql+asyncmy://{self.db_user}:{self.db_password}"
+            f"mysql+asyncmy://{self.db_user}:{password}"
             f"@{self.db_host}:{self.db_port}/{self.db_name}"
             f"?charset=utf8mb4"
         )
