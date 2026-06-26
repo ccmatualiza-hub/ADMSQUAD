@@ -1,9 +1,7 @@
 import sys
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
-from src.api.routers import auth, user, dashboard
+from src.api.routers import auth, user, dashboard, pendencias
 from src.config import settings
 from src.logger import logger
 
@@ -13,26 +11,17 @@ for field in REQUIRED:
         logger.critical("missing_required_env", field=field)
         sys.exit(1)
 
-app = FastAPI(
-    title="CCM App API",
-    version="1.0.0",
-    docs_url="/api/docs",
-    redoc_url="/api/redoc",
-    openapi_url="/api/openapi.json",
-)
+app = FastAPI(title="CCM App API", version="1.0.0",
+              docs_url="/api/docs", redoc_url="/api/redoc", openapi_url="/api/openapi.json")
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[settings.frontend_url],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+app.add_middleware(CORSMiddleware,
+    allow_origins=[settings.frontend_url], allow_credentials=True,
+    allow_methods=["*"], allow_headers=["*"])
 
 app.include_router(auth.router)
 app.include_router(user.router)
 app.include_router(dashboard.router)
-
+app.include_router(pendencias.router)
 
 @app.get("/health", tags=["infra"])
 async def health() -> dict:
