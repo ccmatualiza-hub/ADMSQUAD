@@ -255,7 +255,7 @@ body {
   z-index: 50;
 }
 .topbar-title {
-  font-size: 22px;
+  font-size: 17px;
   font-weight: 900;
   color: var(--ccm-ink);
   text-transform: uppercase;
