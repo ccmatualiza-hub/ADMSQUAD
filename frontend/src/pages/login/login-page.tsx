@@ -41,14 +41,30 @@ export default function LoginPage() {
   return (
     <div className="login-page">
       <div className="login-card">
-        {/* Logo */}
+        {/* Logo CCM */}
         <img
           src="/logo-ccm-white.png"
           alt="CCM Tecnologia"
           className="login-logo"
         />
 
-        <div className="login-title">Portal de Acesso</div>
+        {/* Logo Squad Warriors */}
+        <img
+          src="/logo-squad-warriors.png"
+          alt="Squad Warriors"
+          style={{
+            height: 'auto',
+            maxHeight: '72px',
+            maxWidth: '72px',
+            width: 'auto',
+            display: 'block',
+            objectFit: 'contain',
+            margin: '10px auto 18px',
+            borderRadius: '6px',
+          }}
+        />
+
+        <div className="login-title">ADMSQUAD</div>
         <div className="login-subtitle">CCM Tecnologia</div>
 
         <form onSubmit={handleSubmit(handleLogin)} noValidate>
