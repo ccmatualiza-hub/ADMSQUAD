@@ -9,11 +9,11 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { to: '/dashboard',  icon: 'bi-grid-1x2-fill',        label: 'Dashboard'              },
-  { to: '/cx',         icon: 'bi-headset',               label: 'CX - Cust. Experience' },
-  { to: '/pmo',        icon: 'bi-building',              label: 'PMO - Implantação'      },
-  { to: '/gestao',     icon: 'bi-graph-up-arrow',        label: 'Gestão'                 },
-  { to: '/configuracoes', icon: 'bi-gear-fill',          label: 'Configurações'          },
+  { to: '/dashboard',     icon: 'bi-grid-1x2-fill',   label: 'Dashboard'             },
+  { to: '/cx',            icon: 'bi-headset',          label: 'CX - Cust. Experience' },
+  { to: '/pmo',           icon: 'bi-building',         label: 'PMO - Implantação'     },
+  { to: '/gestao',        icon: 'bi-graph-up-arrow',   label: 'Gestão'                },
+  { to: '/configuracoes', icon: 'bi-gear-fill',        label: 'Configurações'         },
 ];
 
 export default function Sidebar() {
@@ -54,6 +54,24 @@ export default function Sidebar() {
       </nav>
 
       <div className="sidebar-footer">
+        {/* Logo Squad Warriors acima do usuário */}
+        <div style={{ textAlign: 'center', marginBottom: '14px', paddingBottom: '14px', borderBottom: '1px solid #1a3a6e' }}>
+          <img
+            src="/logo-squad-warriors.png"
+            alt="Squad Warriors"
+            style={{
+              height: 'auto',
+              maxHeight: '72px',
+              maxWidth: '72px',
+              width: 'auto',
+              objectFit: 'contain',
+              borderRadius: '6px',
+              display: 'block',
+              margin: '0 auto',
+            }}
+          />
+        </div>
+
         <div className="sidebar-user mb-2">
           <div className="sidebar-avatar">{initials}</div>
           <div>
