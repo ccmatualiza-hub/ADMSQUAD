@@ -12,6 +12,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/dashboard',     icon: 'bi-grid-1x2-fill',   label: 'Dashboard'             },
   { to: '/cx',            icon: 'bi-headset',          label: 'CX - Cust. Experience' },
   { to: '/pmo',           icon: 'bi-building',         label: 'PMO - Implantação'     },
+  { to: '/operacoes',     icon: 'bi-gear-wide-connected', label: 'Operações'           },
   { to: '/gestao',        icon: 'bi-graph-up-arrow',   label: 'Gestão'                },
   { to: '/configuracoes', icon: 'bi-gear-fill',        label: 'Configurações'         },
 ];

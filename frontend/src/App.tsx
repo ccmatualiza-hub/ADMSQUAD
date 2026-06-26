@@ -20,6 +20,7 @@ export default function App() {
         <Route path="dashboard"     element={<DashboardPage />} />
         <Route path="cx"            element={<PlaceholderPage title="CX - Customer Experience" eyebrow="Atendimento" />} />
         <Route path="pmo"           element={<PlaceholderPage title="PMO - Implantação" eyebrow="Projetos" />} />
+        <Route path="operacoes"     element={<PlaceholderPage title="Operações" eyebrow="Operações" />} />
         <Route path="gestao"        element={<PlaceholderPage title="Gestão" eyebrow="Administração" />} />
         <Route path="configuracoes" element={<PlaceholderPage title="Configurações" eyebrow="Sistema" />} />
       </Route>
