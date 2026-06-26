@@ -46,8 +46,10 @@ export default function DashboardPage() {
   const user = useAuthStore((s) => s.user);
   const [clientesAtivos, setClientesAtivos] = useState<number | null>(null);
   const [clientesCx,     setClientesCx]     = useState<number | null>(null);
-  const [loadingA, setLoadingA] = useState(true);
-  const [loadingCx, setLoadingCx] = useState(true);
+  const [clientesPmo,    setClientesPmo]    = useState<number | null>(null);
+  const [loadingA,   setLoadingA]   = useState(true);
+  const [loadingCx,  setLoadingCx]  = useState(true);
+  const [loadingPmo, setLoadingPmo] = useState(true);
 
   useEffect(() => {
     http.get<{ total: number }>('/api/dashboard/clientes-ativos')
@@ -59,6 +61,11 @@ export default function DashboardPage() {
       .then(r => setClientesCx(r.total))
       .catch(() => setClientesCx(null))
       .finally(() => setLoadingCx(false));
+
+    http.get<{ total: number }>('/api/dashboard/clientes-pmo')
+      .then(r => setClientesPmo(r.total))
+      .catch(() => setClientesPmo(null))
+      .finally(() => setLoadingPmo(false));
   }, []);
 
   return (
@@ -70,7 +77,6 @@ export default function DashboardPage() {
 
       {/* KPI Cards */}
       <div className="row g-3 mb-4">
-        {/* Card 1 — Clientes Ativos (verde) */}
         <div className="col-12 col-sm-6 col-xl">
           <KpiCard
             label="Clientes Ativos"
@@ -81,7 +87,6 @@ export default function DashboardPage() {
           />
         </div>
 
-        {/* Card 2 — Clientes CX (azul claro) */}
         <div className="col-12 col-sm-6 col-xl">
           <KpiCard
             label="Clientes CX"
@@ -92,19 +97,22 @@ export default function DashboardPage() {
           />
         </div>
 
-        {/* Card 3 */}
         <div className="col-12 col-sm-6 col-xl">
-          <KpiCard label="Média Cursos"       value="82,2%" sub="Média por colaborador" borderColor="#204294" />
+          <KpiCard
+            label="Clientes PMO"
+            value={clientesPmo !== null ? clientesPmo.toLocaleString('pt-BR') : '—'}
+            sub="Status Implantação"
+            borderColor="#F9E000"
+            loading={loadingPmo}
+          />
         </div>
 
-        {/* Card 4 */}
         <div className="col-12 col-sm-6 col-xl">
-          <KpiCard label="Aproveitamento PDI" value="89,5%" sub="Média da equipe"       borderColor="#00C8B4" />
+          <KpiCard label="Aproveitamento PDI" value="89,5%" sub="Média da equipe" borderColor="#00C8B4" />
         </div>
 
-        {/* Card 5 */}
         <div className="col-12 col-sm-6 col-xl">
-          <KpiCard label="KPIs Média"         value="90,1%" sub="Média da equipe"       borderColor="#C3C3C3" />
+          <KpiCard label="KPIs Média" value="90,1%" sub="Média da equipe" borderColor="#C3C3C3" />
         </div>
       </div>
 
@@ -120,8 +128,8 @@ export default function DashboardPage() {
                 <YAxis tick={{ fontSize: 11, fill: '#4A4A4A' }} />
                 <Tooltip contentStyle={{ background: '#fff', border: '1px solid #C3C3C3', borderRadius: 4, fontSize: 12 }} />
                 <Legend wrapperStyle={{ fontSize: 11 }} />
-                <Line type="monotone" dataKey="acessos"    stroke={CCM_COLORS.blue}      strokeWidth={2} dot={{ r: 3 }} name="Acessos" />
-                <Line type="monotone" dataKey="conclusoes" stroke={CCM_COLORS.blueLight}  strokeWidth={2} dot={{ r: 3 }} name="Conclusões" />
+                <Line type="monotone" dataKey="acessos"    stroke={CCM_COLORS.blue}     strokeWidth={2} dot={{ r: 3 }} name="Acessos" />
+                <Line type="monotone" dataKey="conclusoes" stroke={CCM_COLORS.blueLight} strokeWidth={2} dot={{ r: 3 }} name="Conclusões" />
               </LineChart>
             </ResponsiveContainer>
           </div>
