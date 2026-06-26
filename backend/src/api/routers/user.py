@@ -58,9 +58,11 @@ async def get_me(
 
 @router.get("/", response_model=list[UserOut])
 async def list_users(
-    _: Annotated[dict, Depends(require_admin)],
+    current_user: Annotated[dict, Depends(get_current_user)],
     session: Annotated[AsyncSession, Depends(get_db)],
 ) -> list[UserOut]:
+    if current_user.get("role") not in ("admin", "gestor"):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso negado")
     result = await session.execute(select(UserModel).order_by(UserModel.name))
     users = result.scalars().all()
     return [UserOut(id=u.id, name=u.name, email=u.email, role=u.role,
@@ -130,3 +132,10 @@ async def deactivate_user(
         update(UserModel).where(UserModel.id == user_id).values(active=False)
     )
     await session.commit()
+
+
+@router.get("/check-role")
+async def check_role(
+    current_user: Annotated[dict, Depends(get_current_user)],
+) -> dict:
+    return {"role": current_user.get("role"), "id": current_user.get("sub"), "email": current_user.get("email")}
