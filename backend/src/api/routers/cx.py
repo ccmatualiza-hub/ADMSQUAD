@@ -301,14 +301,15 @@ async def create_agendamento(
                 "formato":      body.formato,
                 "tipo":         body.tipo,
                 "pacote":       body.pacote,
-                "useragend":    current_user.get("name", body.useragend),
+                "useragend":    (current_user.get("name", body.useragend) or "")[:15],
                 "cliente":      body.cliente,
             }
         )
         await session.commit()
         return {"updated": result.rowcount, "cliente": body.cliente}
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc))
+        import traceback
+        raise HTTPException(status_code=500, detail=f"Erro: {str(exc)} | {traceback.format_exc()[-300:]}")
 
 
 @router.put("/agendamentos/{cod}", status_code=200)
@@ -338,7 +339,7 @@ async def update_agendamento(
                 "formato":      body.formato,
                 "tipo":         body.tipo,
                 "pacote":       body.pacote,
-                "useragend":    current_user.get("name", body.useragend),
+                "useragend":    (current_user.get("name", body.useragend) or "")[:15],
                 "cod":          cod,
             }
         )
