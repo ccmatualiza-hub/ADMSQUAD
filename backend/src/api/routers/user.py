@@ -142,3 +142,28 @@ async def check_role(
     current_user: Annotated[dict, Depends(get_current_user)],
 ) -> dict:
     return {"role": current_user.get("role"), "id": current_user.get("sub"), "email": current_user.get("email")}
+
+
+class ChangePasswordBody(BaseModel):
+    current_password: str
+    new_password: str
+
+
+@router.post("/change-password", status_code=200)
+async def change_password(
+    body: ChangePasswordBody,
+    current_user: Annotated[dict, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> dict:
+    from src.infrastructure.security.crypto import hash_password, verify_password
+    result = await session.execute(select(UserModel).where(UserModel.id == int(current_user["sub"])))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    if not verify_password(body.current_password, user.password):
+        raise HTTPException(status_code=400, detail="Senha atual incorreta")
+    if len(body.new_password) < 6:
+        raise HTTPException(status_code=400, detail="Nova senha deve ter ao menos 6 caracteres")
+    user.password = hash_password(body.new_password)
+    await session.commit()
+    return {"ok": True}
