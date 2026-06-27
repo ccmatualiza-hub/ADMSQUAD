@@ -22,13 +22,20 @@ interface Agendamento {
 
 interface ClienteOpt { cliente: string; razao: string | null; }
 
-const TIPO_OPTS   = ['E', 'P', 'M'];
-const FORMATO_OPTS = ['EVO', 'PRG'];
-const PACOTE_OPTS  = ['BASICO', 'STANDARD', 'ADVANCED', 'ENTERPRISE'];
+const TIPO_OPTS = [
+  { label: 'EMERGENCIAL',    value: 'E' },
+  { label: 'TROCA DE VERSÃO', value: 'T' },
+  { label: 'LINXDMS-WEB',    value: 'L' },
+];
+const PACOTE_OPTS = [
+  { label: 'ESSENCIAL',  value: 'ESS' },
+  { label: 'EVOLUTIVO',  value: 'EVO' },
+  { label: 'ESPECIAL',   value: 'ESP' },
+];
 
 const emptyForm = {
   cliente: '', razao: '', dt_atualiza: new Date().toLocaleDateString('pt-BR').replace(/\//g, '/'),
-  ticketupdate: '', formato: 'EVO', tipo: 'E', pacote: 'EVO', useragend: '',
+  ticketupdate: '#', formato: 'CCM', tipo: 'E', pacote: 'EVO', useragend: '',
 };
 
 const inputStyle = { background: 'var(--ccm-ink)', border: '1px solid #1a3a6e', color: '#fff', fontSize: 13 };
@@ -270,17 +277,19 @@ export default function AgendarAtualizacao({ onBack }: { onBack: () => void }) {
               <div className="col-12 col-md-6">
                 <label style={labelStyle}>Ticket</label>
                 <input type="text" className="form-control mt-1" style={inputStyle}
-                  value={form.ticketupdate} onChange={e => setForm(f => ({ ...f, ticketupdate: e.target.value }))}
-                  placeholder="Nº do ticket" />
+                  value={form.ticketupdate}
+                  onChange={e => {
+                    const v = e.target.value;
+                    setForm(f => ({ ...f, ticketupdate: v.startsWith('#') ? v : '#' + v.replace(/^#+/, '') }));
+                  }}
+                  placeholder="#000000" />
               </div>
 
-              {/* Formato */}
+              {/* Formato - fixo CCM */}
               <div className="col-12 col-md-4">
                 <label style={labelStyle}>Formato</label>
-                <select className="form-select mt-1" style={inputStyle}
-                  value={form.formato} onChange={e => setForm(f => ({ ...f, formato: e.target.value }))}>
-                  {FORMATO_OPTS.map(o => <option key={o} value={o}>{o}</option>)}
-                </select>
+                <input type="text" className="form-control mt-1" style={{ ...inputStyle, opacity: 0.6 }}
+                  value="CCM" readOnly />
               </div>
 
               {/* Tipo */}
@@ -288,7 +297,7 @@ export default function AgendarAtualizacao({ onBack }: { onBack: () => void }) {
                 <label style={labelStyle}>Tipo</label>
                 <select className="form-select mt-1" style={inputStyle}
                   value={form.tipo} onChange={e => setForm(f => ({ ...f, tipo: e.target.value }))}>
-                  {TIPO_OPTS.map(o => <option key={o} value={o}>{o}</option>)}
+                  {TIPO_OPTS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                 </select>
               </div>
 
@@ -297,7 +306,7 @@ export default function AgendarAtualizacao({ onBack }: { onBack: () => void }) {
                 <label style={labelStyle}>Pacote</label>
                 <select className="form-select mt-1" style={inputStyle}
                   value={form.pacote} onChange={e => setForm(f => ({ ...f, pacote: e.target.value }))}>
-                  {PACOTE_OPTS.map(o => <option key={o} value={o}>{o}</option>)}
+                  {PACOTE_OPTS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                 </select>
               </div>
 
