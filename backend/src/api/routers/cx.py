@@ -199,3 +199,150 @@ async def list_atualizacoes(
         return [AtualizacaoItem(**dict(zip(keys, r))) for r in rows]
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
+
+
+# ── Agendamentos ──────────────────────────────────────────────────────────────
+
+class AgendamentoCreate(BaseModel):
+    cliente: str        # valor da coluna 'cliente' da tbl_linx
+    dt_atualiza: str    # dd/mm/yyyy
+    ticketupdate: str
+    formato: str
+    tipo: str
+    pacote: str
+    useragend: str      # preenchido pelo backend com nome do usuário logado
+
+
+class AgendamentoItem(BaseModel):
+    cod: int
+    razao: str | None = None
+    cliente: str | None = None
+    sistema: str | None = None
+    bd: str | None = None
+    versao: str | None = None
+    dt_atualiza: str | None = None
+    ticketupdate: str | None = None
+    formato: str | None = None
+    tipo: str | None = None
+    pacote: str | None = None
+    useragend: str | None = None
+    concluido: str | int | None = None
+    status: str | None = None
+
+
+@router.get("/agendamentos/hoje", response_model=list[AgendamentoItem])
+async def agendamentos_hoje(
+    _: Annotated[dict, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> list[AgendamentoItem]:
+    try:
+        result = await session.execute(
+            text("""
+                SELECT cod, razao, cliente, sistema, bd, versao,
+                       dt_atualiza, ticketupdate, formato, tipo, pacote, useragend, concluido, status
+                FROM tbl_linx
+                WHERE dt_atualiza = DATE_FORMAT(CURDATE(), '%d/%m/%Y')
+                ORDER BY razao
+            """)
+        )
+        rows = result.fetchall()
+        keys = list(result.keys())
+        return [AgendamentoItem(**dict(zip(keys, r))) for r in rows]
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
+@router.get("/agendamentos/clientes-disponiveis")
+async def clientes_disponiveis(
+    q: str = "",
+    _: Annotated[dict, Depends(get_current_user)] = None,
+    session: Annotated[AsyncSession, Depends(get_db)] = None,
+) -> list[dict]:
+    """Lista clientes ativos para o autocomplete de agendamento"""
+    try:
+        where = "status IN ('6 - ATIVO', '7 - ATIVO VPU', '0 - IMPLANTAÇÃO', 'X - ATIVO COMPLEMENTO')"
+        params: dict = {}
+        if q:
+            where += " AND (cliente LIKE :q OR razao LIKE :q)"
+            params["q"] = f"%{q}%"
+        result = await session.execute(
+            text(f"SELECT DISTINCT cliente, razao FROM tbl_linx WHERE {where} ORDER BY razao LIMIT 50"),
+            params
+        )
+        rows = result.fetchall()
+        return [{"cliente": r[0], "razao": r[1]} for r in rows if r[0]]
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
+@router.post("/agendamentos", status_code=200)
+async def create_agendamento(
+    body: AgendamentoCreate,
+    current_user: Annotated[dict, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> dict:
+    """Faz UPDATE na tbl_linx para todos os registros do cliente selecionado"""
+    try:
+        result = await session.execute(
+            text("""
+                UPDATE tbl_linx SET
+                    dt_atualiza  = :dt_atualiza,
+                    ticketupdate = :ticketupdate,
+                    concluido    = 0,
+                    formato      = :formato,
+                    tipo         = :tipo,
+                    pacote       = :pacote,
+                    useragend    = :useragend
+                WHERE cliente = :cliente
+            """),
+            {
+                "dt_atualiza":  body.dt_atualiza,
+                "ticketupdate": body.ticketupdate,
+                "formato":      body.formato,
+                "tipo":         body.tipo,
+                "pacote":       body.pacote,
+                "useragend":    current_user.get("name", body.useragend),
+                "cliente":      body.cliente,
+            }
+        )
+        await session.commit()
+        return {"updated": result.rowcount, "cliente": body.cliente}
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
+@router.put("/agendamentos/{cod}", status_code=200)
+async def update_agendamento(
+    cod: int,
+    body: AgendamentoCreate,
+    current_user: Annotated[dict, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> dict:
+    """Edita agendamento de um registro específico pelo cod"""
+    try:
+        result = await session.execute(
+            text("""
+                UPDATE tbl_linx SET
+                    dt_atualiza  = :dt_atualiza,
+                    ticketupdate = :ticketupdate,
+                    concluido    = 0,
+                    formato      = :formato,
+                    tipo         = :tipo,
+                    pacote       = :pacote,
+                    useragend    = :useragend
+                WHERE cod = :cod
+            """),
+            {
+                "dt_atualiza":  body.dt_atualiza,
+                "ticketupdate": body.ticketupdate,
+                "formato":      body.formato,
+                "tipo":         body.tipo,
+                "pacote":       body.pacote,
+                "useragend":    current_user.get("name", body.useragend),
+                "cod":          cod,
+            }
+        )
+        await session.commit()
+        return {"updated": result.rowcount}
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
