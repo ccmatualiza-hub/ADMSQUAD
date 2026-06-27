@@ -121,3 +121,110 @@ async def update_cliente_pmo(
         return {"updated": True}
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
+
+
+# ── Franquias ──────────────────────────────────────────────────────────────
+
+class FranquiaItem(BaseModel):
+    cod: int
+    nome: str | None = None
+    contato: str | None = None
+    celular: str | None = None
+    email: str | None = None
+    cidade: str | None = None
+    modelo: str | None = None
+    status: str | None = None
+
+
+class FranquiaCreate(BaseModel):
+    nome: str
+    contato: str | None = None
+    celular: str | None = None
+    email: str | None = None
+    cidade: str | None = None
+    modelo: str | None = None
+    status: str = "ATIVO"
+
+
+class FranquiaUpdate(BaseModel):
+    nome: str | None = None
+    contato: str | None = None
+    celular: str | None = None
+    email: str | None = None
+    cidade: str | None = None
+    modelo: str | None = None
+    status: str | None = None
+
+
+@router.get("/franquias", response_model=list[FranquiaItem])
+async def list_franquias(
+    q: str = "",
+    _: Annotated[dict, Depends(get_current_user)] = None,
+    session: Annotated[AsyncSession, Depends(get_db)] = None,
+) -> list[FranquiaItem]:
+    try:
+        params: dict = {}
+        where = "WHERE 1=1"
+        if q:
+            where += " AND (nome LIKE :q OR contato LIKE :q OR cidade LIKE :q)"
+            params["q"] = f"%{q}%"
+        result = await session.execute(
+            text(f"SELECT cod, nome, contato, celular, email, cidade, modelo, status FROM tbl_franq {where} ORDER BY nome"),
+            params
+        )
+        rows = result.fetchall()
+        keys = list(result.keys())
+        return [FranquiaItem(**dict(zip(keys, r))) for r in rows]
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
+@router.post("/franquias", status_code=status.HTTP_201_CREATED)
+async def create_franquia(
+    body: FranquiaCreate,
+    _: Annotated[dict, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> dict:
+    try:
+        result = await session.execute(
+            text("""INSERT INTO tbl_franq (nome, contato, celular, email, cidade, modelo, status)
+                    VALUES (:nome, :contato, :celular, :email, :cidade, :modelo, :status)"""),
+            {
+                "nome":     body.nome,
+                "contato":  body.contato or "",
+                "celular":  body.celular or "",
+                "email":    body.email or "",
+                "cidade":   body.cidade or "",
+                "modelo":   body.modelo or "",
+                "status":   body.status,
+            }
+        )
+        await session.commit()
+        return {"created": True, "id": result.lastrowid}
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
+@router.put("/franquias/{cod}")
+async def update_franquia(
+    cod: int,
+    body: FranquiaUpdate,
+    _: Annotated[dict, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> dict:
+    try:
+        sets, params = [], {"cod": cod}
+        if body.nome     is not None: sets.append("nome=:nome");       params["nome"]     = body.nome
+        if body.contato  is not None: sets.append("contato=:contato"); params["contato"]  = body.contato
+        if body.celular  is not None: sets.append("celular=:celular"); params["celular"]  = body.celular
+        if body.email    is not None: sets.append("email=:email");     params["email"]    = body.email
+        if body.cidade   is not None: sets.append("cidade=:cidade");   params["cidade"]   = body.cidade
+        if body.modelo   is not None: sets.append("modelo=:modelo");   params["modelo"]   = body.modelo
+        if body.status   is not None: sets.append("status=:status");   params["status"]   = body.status
+        if not sets:
+            raise HTTPException(status_code=400, detail="Nada para atualizar")
+        await session.execute(text(f"UPDATE tbl_franq SET {', '.join(sets)} WHERE cod = :cod"), params)
+        await session.commit()
+        return {"updated": True}
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
