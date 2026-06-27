@@ -51,7 +51,6 @@ export default function MonitorAtualizacoes({ onBack }: { onBack: () => void }) 
   const [stats, setStats]       = useState<Stats | null>(null);
   const [items, setItems]       = useState<Atualizacao[]>([]);
   const [loading, setLoading]   = useState(true);
-  const [search, setSearch]     = useState('');
 
 
   const fetchData = async () => {
@@ -73,10 +72,7 @@ export default function MonitorAtualizacoes({ onBack }: { onBack: () => void }) 
     return () => clearInterval(interval);
   }, []);
 
-  const filtered = items.filter(i =>
-    [i.razao, i.sistema, i.bd, i.ticketupdate, i.useragend].some(v =>
-      (v ?? '').toLowerCase().includes(search.toLowerCase()))
-  );
+  const filtered = items;
 
   const th = { color: '#fff', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.05em', padding: '10px 12px', textAlign: 'left' as const, fontSize: 10, whiteSpace: 'nowrap' as const };
   const td = { padding: '9px 12px', fontSize: 12, whiteSpace: 'nowrap' as const };
