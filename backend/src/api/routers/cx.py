@@ -349,6 +349,40 @@ async def create_agendamento(
         raise HTTPException(status_code=500, detail=str(exc))
 
 
+@router.delete("/agendamentos/{cod}", status_code=200)
+async def cancelar_agendamento(
+    cod: int,
+    current_user: Annotated[dict, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> dict:
+    try:
+        # 1. Buscar dados antes de cancelar
+        linx = await session.execute(
+            text("SELECT cliente, dt_atualiza FROM tbl_linx WHERE cod = :cod"),
+            {"cod": cod}
+        )
+        row = linx.fetchone()
+
+        # 2. UPDATE tbl_linx — zera data e marca concluido=100
+        await session.execute(
+            text("UPDATE tbl_linx SET dt_atualiza = '00/00/0000', concluido = 100 WHERE cod = :cod"),
+            {"cod": cod}
+        )
+
+        # 3. DELETE tbl_history pelo cliente e data
+        if row:
+            cliente, data = row
+            await session.execute(
+                text("DELETE FROM tbl_history WHERE cliente = :cliente AND data = :data"),
+                {"cliente": cliente or "", "data": data or ""}
+            )
+
+        await session.commit()
+        return {"cancelled": True, "cod": cod}
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
 @router.put("/agendamentos/{cod}", status_code=200)
 async def update_agendamento(
     cod: int,

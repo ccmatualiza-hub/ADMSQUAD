@@ -115,6 +115,15 @@ export default function AgendarAtualizacao({ onBack }: { onBack: () => void }) {
     setShowModal(true);
   };
 
+  const handleCancel = async (a: Agendamento) => {
+    if (!confirm(`Cancelar agendamento de "${a.razao}"? Isso zerará a data e marcará como concluído.`)) return;
+    try {
+      await http.del(`/api/cx/agendamentos/${a.cod}`);
+      toast.success('Agendamento cancelado!');
+      fetchAgendamentos();
+    } catch { toast.error('Erro ao cancelar agendamento'); }
+  };
+
   const handleSave = async () => {
     if (!form.cod || !form.cliente || !form.dt_atualiza) { toast.error('Selecione uma empresa da lista'); return; }
     setSaving(true);
@@ -216,6 +225,9 @@ export default function AgendarAtualizacao({ onBack }: { onBack: () => void }) {
                       <td style={{ ...td, textAlign: 'center' }}>
                         <button className="btn btn-sm" style={{ background: 'var(--ccm-blue)', color: '#fff', fontSize: 10, padding: '3px 10px' }} onClick={() => openEdit(a)}>
                           <i className="bi bi-pencil-fill me-1" />Editar
+                        </button>
+                        <button className="btn btn-sm" style={{ background: '#E74C3C', color: '#fff', fontSize: 10, padding: '3px 10px' }} onClick={() => handleCancel(a)}>
+                          <i className="bi bi-x-circle me-1" />Cancelar
                         </button>
                       </td>
                     </tr>
