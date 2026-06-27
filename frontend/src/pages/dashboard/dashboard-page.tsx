@@ -8,15 +8,6 @@ import { http } from '../../lib/http-client';
 
 const CCM_COLORS = { blue: '#204294', blueLight: '#00B0FA', teal: '#00C8B4', gray: '#C3C3C3' };
 
-const monthlyData = [
-  { mes: 'Jan', acessos: 210, conclusoes: 180 },
-  { mes: 'Fev', acessos: 195, conclusoes: 170 },
-  { mes: 'Mar', acessos: 230, conclusoes: 210 },
-  { mes: 'Abr', acessos: 250, conclusoes: 225 },
-  { mes: 'Mai', acessos: 280, conclusoes: 255 },
-  { mes: 'Jun', acessos: 310, conclusoes: 290 },
-];
-
 
 
 function KpiCard({ label, value, sub, borderColor, loading }: {
@@ -48,6 +39,7 @@ export default function DashboardPage() {
   const [loadingSrv, setLoadingSrv] = useState(true);
   const [loadingPen, setLoadingPen] = useState(true);
   const [pendenciasAnalista, setPendenciasAnalista] = useState<{ nome: string; valor: number }[]>([]);
+  const [historico, setHistorico] = useState<{ data: string; agente_ia: number; humano: number }[]>([]);
 
   useEffect(() => {
     http.get<{ total: number }>('/api/dashboard/clientes-ativos')
@@ -58,6 +50,8 @@ export default function DashboardPage() {
       .then(r => setClientesPmo(r.total)).catch(() => setClientesPmo(null)).finally(() => setLoadingPmo(false));
     http.get<{ total: number }>('/api/dashboard/servidores-ativos')
       .then(r => setServidoresAtivos(r.total)).catch(() => setServidoresAtivos(null)).finally(() => setLoadingSrv(false));
+    http.get<{ data: string; agente_ia: number; humano: number }[]>('/api/dashboard/historico-atualizacoes')
+      .then(r => setHistorico(r)).catch(() => setHistorico([]));
     http.get<{ nome: string; valor: number }[]>('/api/dashboard/pendencias-por-analista')
       .then(r => setPendenciasAnalista(r)).catch(() => setPendenciasAnalista([]));
     http.get<{ total: number }>('/api/dashboard/pendencias-abertas')
@@ -102,18 +96,24 @@ export default function DashboardPage() {
       <div className="row g-3">
         <div className="col-12 col-lg-7">
           <div className="chart-card">
-            <div className="chart-card-title">Acessos vs Conclusões — 2026</div>
-            <ResponsiveContainer width="100%" height={260}>
-              <LineChart data={monthlyData} margin={{ top: 4, right: 12, bottom: 4, left: 0 }}>
-                <CartesianGrid stroke={CCM_COLORS.gray} strokeDasharray="3 3" />
-                <XAxis dataKey="mes" tick={{ fontSize: 11, fill: '#4A4A4A' }} />
-                <YAxis tick={{ fontSize: 11, fill: '#4A4A4A' }} />
-                <Tooltip contentStyle={{ background: '#fff', border: '1px solid #C3C3C3', borderRadius: 4, fontSize: 12 }} />
-                <Legend wrapperStyle={{ fontSize: 11 }} />
-                <Line type="monotone" dataKey="acessos"    stroke={CCM_COLORS.blue}     strokeWidth={2} dot={{ r: 3 }} name="Acessos" />
-                <Line type="monotone" dataKey="conclusoes" stroke={CCM_COLORS.blueLight} strokeWidth={2} dot={{ r: 3 }} name="Conclusões" />
-              </LineChart>
-            </ResponsiveContainer>
+            <div className="chart-card-title">Atualizações — Agente IA vs Humano</div>
+            {historico.length === 0 ? (
+              <div style={{ height: 260, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ccm-gray-dark)', fontSize: 13 }}>
+                Sem dados de histórico disponíveis
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={260}>
+                <LineChart data={historico} margin={{ top: 4, right: 12, bottom: 4, left: 0 }}>
+                  <CartesianGrid stroke={CCM_COLORS.gray} strokeDasharray="3 3" />
+                  <XAxis dataKey="data" tick={{ fontSize: 9, fill: '#4A4A4A' }} />
+                  <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: '#4A4A4A' }} />
+                  <Tooltip contentStyle={{ background: '#fff', border: '1px solid #C3C3C3', borderRadius: 4, fontSize: 12 }} />
+                  <Legend wrapperStyle={{ fontSize: 11 }} />
+                  <Line type="monotone" dataKey="agente_ia" stroke={CCM_COLORS.blueLight} strokeWidth={2} dot={{ r: 3 }} name="Agente IA" />
+                  <Line type="monotone" dataKey="humano"    stroke={CCM_COLORS.blue}      strokeWidth={2} dot={{ r: 3 }} name="Humano" />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
         <div className="col-12 col-lg-5">

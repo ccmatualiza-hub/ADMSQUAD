@@ -120,3 +120,30 @@ async def pendencias_por_analista(
         return [{"nome": r[0], "valor": int(r[1])} for r in rows]
     except Exception:
         return []
+
+
+@router.get("/historico-atualizacoes")
+async def historico_atualizacoes(
+    _: Annotated[dict, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> list[dict]:
+    try:
+        result = await session.execute(
+            text("""
+                SELECT
+                    data,
+                    SUM(CASE WHEN UPPER(useragendar) = 'AGENTE-IA' THEN 1 ELSE 0 END) as agente_ia,
+                    SUM(CASE WHEN UPPER(useragendar) != 'AGENTE-IA' THEN 1 ELSE 0 END) as humano
+                FROM tbl_history
+                WHERE data IS NOT NULL AND data != '' AND data != '00/00/0000'
+                GROUP BY data
+                ORDER BY STR_TO_DATE(data, '%d/%m/%Y') DESC
+                LIMIT 30
+            """)
+        )
+        rows = result.fetchall()
+        # Return in ascending order for chart
+        data = [{"data": r[0], "agente_ia": int(r[1]), "humano": int(r[2])} for r in rows]
+        return list(reversed(data))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
