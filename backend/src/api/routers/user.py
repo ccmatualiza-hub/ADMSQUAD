@@ -12,7 +12,7 @@ from src.infrastructure.security.crypto import hash_password
 
 router = APIRouter(prefix="/api/user", tags=["user"])
 
-RoleType = Literal["admin", "gestor", "operador_cx", "operador_pmo", "user"]
+
 
 
 class UserOut(BaseModel):
@@ -29,12 +29,12 @@ class UserCreate(BaseModel):
     name: str
     email: EmailStr
     password: str
-    role: RoleType = "operador_cx"
+    role: str = "operador_cx"
 
 
 class UserUpdate(BaseModel):
     name: str | None = None
-    role: RoleType | None = None
+    role: str | None = None
     active: bool | None = None
     password: str | None = None
 

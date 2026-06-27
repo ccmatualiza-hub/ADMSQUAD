@@ -20,7 +20,7 @@ class UserOut(BaseModel):
     id: int
     name: str
     email: str
-    role: Literal["admin", "user"]
+    role: str
     avatar_url: str | None = None
 
 
@@ -33,7 +33,7 @@ class RegisterRequest(BaseModel):
     name: str
     email: EmailStr
     password: str
-    role: Literal["admin", "user"] = "user"
+    role: str = "user"
 
 
 @router.post("/login", response_model=LoginResponse)
