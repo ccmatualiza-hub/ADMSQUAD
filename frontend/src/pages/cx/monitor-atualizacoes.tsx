@@ -53,7 +53,6 @@ export default function MonitorAtualizacoes({ onBack }: { onBack: () => void }) 
   const [loading, setLoading]   = useState(true);
   const [search, setSearch]     = useState('');
 
-  const today = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
 
   const fetchData = async () => {
     setLoading(true);
@@ -92,9 +91,6 @@ export default function MonitorAtualizacoes({ onBack }: { onBack: () => void }) 
         <span style={{ color: 'var(--ccm-gray-medium)', fontSize: 12 }}>/</span>
         <span style={{ color: 'var(--ccm-gray-dark)', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.1em' }}>Monitor de Atualizações</span>
       </div>
-      <div className="section-title mb-1" style={{ textAlign: 'center' }}>Monitor de Atualizações</div>
-      <div style={{ textAlign: 'center', fontSize: 12, color: 'var(--ccm-gray-dark)', marginBottom: 20, textTransform: 'capitalize' }}>{today}</div>
-
       {/* KPI Cards */}
       <div className="row g-3 mb-4">
         <div className="col-6 col-lg-3">
@@ -140,25 +136,9 @@ export default function MonitorAtualizacoes({ onBack }: { onBack: () => void }) 
 
       {/* Tabela */}
       <div className="table-card">
-        <div style={{ background: 'var(--ccm-ink)', padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderRadius: '6px 6px 0 0' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <i className="bi bi-arrow-repeat" style={{ color: '#00B0FA', fontSize: 16 }} />
-            <span style={{ color: '#fff', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.12em' }}>
-              {filtered.length} atualizações
-            </span>
-          </div>
-          <button className="btn btn-sm" style={{ background: 'rgba(255,255,255,.1)', color: '#fff', fontSize: 11 }} onClick={fetchData}>
-            <i className="bi bi-arrow-clockwise me-1" />Atualizar
-          </button>
-        </div>
 
-        <div style={{ padding: '10px 20px', borderBottom: '1px solid var(--ccm-line)' }}>
-          <input type="text" className="form-control" placeholder="Buscar razão, sistema, ticket ou agendado..."
-            value={search} onChange={e => setSearch(e.target.value)}
-            style={{ maxWidth: 360, fontSize: 13 }} />
-        </div>
 
-        <div style={{ overflowX: 'auto' }}>
+        <div style={{ overflowX: 'auto', borderRadius: '6px 6px 0 0' }}>
           {loading ? (
             <div style={{ padding: 32, textAlign: 'center', color: 'var(--ccm-gray-dark)' }}>
               <span className="spinner-border spinner-border-sm me-2" />Carregando...
