@@ -140,9 +140,9 @@ class AtualizacaoItem(BaseModel):
 
 class AtualizacaoStats(BaseModel):
     total: int
-    pct_nao_iniciado: float   # concluido = '0'
-    pct_em_andamento: float   # concluido != '0' e != '100'
-    pct_concluido: float      # concluido = '100'
+    pct_nao_iniciado: float
+    pct_em_andamento: float
+    pct_concluido: float
     nao_iniciado: int
     em_andamento: int
     concluido_count: int
@@ -204,13 +204,14 @@ async def list_atualizacoes(
 # ── Agendamentos ──────────────────────────────────────────────────────────────
 
 class AgendamentoCreate(BaseModel):
-    cliente: str        # valor da coluna 'cliente' da tbl_linx
-    dt_atualiza: str    # dd/mm/yyyy
+    cod: int
+    cliente: str
+    dt_atualiza: str
     ticketupdate: str
     formato: str
     tipo: str
     pacote: str
-    useragend: str      # preenchido pelo backend com nome do usuário logado
+    useragend: str
 
 
 class AgendamentoItem(BaseModel):
@@ -258,19 +259,18 @@ async def clientes_disponiveis(
     _: Annotated[dict, Depends(get_current_user)] = None,
     session: Annotated[AsyncSession, Depends(get_db)] = None,
 ) -> list[dict]:
-    """Lista clientes ativos para o autocomplete de agendamento"""
     try:
         where = "status IN ('6 - ATIVO', '7 - ATIVO VPU', '0 - IMPLANTAÇÃO', 'X - ATIVO COMPLEMENTO')"
         params: dict = {}
         if q:
-            where += " AND (cliente LIKE :q OR razao LIKE :q)"
+            where += " AND (razao LIKE :q OR cliente LIKE :q)"
             params["q"] = f"%{q}%"
         result = await session.execute(
-            text(f"SELECT DISTINCT cliente, razao FROM tbl_linx WHERE {where} ORDER BY razao LIMIT 50"),
+            text(f"SELECT cod, cliente, razao FROM tbl_linx WHERE {where} ORDER BY razao LIMIT 50"),
             params
         )
         rows = result.fetchall()
-        return [{"cliente": r[0], "razao": r[1]} for r in rows if r[0]]
+        return [{"cod": r[0], "cliente": r[1], "razao": r[2]} for r in rows if r[1]]
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
 
@@ -281,7 +281,6 @@ async def create_agendamento(
     current_user: Annotated[dict, Depends(get_current_user)],
     session: Annotated[AsyncSession, Depends(get_db)],
 ) -> dict:
-    """Faz UPDATE na tbl_linx para todos os registros do cliente selecionado"""
     try:
         result = await session.execute(
             text("""
@@ -293,7 +292,7 @@ async def create_agendamento(
                     tipo         = :tipo,
                     pacote       = :pacote,
                     useragend    = :useragend
-                WHERE cliente = :cliente
+                WHERE cod = :cod
             """),
             {
                 "dt_atualiza":  body.dt_atualiza,
@@ -302,14 +301,13 @@ async def create_agendamento(
                 "tipo":         body.tipo,
                 "pacote":       body.pacote,
                 "useragend":    (current_user.get("name", body.useragend) or "")[:15],
-                "cliente":      body.cliente,
+                "cod":          body.cod,
             }
         )
         await session.commit()
-        return {"updated": result.rowcount, "cliente": body.cliente}
+        return {"updated": result.rowcount, "cod": body.cod}
     except Exception as exc:
-        import traceback
-        raise HTTPException(status_code=500, detail=f"Erro: {str(exc)} | {traceback.format_exc()[-300:]}")
+        raise HTTPException(status_code=500, detail=str(exc))
 
 
 @router.put("/agendamentos/{cod}", status_code=200)
@@ -319,7 +317,6 @@ async def update_agendamento(
     current_user: Annotated[dict, Depends(get_current_user)],
     session: Annotated[AsyncSession, Depends(get_db)],
 ) -> dict:
-    """Edita agendamento de um registro específico pelo cod"""
     try:
         result = await session.execute(
             text("""

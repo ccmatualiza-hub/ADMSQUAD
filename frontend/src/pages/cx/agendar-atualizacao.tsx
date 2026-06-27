@@ -20,7 +20,7 @@ interface Agendamento {
   status: string | null;
 }
 
-interface ClienteOpt { cliente: string; razao: string | null; }
+interface ClienteOpt { cod: number; cliente: string; razao: string | null; }
 
 const TIPO_OPTS = [
   { label: 'EMERGENCIAL',    value: 'E' },
@@ -34,7 +34,7 @@ const PACOTE_OPTS = [
 ];
 
 const emptyForm = {
-  cliente: '', razao: '', dt_atualiza: new Date().toLocaleDateString('pt-BR').replace(/\//g, '/'),
+  cod: 0, cliente: '', razao: '', dt_atualiza: new Date().toLocaleDateString('pt-BR').replace(/\//g, '/'),
   ticketupdate: '#', formato: 'CCM', tipo: 'E', pacote: 'EVO', useragend: '',
 };
 
@@ -54,7 +54,7 @@ export default function AgendarAtualizacao({ onBack }: { onBack: () => void }) {
   const [loading, setLoading]           = useState(true);
   const [showModal, setShowModal]       = useState(false);
   const [editCod, setEditCod]           = useState<number | null>(null);
-  const [form, setForm]                 = useState({ ...emptyForm, useragend: user?.name ?? '' });
+  const [form, setForm]                 = useState<typeof emptyForm>({ ...emptyForm, useragend: user?.name ?? '' });
   const [saving, setSaving]             = useState(false);
   const [clienteOpts, setClienteOpts]   = useState<ClienteOpt[]>([]);
   const [showSugs, setShowSugs]         = useState(false);
@@ -91,7 +91,7 @@ export default function AgendarAtualizacao({ onBack }: { onBack: () => void }) {
   };
 
   const selectCliente = (opt: ClienteOpt) => {
-    setForm(f => ({ ...f, cliente: opt.cliente, razao: opt.razao ?? '' }));
+    setForm(f => ({ ...f, cod: opt.cod, cliente: opt.cliente, razao: opt.razao ?? '' }));
     setShowSugs(false);
   };
 
@@ -104,7 +104,7 @@ export default function AgendarAtualizacao({ onBack }: { onBack: () => void }) {
   const openEdit = (a: Agendamento) => {
     setEditCod(a.cod);
     setForm({
-      cliente: a.cliente ?? '', razao: a.razao ?? '',
+      cod: a.cod, cliente: a.cliente ?? '', razao: a.razao ?? '',
       dt_atualiza: a.dt_atualiza ?? '',
       ticketupdate: a.ticketupdate ?? '',
       formato: a.formato ?? 'EVO',
@@ -116,10 +116,10 @@ export default function AgendarAtualizacao({ onBack }: { onBack: () => void }) {
   };
 
   const handleSave = async () => {
-    if (!form.cliente || !form.dt_atualiza) { toast.error('Empresa e Data são obrigatórios'); return; }
+    if (!form.cod || !form.cliente || !form.dt_atualiza) { toast.error('Selecione uma empresa da lista'); return; }
     setSaving(true);
     try {
-      const body = { ...form, useragend: user?.name ?? form.useragend };
+      const body = { ...form, cod: form.cod, useragend: user?.name ?? form.useragend };
       if (editCod !== null) {
         await http.put(`/api/cx/agendamentos/${editCod}`, body);
         toast.success('Agendamento atualizado!');
