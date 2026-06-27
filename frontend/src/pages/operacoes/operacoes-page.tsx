@@ -31,7 +31,7 @@ export default function OperacoesPage() {
               <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ccm-ink)', textTransform: 'uppercase', letterSpacing: '.06em' }}>Daily — Pendências</div>
             </div>
             <div style={{ fontSize: 12, color: 'var(--ccm-gray-dark)', lineHeight: 1.5 }}>
-              Registrar e acompanhar pendências e impedimentos diários da equipe.
+              Registrar pendências e impedimentos da equipe.
             </div>
             <div style={{ marginTop: 12, fontSize: 11, fontWeight: 700, color: '#D4A000', textTransform: 'uppercase', letterSpacing: '.1em' }}>
               Acessar <i className="bi bi-arrow-right" />
