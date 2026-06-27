@@ -282,6 +282,12 @@ async def create_agendamento(
     session: Annotated[AsyncSession, Depends(get_db)],
 ) -> dict:
     try:
+        useragend = (current_user.get("name", body.useragend) or "")[:15]
+        formato   = (body.formato or "M")[:1]
+        tipo      = (body.tipo or "E")[:1]
+        pacote    = (body.pacote or "EVO")[:10]
+
+        # 1. UPDATE tbl_linx
         result = await session.execute(
             text("""
                 UPDATE tbl_linx SET
@@ -297,13 +303,46 @@ async def create_agendamento(
             {
                 "dt_atualiza":  body.dt_atualiza,
                 "ticketupdate": body.ticketupdate,
-                "formato":      (body.formato or "M")[:1],
-                "tipo":         (body.tipo or "E")[:1],
-                "pacote":       (body.pacote or "EVO")[:10],
-                "useragend":    (current_user.get("name", body.useragend) or "")[:15],
+                "formato":      formato,
+                "tipo":         tipo,
+                "pacote":       pacote,
+                "useragend":    useragend,
                 "cod":          body.cod,
             }
         )
+
+        # 2. Buscar dados do cliente na tbl_linx
+        linx = await session.execute(
+            text("SELECT razao, cliente, sistema, versao, bd, status FROM tbl_linx WHERE cod = :cod"),
+            {"cod": body.cod}
+        )
+        row = linx.fetchone()
+
+        if row:
+            razao, cliente, sistema, versao, bd, status_linx = row
+
+            # 3. INSERT na tbl_history
+            await session.execute(
+                text("""
+                    INSERT INTO tbl_history
+                        (razao, cliente, sistema, versao, data, tipo, pacote, ticket, bd, useragendar, concluido, status)
+                    VALUES
+                        (:razao, :cliente, :sistema, :versao, :data, :tipo, :pacote, :ticket, :bd, :useragendar, 0, 'AGENDADO')
+                """),
+                {
+                    "razao":       razao or "",
+                    "cliente":     cliente or "",
+                    "sistema":     sistema or "",
+                    "versao":      versao or "",
+                    "data":        body.dt_atualiza,
+                    "tipo":        tipo,
+                    "pacote":      pacote[:3],
+                    "ticket":      body.ticketupdate[:10],
+                    "bd":          bd or "",
+                    "useragendar": useragend,
+                }
+            )
+
         await session.commit()
         return {"updated": result.rowcount, "cod": body.cod}
     except Exception as exc:
