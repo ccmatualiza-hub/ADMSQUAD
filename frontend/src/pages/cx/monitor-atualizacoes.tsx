@@ -113,22 +113,6 @@ export default function MonitorAtualizacoes({ onBack }: { onBack: () => void }) 
         </div>
       </div>
 
-      {/* Barra de progresso visual */}
-      {stats && stats.total > 0 && (
-        <div style={{ background: '#fff', borderRadius: 6, padding: '14px 20px', marginBottom: 20, boxShadow: '0 1px 4px rgba(12,25,33,.07)' }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--ccm-gray-dark)', textTransform: 'uppercase', letterSpacing: '.1em', marginBottom: 8 }}>Progresso Geral</div>
-          <div style={{ display: 'flex', height: 16, borderRadius: 99, overflow: 'hidden', gap: 2 }}>
-            {stats.pct_nao_iniciado > 0 && <div style={{ width: `${stats.pct_nao_iniciado}%`, background: '#C3C3C3', transition: 'width .5s' }} title={`Não iniciado: ${stats.pct_nao_iniciado}%`} />}
-            {stats.pct_em_andamento > 0 && <div style={{ width: `${stats.pct_em_andamento}%`, background: '#F9E000', transition: 'width .5s' }} title={`Em andamento: ${stats.pct_em_andamento}%`} />}
-            {stats.pct_concluido > 0 && <div style={{ width: `${stats.pct_concluido}%`, background: '#1DB954', transition: 'width .5s' }} title={`Concluído: ${stats.pct_concluido}%`} />}
-          </div>
-          <div style={{ display: 'flex', gap: 16, marginTop: 8, fontSize: 11, color: 'var(--ccm-gray-dark)' }}>
-            <span><span style={{ display: 'inline-block', width: 10, height: 10, background: '#C3C3C3', borderRadius: 2, marginRight: 4 }} />Não Iniciado {stats.pct_nao_iniciado}%</span>
-            <span><span style={{ display: 'inline-block', width: 10, height: 10, background: '#F9E000', borderRadius: 2, marginRight: 4 }} />Em Andamento {stats.pct_em_andamento}%</span>
-            <span><span style={{ display: 'inline-block', width: 10, height: 10, background: '#1DB954', borderRadius: 2, marginRight: 4 }} />Concluído {stats.pct_concluido}%</span>
-          </div>
-        </div>
-      )}
 
       {/* Tabela */}
       <div className="table-card">
