@@ -297,9 +297,9 @@ async def create_agendamento(
             {
                 "dt_atualiza":  body.dt_atualiza,
                 "ticketupdate": body.ticketupdate,
-                "formato":      body.formato,
-                "tipo":         body.tipo,
-                "pacote":       body.pacote,
+                "formato":      (body.formato or "M")[:1],
+                "tipo":         (body.tipo or "E")[:1],
+                "pacote":       (body.pacote or "EVO")[:10],
                 "useragend":    (current_user.get("name", body.useragend) or "")[:15],
                 "cod":          body.cod,
             }
@@ -333,9 +333,9 @@ async def update_agendamento(
             {
                 "dt_atualiza":  body.dt_atualiza,
                 "ticketupdate": body.ticketupdate,
-                "formato":      body.formato,
-                "tipo":         body.tipo,
-                "pacote":       body.pacote,
+                "formato":      (body.formato or "M")[:1],
+                "tipo":         (body.tipo or "E")[:1],
+                "pacote":       (body.pacote or "EVO")[:10],
                 "useragend":    (current_user.get("name", body.useragend) or "")[:15],
                 "cod":          cod,
             }

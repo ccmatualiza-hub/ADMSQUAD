@@ -35,7 +35,7 @@ const PACOTE_OPTS = [
 
 const emptyForm = {
   cod: 0, cliente: '', razao: '', dt_atualiza: new Date().toLocaleDateString('pt-BR').replace(/\//g, '/'),
-  ticketupdate: '#', formato: 'CCM', tipo: 'E', pacote: 'EVO', useragend: '',
+  ticketupdate: '#', formato: 'M', tipo: 'E', pacote: 'EVO', useragend: '',
 };
 
 const inputStyle = { background: 'var(--ccm-ink)', border: '1px solid #1a3a6e', color: '#fff', fontSize: 13 };
