@@ -96,7 +96,7 @@ export default function DashboardPage() {
       <div className="row g-3">
         <div className="col-12 col-lg-7">
           <div className="chart-card">
-            <div className="chart-card-title">Atualizações — Agente IA vs Humano</div>
+            <div className="chart-card-title">Agendamento de Atualizações Linx — Agente IA vs Humano</div>
             {historico.length === 0 ? (
               <div style={{ height: 260, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ccm-gray-dark)', fontSize: 13 }}>
                 Sem dados de histórico disponíveis
