@@ -83,18 +83,19 @@ export default function Sidebar() {
             </div>
           </div>
 
-          {/* Alterar senha */}
-          <button className="btn btn-sm w-100 mb-1"
-            style={{ background: 'rgba(0,176,250,.12)', color: '#00B0FA', fontSize: 11, fontWeight: 700 }}
-            onClick={() => setShowPwModal(true)}>
-            <i className="bi bi-key me-1" /> Alterar Senha
-          </button>
-
-          <button className="btn btn-sm w-100"
-            style={{ background: 'rgba(255,255,255,.07)', color: '#9BA4AB', fontSize: 11, fontWeight: 700 }}
-            onClick={handleLogout}>
-            <i className="bi bi-box-arrow-right me-1" /> Sair
-          </button>
+          {/* Alterar senha + Sair lado a lado */}
+          <div style={{ display: 'flex', gap: 6 }}>
+            <button className="btn btn-sm"
+              style={{ flex: 1, background: 'rgba(0,176,250,.12)', color: '#00B0FA', fontSize: 10, fontWeight: 700, padding: '5px 4px' }}
+              onClick={() => setShowPwModal(true)}>
+              <i className="bi bi-key me-1" />Senha
+            </button>
+            <button className="btn btn-sm"
+              style={{ flex: 1, background: 'rgba(255,255,255,.07)', color: '#9BA4AB', fontSize: 10, fontWeight: 700, padding: '5px 4px' }}
+              onClick={handleLogout}>
+              <i className="bi bi-box-arrow-right me-1" />Sair
+            </button>
+          </div>
         </div>
       </aside>
 
