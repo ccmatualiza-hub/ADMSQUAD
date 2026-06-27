@@ -339,7 +339,7 @@ async def create_agendamento(
                     "pacote":      pacote[:3],
                     "ticket":      body.ticketupdate[:10],
                     "bd":          bd or "",
-                    "useragendar": useragend,
+                    "useragendar": useragend.upper(),
                 }
             )
 
