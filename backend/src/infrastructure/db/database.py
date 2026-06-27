@@ -7,11 +7,15 @@ from src.config import settings
 
 engine = create_async_engine(
     settings.database_url,
-    pool_size=5,
+    pool_size=3,
     max_overflow=2,
-    pool_pre_ping=False,
-    pool_recycle=1800,  # recicla conexões a cada 30min
-    pool_timeout=30,
+    pool_pre_ping=True,       # testa conexão antes de usar
+    pool_recycle=900,          # recicla a cada 15min (antes do MySQL timeout de 28800s)
+    pool_timeout=20,
+    connect_args={
+        "connect_timeout": 10,
+        "autocommit": False,
+    },
     echo=False,
 )
 
@@ -28,4 +32,10 @@ class Base(DeclarativeBase):
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     async with AsyncSessionLocal() as session:
-        yield session
+        try:
+            yield session
+        except Exception:
+            await session.rollback()
+            raise
+        finally:
+            await session.close()
