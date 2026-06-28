@@ -40,8 +40,8 @@ export default function CxPage() {
       <div className="row g-3">
         <Card title="Clientes"                  desc="Consultar e visualizar dados dos clientes parceria Linx."    color="#00B0FA" icon="bi-people-fill"          onClick={() => setSubPage('clientes')} />
         <Card title="Monitor de Atualizações"   desc="Acompanhar as atualizações Linx de hoje."                   color="#1DB954" icon="bi-arrow-repeat"         onClick={() => setSubPage('monitor')}  />
-        <Card title="Agendar Atualização Linx"  desc="Registrar e editar agendamentos de atualização Linx."       color="#7F77DD" icon="bi-calendar-plus"        onClick={() => setSubPage('agendar')}  />
-        <Card title="Adiantar Atendimentos Linx" desc="Registrar atendimentos aguardando ticket de abertura Linx." color="#E74C3C" icon="bi-ticket-detailed"      onClick={() => setSubPage('adiantar')} />
+        <Card title="Agendar Atualização Linx"  desc="Registrar agendamentos de atualizações Linx."       color="#7F77DD" icon="bi-calendar-plus"        onClick={() => setSubPage('agendar')}  />
+        <Card title="Adiantar Atendimentos Linx" desc="Registrar atendimentos sem ticket aberto." color="#E74C3C" icon="bi-ticket-detailed"      onClick={() => setSubPage('adiantar')} />
         <div className="col-12 col-md-4 col-lg-3">
           <div style={{ background: '#F7F8FA', border: '1px dashed var(--ccm-line)', borderRadius: 6, padding: '20px 22px', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 120, color: 'var(--ccm-gray-medium)', fontSize: 12, letterSpacing: '.08em' }}>
             <i className="bi bi-plus-circle me-2" />Em breve
