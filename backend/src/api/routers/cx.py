@@ -528,3 +528,33 @@ async def update_adiantar(
         return row_to_adiantar(row, list(result.keys()))
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
+
+
+@router.put("/clientes/{cod}")
+async def update_cliente(
+    cod: int,
+    body: dict,
+    _: Annotated[dict, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> dict:
+    try:
+        allowed = ["razao", "sistema", "versao", "qtdusers", "serverbd", "status",
+                   "contatos", "telefones", "emails", "reg", "local", "grupo",
+                   "tipo", "pacote", "dt_atualiza", "versaoat", "franq", "ufmatriz",
+                   "integracoes", "infraprod", "infrats", "shape", "ocpu", "mem",
+                   "tsplus", "detalhes", "implat", "datastart", "prxcontat", "cnpj",
+                   "agtazure", "linxwebver", "bandeira", "bd"]
+        sets, params = [], {"cod": cod}
+        for k, v in body.items():
+            if k in allowed:
+                sets.append(f"{k}=:{k}")
+                params[k] = v
+        if not sets:
+            raise HTTPException(status_code=400, detail="Nada para atualizar")
+        await session.execute(
+            text(f"UPDATE tbl_linx SET {', '.join(sets)} WHERE cod = :cod"), params
+        )
+        await session.commit()
+        return {"updated": True}
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))

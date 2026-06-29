@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { http } from '../../lib/http-client';
 
 interface Cliente {
@@ -40,6 +41,60 @@ function Field({ label, value }: { label: string; value: string | number | null 
     <div style={{ marginBottom: 10 }}>
       <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.12em', color: 'var(--ccm-gray-dark)', marginBottom: 2 }}>{label}</div>
       <div style={{ fontSize: 13, color: 'var(--ccm-ink)', wordBreak: 'break-word' }}>{String(value)}</div>
+      {/* Modal Editar */}
+      {editItem && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: 16 }}>
+          <div style={{ background: '#132230', border: '1px solid #1a3a6e', borderTop: '3px solid #00B0FA', borderRadius: 8, padding: '28px 32px', width: '100%', maxWidth: 620, boxShadow: '0 8px 32px rgba(0,0,0,.4)', maxHeight: '90vh', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <div>
+                <div style={{ color: '#00B0FA', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.18em' }}>CX — Editar Cliente</div>
+                <div style={{ color: '#fff', fontWeight: 900, fontSize: 15 }}>{editItem.razao || editItem.cliente}</div>
+              </div>
+              <button onClick={() => setEditItem(null)} style={{ background: 'transparent', border: 'none', color: '#9BA4AB', fontSize: 22, cursor: 'pointer' }}>×</button>
+            </div>
+            <div className="row g-3">
+              {[
+                { label: 'Razão Social', key: 'razao' },
+                { label: 'Sistema', key: 'sistema' },
+                { label: 'Versão', key: 'versao' },
+                { label: 'Server BD', key: 'serverbd' },
+                { label: 'Qtd. Usuários', key: 'qtdusers', type: 'number' },
+                { label: 'Status', key: 'status' },
+                { label: 'Franquia', key: 'franq' },
+                { label: 'Implantador', key: 'implat' },
+                { label: 'Contatos', key: 'contatos' },
+                { label: 'Telefones', key: 'telefones' },
+                { label: 'E-mails', key: 'emails' },
+                { label: 'Local', key: 'local' },
+                { label: 'Próx. Contato', key: 'prxcontat' },
+              ].map(({ label, key, type }) => (
+                <div key={key} className="col-12 col-md-6">
+                  <label style={{ color: '#9BA4AB', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.14em' }}>{label}</label>
+                  <input type={type || 'text'} className="form-control mt-1"
+                    style={{ background: 'var(--ccm-ink)', border: '1px solid #1a3a6e', color: '#fff', fontSize: 13 }}
+                    value={(editForm as Record<string, string | number | undefined>)[key] ?? ''}
+                    onChange={e => setEditForm(f => ({ ...f, [key]: type === 'number' ? Number(e.target.value) : e.target.value }))} />
+                </div>
+              ))}
+              <div className="col-12">
+                <label style={{ color: '#9BA4AB', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.14em' }}>Observações</label>
+                <textarea className="form-control mt-1" rows={3}
+                  style={{ background: 'var(--ccm-ink)', border: '1px solid #1a3a6e', color: '#fff', fontSize: 13, resize: 'vertical' }}
+                  value={editForm.detalhes ?? ''}
+                  onChange={e => setEditForm(f => ({ ...f, detalhes: e.target.value }))} />
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 20 }}>
+              <button className="btn btn-sm" style={{ background: 'rgba(255,255,255,.07)', color: '#9BA4AB', fontSize: 12, padding: '8px 20px' }} onClick={() => setEditItem(null)}>
+                Cancelar
+              </button>
+              <button className="btn btn-ccm-primary" style={{ fontSize: 12, padding: '8px 24px' }} onClick={handleSaveEdit} disabled={savingEdit}>
+                {savingEdit ? <><span className="spinner-border spinner-border-sm me-1" />Salvando…</> : <><i className="bi bi-check-lg me-1" />Salvar Alterações</>}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -52,6 +107,9 @@ export default function ClientesListPage({ onBack }: { onBack: () => void }) {
   const [filterStatus, setFilterStatus] = useState('');
   const [detalhe, setDetalhe]         = useState<ClienteDetalhe | null>(null);
   const [loadingDet, setLoadingDet]   = useState(false);
+  const [editItem, setEditItem]       = useState<ClienteDetalhe | null>(null);
+  const [editForm, setEditForm]       = useState<Partial<ClienteDetalhe>>({});
+  const [savingEdit, setSavingEdit]   = useState(false);
 
   const fetchClientes = async (q = '', s = '') => {
     setLoading(true);
@@ -80,6 +138,34 @@ export default function ClientesListPage({ onBack }: { onBack: () => void }) {
       setDetalhe(d);
     } catch { /* silent */ }
     finally { setLoadingDet(false); }
+  };
+
+  const openEdit = async (cod: number) => {
+    try {
+      const d = await http.get<ClienteDetalhe>(`/api/cx/clientes/${cod}`);
+      setEditItem(d);
+      setEditForm({
+        razao: d.razao ?? '', sistema: d.sistema ?? '', versao: d.versao ?? '',
+        qtdusers: d.qtdusers ?? undefined, serverbd: d.serverbd ?? '',
+        contatos: d.contatos ?? '', telefones: d.telefones ?? '',
+        emails: d.emails ?? '', local: d.local ?? '', franq: d.franq ?? '',
+        implat: d.implat ?? '', prxcontat: d.prxcontat ?? '',
+        datprev: undefined, detalhes: d.detalhes ?? '', status: d.status ?? '',
+      });
+    } catch { toast.error('Erro ao carregar dados do cliente'); }
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editItem) return;
+    setSavingEdit(true);
+    try {
+      await http.put(`/api/cx/clientes/${editItem.cod}`, editForm);
+      toast.success('Cliente atualizado!');
+      setEditItem(null);
+      fetchClientes();
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Erro ao salvar');
+    } finally { setSavingEdit(false); }
   };
 
   const th = { color: '#fff', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.05em', padding: '10px 12px', textAlign: 'left' as const, fontSize: 10, whiteSpace: 'nowrap' as const };
@@ -156,10 +242,16 @@ export default function ClientesListPage({ onBack }: { onBack: () => void }) {
                     <td style={td}>{c.serverbd || '—'}</td>
                     <td style={td}>{statusBadge(c.status)}</td>
                     <td style={{ ...td, textAlign: 'center' }}>
-                      <button className="btn btn-sm" style={{ background: '#00B0FA', color: '#fff', fontSize: 10, padding: '3px 10px' }}
-                        onClick={() => openDetalhe(c.cod)}>
-                        <i className="bi bi-eye me-1" />Ver
-                      </button>
+                      <div style={{ display: 'flex', gap: 4 }}>
+                        <button className="btn btn-sm" style={{ background: '#00B0FA', color: '#fff', fontSize: 10, padding: '3px 8px' }}
+                          onClick={() => openDetalhe(c.cod)}>
+                          <i className="bi bi-eye me-1" />Ver
+                        </button>
+                        <button className="btn btn-sm" style={{ background: 'var(--ccm-blue)', color: '#fff', fontSize: 10, padding: '3px 8px' }}
+                          onClick={() => openEdit(c.cod)}>
+                          <i className="bi bi-pencil-fill me-1" />Editar
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -269,6 +361,60 @@ export default function ClientesListPage({ onBack }: { onBack: () => void }) {
                 </div>
               </>
             )}
+          </div>
+        </div>
+      )}
+      {/* Modal Editar */}
+      {editItem && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: 16 }}>
+          <div style={{ background: '#132230', border: '1px solid #1a3a6e', borderTop: '3px solid #00B0FA', borderRadius: 8, padding: '28px 32px', width: '100%', maxWidth: 620, boxShadow: '0 8px 32px rgba(0,0,0,.4)', maxHeight: '90vh', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <div>
+                <div style={{ color: '#00B0FA', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.18em' }}>CX — Editar Cliente</div>
+                <div style={{ color: '#fff', fontWeight: 900, fontSize: 15 }}>{editItem.razao || editItem.cliente}</div>
+              </div>
+              <button onClick={() => setEditItem(null)} style={{ background: 'transparent', border: 'none', color: '#9BA4AB', fontSize: 22, cursor: 'pointer' }}>×</button>
+            </div>
+            <div className="row g-3">
+              {[
+                { label: 'Razão Social', key: 'razao' },
+                { label: 'Sistema', key: 'sistema' },
+                { label: 'Versão', key: 'versao' },
+                { label: 'Server BD', key: 'serverbd' },
+                { label: 'Qtd. Usuários', key: 'qtdusers', type: 'number' },
+                { label: 'Status', key: 'status' },
+                { label: 'Franquia', key: 'franq' },
+                { label: 'Implantador', key: 'implat' },
+                { label: 'Contatos', key: 'contatos' },
+                { label: 'Telefones', key: 'telefones' },
+                { label: 'E-mails', key: 'emails' },
+                { label: 'Local', key: 'local' },
+                { label: 'Próx. Contato', key: 'prxcontat' },
+              ].map(({ label, key, type }) => (
+                <div key={key} className="col-12 col-md-6">
+                  <label style={{ color: '#9BA4AB', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.14em' }}>{label}</label>
+                  <input type={type || 'text'} className="form-control mt-1"
+                    style={{ background: 'var(--ccm-ink)', border: '1px solid #1a3a6e', color: '#fff', fontSize: 13 }}
+                    value={(editForm as Record<string, string | number | undefined>)[key] ?? ''}
+                    onChange={e => setEditForm(f => ({ ...f, [key]: type === 'number' ? Number(e.target.value) : e.target.value }))} />
+                </div>
+              ))}
+              <div className="col-12">
+                <label style={{ color: '#9BA4AB', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.14em' }}>Observações</label>
+                <textarea className="form-control mt-1" rows={3}
+                  style={{ background: 'var(--ccm-ink)', border: '1px solid #1a3a6e', color: '#fff', fontSize: 13, resize: 'vertical' }}
+                  value={editForm.detalhes ?? ''}
+                  onChange={e => setEditForm(f => ({ ...f, detalhes: e.target.value }))} />
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 20 }}>
+              <button className="btn btn-sm" style={{ background: 'rgba(255,255,255,.07)', color: '#9BA4AB', fontSize: 12, padding: '8px 20px' }} onClick={() => setEditItem(null)}>
+                Cancelar
+              </button>
+              <button className="btn btn-ccm-primary" style={{ fontSize: 12, padding: '8px 24px' }} onClick={handleSaveEdit} disabled={savingEdit}>
+                {savingEdit ? <><span className="spinner-border spinner-border-sm me-1" />Salvando…</> : <><i className="bi bi-check-lg me-1" />Salvar Alterações</>}
+              </button>
+            </div>
           </div>
         </div>
       )}
