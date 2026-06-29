@@ -22,10 +22,15 @@ interface ClienteDetalhe {
 }
 
 type EditForm = {
-  razao: string; sistema: string; versao: string; serverbd: string;
-  qtdusers: string; status: string; franq: string; implat: string;
-  contatos: string; telefones: string; emails: string; local: string;
-  prxcontat: string; detalhes: string;
+  razao: string; sistema: string; versao: string; bd: string; serverbd: string;
+  qtdusers: string; qtdsistemas: string; qtdsrv: string;
+  status: string; franq: string; ufmatriz: string; reg: string; bandeira: string;
+  implat: string; contatos: string; telefones: string; emails: string;
+  local: string; prxcontat: string; cnpj: string; grupo: string;
+  tipo: string; pacote: string; dt_atualiza: string; versaoat: string;
+  datastart: string; agtazure: string; linxwebver: string;
+  shape: string; ocpu: string; mem: string; tsplus: string;
+  integracoes: string; infraprod: string; infrats: string; detalhes: string;
 };
 
 const STATUS_COLORS: Record<string, { color: string; bg: string }> = {
@@ -53,10 +58,15 @@ function Field({ label, value }: { label: string; value: string | number | null 
 }
 
 const emptyEditForm: EditForm = {
-  razao: '', sistema: '', versao: '', serverbd: '',
-  qtdusers: '', status: '', franq: '', implat: '',
-  contatos: '', telefones: '', emails: '', local: '',
-  prxcontat: '', detalhes: '',
+  razao: '', sistema: '', versao: '', bd: '', serverbd: '',
+  qtdusers: '', qtdsistemas: '', qtdsrv: '',
+  status: '', franq: '', ufmatriz: '', reg: '', bandeira: '',
+  implat: '', contatos: '', telefones: '', emails: '',
+  local: '', prxcontat: '', cnpj: '', grupo: '',
+  tipo: '', pacote: '', dt_atualiza: '', versaoat: '',
+  datastart: '', agtazure: '', linxwebver: '',
+  shape: '', ocpu: '', mem: '', tsplus: '',
+  integracoes: '', infraprod: '', infrats: '', detalhes: '',
 };
 
 export default function ClientesListPage({ onBack }: { onBack: () => void }) {
@@ -106,11 +116,21 @@ export default function ClientesListPage({ onBack }: { onBack: () => void }) {
       setEditItem(d);
       setEditForm({
         razao: d.razao ?? '', sistema: d.sistema ?? '', versao: d.versao ?? '',
-        serverbd: d.serverbd ?? '', qtdusers: String(d.qtdusers ?? ''),
-        status: d.status ?? '', franq: d.franq ?? '', implat: d.implat ?? '',
+        bd: d.bd ?? '', serverbd: d.serverbd ?? '',
+        qtdusers: String(d.qtdusers ?? ''), qtdsistemas: String(d.qtdsistemas ?? ''),
+        qtdsrv: d.qtdsrv ?? '', status: d.status ?? '',
+        franq: d.franq ?? '', ufmatriz: d.ufmatriz ?? '', reg: d.reg ?? '',
+        bandeira: d.bandeira ?? '', implat: d.implat ?? '',
         contatos: d.contatos ?? '', telefones: d.telefones ?? '',
         emails: d.emails ?? '', local: d.local ?? '',
-        prxcontat: d.prxcontat ?? '', detalhes: d.detalhes ?? '',
+        prxcontat: d.prxcontat ?? '', cnpj: d.cnpj ?? '', grupo: d.grupo ?? '',
+        tipo: d.tipo ?? '', pacote: d.pacote ?? '',
+        dt_atualiza: d.dt_atualiza ?? '', versaoat: d.versaoat ?? '',
+        datastart: d.datastart ?? '', agtazure: d.agtazure ?? '',
+        linxwebver: d.linxwebver ?? '', shape: d.shape ?? '',
+        ocpu: d.ocpu ?? '', mem: d.mem ?? '', tsplus: d.tsplus ?? '',
+        integracoes: d.integracoes ?? '', infraprod: d.infraprod ?? '',
+        infrats: d.infrats ?? '', detalhes: d.detalhes ?? '',
       });
     } catch { toast.error('Erro ao carregar dados do cliente'); }
   };
@@ -281,12 +301,55 @@ export default function ClientesListPage({ onBack }: { onBack: () => void }) {
               <button onClick={() => setEditItem(null)} style={{ background: 'transparent', border: 'none', color: '#9BA4AB', fontSize: 22, cursor: 'pointer' }}>×</button>
             </div>
             <div className="row g-3">
+              {/* Identificação */}
+              <div className="col-12"><div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.15em', color: '#00B0FA', borderBottom: '1px solid #1a3a6e', paddingBottom: 4, marginBottom: 4 }}>Identificação</div></div>
               {([
-                ['Razão Social', 'razao'], ['Sistema', 'sistema'], ['Versão', 'versao'],
-                ['Server BD', 'serverbd'], ['Qtd. Usuários', 'qtdusers'], ['Status', 'status'],
-                ['Franquia', 'franq'], ['Implantador', 'implat'], ['Contatos', 'contatos'],
-                ['Telefones', 'telefones'], ['E-mails', 'emails'], ['Local', 'local'],
-                ['Próx. Contato', 'prxcontat'],
+                ['Razão Social', 'razao'], ['Bandeira', 'bandeira'], ['CNPJ', 'cnpj'],
+                ['Grupo', 'grupo'], ['UF Matriz', 'ufmatriz'], ['Região', 'reg'],
+                ['Franquia', 'franq'], ['Implantador', 'implat'],
+                ['Local', 'local'], ['Data Start', 'datastart'], ['Próx. Contato', 'prxcontat'],
+              ] as [string, keyof EditForm][]).map(([label, key]) => (
+                <div key={key} className="col-12 col-md-6">
+                  <label style={labelStyle}>{label}</label>
+                  <input type="text" className="form-control mt-1" style={inputStyle}
+                    value={editForm[key]}
+                    onChange={e => setEditForm(f => ({ ...f, [key]: e.target.value }))} />
+                </div>
+              ))}
+              {/* Sistema */}
+              <div className="col-12"><div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.15em', color: '#00B0FA', borderBottom: '1px solid #1a3a6e', paddingBottom: 4, marginBottom: 4, marginTop: 4 }}>Sistema</div></div>
+              {([
+                ['Sistema', 'sistema'], ['Versão', 'versao'], ['Versão Atual', 'versaoat'],
+                ['Tipo', 'tipo'], ['Pacote', 'pacote'], ['Qtd. Usuários', 'qtdusers'],
+                ['Qtd. Sistemas', 'qtdsistemas'], ['Linx Web Ver.', 'linxwebver'],
+                ['Últ. Atualização', 'dt_atualiza'], ['Status', 'status'],
+              ] as [string, keyof EditForm][]).map(([label, key]) => (
+                <div key={key} className="col-12 col-md-6">
+                  <label style={labelStyle}>{label}</label>
+                  <input type="text" className="form-control mt-1" style={inputStyle}
+                    value={editForm[key]}
+                    onChange={e => setEditForm(f => ({ ...f, [key]: e.target.value }))} />
+                </div>
+              ))}
+              {/* Infraestrutura */}
+              <div className="col-12"><div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.15em', color: '#00B0FA', borderBottom: '1px solid #1a3a6e', paddingBottom: 4, marginBottom: 4, marginTop: 4 }}>Infraestrutura</div></div>
+              {([
+                ['BD', 'bd'], ['Server BD', 'serverbd'], ['Qtd. Servidores', 'qtdsrv'],
+                ['Shape', 'shape'], ['oCPU', 'ocpu'], ['Memória', 'mem'],
+                ['TSPlus', 'tsplus'], ['Azure Agent', 'agtazure'],
+                ['Infra Prod', 'infraprod'], ['Infra TS', 'infrats'], ['Integrações', 'integracoes'],
+              ] as [string, keyof EditForm][]).map(([label, key]) => (
+                <div key={key} className="col-12 col-md-6">
+                  <label style={labelStyle}>{label}</label>
+                  <input type="text" className="form-control mt-1" style={inputStyle}
+                    value={editForm[key]}
+                    onChange={e => setEditForm(f => ({ ...f, [key]: e.target.value }))} />
+                </div>
+              ))}
+              {/* Contato */}
+              <div className="col-12"><div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.15em', color: '#00B0FA', borderBottom: '1px solid #1a3a6e', paddingBottom: 4, marginBottom: 4, marginTop: 4 }}>Contato</div></div>
+              {([
+                ['Contatos', 'contatos'], ['Telefones', 'telefones'], ['E-mails', 'emails'],
               ] as [string, keyof EditForm][]).map(([label, key]) => (
                 <div key={key} className="col-12 col-md-6">
                   <label style={labelStyle}>{label}</label>
