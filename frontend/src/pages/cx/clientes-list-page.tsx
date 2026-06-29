@@ -21,6 +21,13 @@ interface ClienteDetalhe {
   agtazure: string | null; linxwebver: string | null;
 }
 
+type EditForm = {
+  razao: string; sistema: string; versao: string; serverbd: string;
+  qtdusers: string; status: string; franq: string; implat: string;
+  contatos: string; telefones: string; emails: string; local: string;
+  prxcontat: string; detalhes: string;
+};
+
 const STATUS_COLORS: Record<string, { color: string; bg: string }> = {
   '6 - ATIVO':             { color: '#0E7E3B', bg: '#D4F5E2' },
   '7 - ATIVO VPU':         { color: '#0E7E3B', bg: '#C8F0D8' },
@@ -41,63 +48,16 @@ function Field({ label, value }: { label: string; value: string | number | null 
     <div style={{ marginBottom: 10 }}>
       <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.12em', color: 'var(--ccm-gray-dark)', marginBottom: 2 }}>{label}</div>
       <div style={{ fontSize: 13, color: 'var(--ccm-ink)', wordBreak: 'break-word' }}>{String(value)}</div>
-      {/* Modal Editar */}
-      {editItem && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: 16 }}>
-          <div style={{ background: '#132230', border: '1px solid #1a3a6e', borderTop: '3px solid #00B0FA', borderRadius: 8, padding: '28px 32px', width: '100%', maxWidth: 620, boxShadow: '0 8px 32px rgba(0,0,0,.4)', maxHeight: '90vh', overflowY: 'auto' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-              <div>
-                <div style={{ color: '#00B0FA', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.18em' }}>CX — Editar Cliente</div>
-                <div style={{ color: '#fff', fontWeight: 900, fontSize: 15 }}>{editItem.razao || editItem.cliente}</div>
-              </div>
-              <button onClick={() => setEditItem(null)} style={{ background: 'transparent', border: 'none', color: '#9BA4AB', fontSize: 22, cursor: 'pointer' }}>×</button>
-            </div>
-            <div className="row g-3">
-              {[
-                { label: 'Razão Social', key: 'razao' },
-                { label: 'Sistema', key: 'sistema' },
-                { label: 'Versão', key: 'versao' },
-                { label: 'Server BD', key: 'serverbd' },
-                { label: 'Qtd. Usuários', key: 'qtdusers', type: 'number' },
-                { label: 'Status', key: 'status' },
-                { label: 'Franquia', key: 'franq' },
-                { label: 'Implantador', key: 'implat' },
-                { label: 'Contatos', key: 'contatos' },
-                { label: 'Telefones', key: 'telefones' },
-                { label: 'E-mails', key: 'emails' },
-                { label: 'Local', key: 'local' },
-                { label: 'Próx. Contato', key: 'prxcontat' },
-              ].map(({ label, key, type }) => (
-                <div key={key} className="col-12 col-md-6">
-                  <label style={{ color: '#9BA4AB', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.14em' }}>{label}</label>
-                  <input type={type || 'text'} className="form-control mt-1"
-                    style={{ background: 'var(--ccm-ink)', border: '1px solid #1a3a6e', color: '#fff', fontSize: 13 }}
-                    value={(editForm as Record<string, string | number | undefined>)[key] ?? ''}
-                    onChange={e => setEditForm(f => ({ ...f, [key]: type === 'number' ? Number(e.target.value) : e.target.value }))} />
-                </div>
-              ))}
-              <div className="col-12">
-                <label style={{ color: '#9BA4AB', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.14em' }}>Observações</label>
-                <textarea className="form-control mt-1" rows={3}
-                  style={{ background: 'var(--ccm-ink)', border: '1px solid #1a3a6e', color: '#fff', fontSize: 13, resize: 'vertical' }}
-                  value={editForm.detalhes ?? ''}
-                  onChange={e => setEditForm(f => ({ ...f, detalhes: e.target.value }))} />
-              </div>
-            </div>
-            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 20 }}>
-              <button className="btn btn-sm" style={{ background: 'rgba(255,255,255,.07)', color: '#9BA4AB', fontSize: 12, padding: '8px 20px' }} onClick={() => setEditItem(null)}>
-                Cancelar
-              </button>
-              <button className="btn btn-ccm-primary" style={{ fontSize: 12, padding: '8px 24px' }} onClick={handleSaveEdit} disabled={savingEdit}>
-                {savingEdit ? <><span className="spinner-border spinner-border-sm me-1" />Salvando…</> : <><i className="bi bi-check-lg me-1" />Salvar Alterações</>}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
+
+const emptyEditForm: EditForm = {
+  razao: '', sistema: '', versao: '', serverbd: '',
+  qtdusers: '', status: '', franq: '', implat: '',
+  contatos: '', telefones: '', emails: '', local: '',
+  prxcontat: '', detalhes: '',
+};
 
 export default function ClientesListPage({ onBack }: { onBack: () => void }) {
   const [clientes, setClientes]       = useState<Cliente[]>([]);
@@ -108,7 +68,7 @@ export default function ClientesListPage({ onBack }: { onBack: () => void }) {
   const [detalhe, setDetalhe]         = useState<ClienteDetalhe | null>(null);
   const [loadingDet, setLoadingDet]   = useState(false);
   const [editItem, setEditItem]       = useState<ClienteDetalhe | null>(null);
-  const [editForm, setEditForm]       = useState<Partial<ClienteDetalhe>>({});
+  const [editForm, setEditForm]       = useState<EditForm>(emptyEditForm);
   const [savingEdit, setSavingEdit]   = useState(false);
 
   const fetchClientes = async (q = '', s = '') => {
@@ -146,11 +106,11 @@ export default function ClientesListPage({ onBack }: { onBack: () => void }) {
       setEditItem(d);
       setEditForm({
         razao: d.razao ?? '', sistema: d.sistema ?? '', versao: d.versao ?? '',
-        qtdusers: d.qtdusers ?? undefined, serverbd: d.serverbd ?? '',
+        serverbd: d.serverbd ?? '', qtdusers: String(d.qtdusers ?? ''),
+        status: d.status ?? '', franq: d.franq ?? '', implat: d.implat ?? '',
         contatos: d.contatos ?? '', telefones: d.telefones ?? '',
-        emails: d.emails ?? '', local: d.local ?? '', franq: d.franq ?? '',
-        implat: d.implat ?? '', prxcontat: d.prxcontat ?? '',
-        datprev: undefined, detalhes: d.detalhes ?? '', status: d.status ?? '',
+        emails: d.emails ?? '', local: d.local ?? '',
+        prxcontat: d.prxcontat ?? '', detalhes: d.detalhes ?? '',
       });
     } catch { toast.error('Erro ao carregar dados do cliente'); }
   };
@@ -159,10 +119,11 @@ export default function ClientesListPage({ onBack }: { onBack: () => void }) {
     if (!editItem) return;
     setSavingEdit(true);
     try {
-      await http.put(`/api/cx/clientes/${editItem.cod}`, editForm);
+      const body = { ...editForm, qtdusers: editForm.qtdusers ? Number(editForm.qtdusers) : null };
+      await http.put(`/api/cx/clientes/${editItem.cod}`, body);
       toast.success('Cliente atualizado!');
       setEditItem(null);
-      fetchClientes();
+      fetchClientes(search, filterStatus);
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : 'Erro ao salvar');
     } finally { setSavingEdit(false); }
@@ -170,6 +131,8 @@ export default function ClientesListPage({ onBack }: { onBack: () => void }) {
 
   const th = { color: '#fff', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.05em', padding: '10px 12px', textAlign: 'left' as const, fontSize: 10, whiteSpace: 'nowrap' as const };
   const td = { padding: '9px 12px', fontSize: 12, whiteSpace: 'nowrap' as const };
+  const inputStyle = { background: 'var(--ccm-ink)', border: '1px solid #1a3a6e', color: '#fff', fontSize: 13 };
+  const labelStyle = { color: '#9BA4AB', fontSize: 10, fontWeight: 700 as const, textTransform: 'uppercase' as const, letterSpacing: '.14em' };
 
   return (
     <div>
@@ -184,7 +147,6 @@ export default function ClientesListPage({ onBack }: { onBack: () => void }) {
       <div className="section-title mb-4" style={{ textAlign: 'center' }}>Clientes Parceria Linx</div>
 
       <div className="table-card">
-        {/* Header */}
         <div style={{ background: 'var(--ccm-ink)', padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderRadius: '6px 6px 0 0' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <i className="bi bi-people-fill" style={{ color: '#00B0FA', fontSize: 16 }} />
@@ -194,7 +156,6 @@ export default function ClientesListPage({ onBack }: { onBack: () => void }) {
           </div>
         </div>
 
-        {/* Filtros */}
         <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--ccm-line)', display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
           <input type="text" className="form-control" placeholder="Buscar por razão, cliente ou sistema..."
             value={search} onChange={e => setSearch(e.target.value)} onKeyDown={handleKeyDown}
@@ -209,7 +170,6 @@ export default function ClientesListPage({ onBack }: { onBack: () => void }) {
           </button>
         </div>
 
-        {/* Tabela */}
         <div style={{ overflowX: 'auto' }}>
           {loading ? (
             <div style={{ padding: 32, textAlign: 'center', color: 'var(--ccm-gray-dark)' }}>
@@ -226,7 +186,7 @@ export default function ClientesListPage({ onBack }: { onBack: () => void }) {
                   <th style={{ ...th, textAlign: 'center' }}>Users</th>
                   <th style={th}>Server BD</th>
                   <th style={th}>Status</th>
-                  <th style={{ ...th, textAlign: 'center' }}>Detalhe</th>
+                  <th style={{ ...th, textAlign: 'center' }}>Ações</th>
                 </tr>
               </thead>
               <tbody>
@@ -242,7 +202,7 @@ export default function ClientesListPage({ onBack }: { onBack: () => void }) {
                     <td style={td}>{c.serverbd || '—'}</td>
                     <td style={td}>{statusBadge(c.status)}</td>
                     <td style={{ ...td, textAlign: 'center' }}>
-                      <div style={{ display: 'flex', gap: 4 }}>
+                      <div style={{ display: 'flex', gap: 4, justifyContent: 'center' }}>
                         <button className="btn btn-sm" style={{ background: '#00B0FA', color: '#fff', fontSize: 10, padding: '3px 8px' }}
                           onClick={() => openDetalhe(c.cod)}>
                           <i className="bi bi-eye me-1" />Ver
@@ -267,14 +227,13 @@ export default function ClientesListPage({ onBack }: { onBack: () => void }) {
           <div style={{ background: '#fff', borderRadius: 8, borderTop: '3px solid #00B0FA', width: '100%', maxWidth: 700, maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 8px 32px rgba(0,0,0,.3)' }}>
             {loadingDet ? (
               <div style={{ padding: 48, textAlign: 'center', color: 'var(--ccm-gray-dark)' }}>
-                <span className="spinner-border spinner-border-sm me-2" />Carregando detalhes...
+                <span className="spinner-border spinner-border-sm me-2" />Carregando...
               </div>
             ) : detalhe && (
               <>
-                {/* Header do modal */}
                 <div style={{ background: 'var(--ccm-ink)', padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderRadius: '6px 6px 0 0' }}>
                   <div>
-                    <div style={{ color: '#00B0FA', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.18em' }}>CX — Detalhe do Cliente</div>
+                    <div style={{ color: '#00B0FA', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.18em' }}>CX — Detalhe</div>
                     <div style={{ color: '#fff', fontWeight: 900, fontSize: 15 }}>{detalhe.razao || detalhe.cliente}</div>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -282,88 +241,34 @@ export default function ClientesListPage({ onBack }: { onBack: () => void }) {
                     <button onClick={() => setDetalhe(null)} style={{ background: 'transparent', border: 'none', color: '#9BA4AB', fontSize: 22, cursor: 'pointer' }}>×</button>
                   </div>
                 </div>
-
-                {/* Conteúdo */}
                 <div style={{ padding: '20px 24px' }}>
-                  {/* Identificação */}
-                  <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.15em', color: '#00B0FA', borderBottom: '1px solid var(--ccm-line)', paddingBottom: 6, marginBottom: 14 }}>Identificação</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0 24px' }}>
-                    <Field label="Razão Social" value={detalhe.razao} />
-                    <Field label="Cliente (Código)" value={detalhe.cliente} />
-                    <Field label="Bandeira" value={detalhe.bandeira} />
-                    <Field label="CNPJ" value={detalhe.cnpj} />
-                    <Field label="Grupo" value={detalhe.grupo} />
-                    <Field label="UF Matriz" value={detalhe.ufmatriz} />
-                    <Field label="Franquia" value={detalhe.franq} />
-                    <Field label="Região" value={detalhe.reg} />
-                    <Field label="Local" value={detalhe.local} />
-                    <Field label="Data Start" value={detalhe.datastart} />
-                  </div>
-
-                  {/* Sistema */}
-                  <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.15em', color: '#00B0FA', borderBottom: '1px solid var(--ccm-line)', paddingBottom: 6, marginBottom: 14, marginTop: 8 }}>Sistema</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0 24px' }}>
-                    <Field label="Sistema" value={detalhe.sistema} />
-                    <Field label="Versão" value={detalhe.versao} />
-                    <Field label="Versão Atual" value={detalhe.versaoat} />
-                    <Field label="Pacote" value={detalhe.pacote} />
-                    <Field label="Tipo" value={detalhe.tipo} />
-                    <Field label="Qtd. Users" value={detalhe.qtdusers} />
-                    <Field label="Qtd. Sistemas" value={detalhe.qtdsistemas} />
-                    <Field label="Linx Web Ver." value={detalhe.linxwebver} />
-                    <Field label="Últ. Atualização" value={detalhe.dt_atualiza} />
-                  </div>
-
-                  {/* Infraestrutura */}
-                  <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.15em', color: '#00B0FA', borderBottom: '1px solid var(--ccm-line)', paddingBottom: 6, marginBottom: 14, marginTop: 8 }}>Infraestrutura</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0 24px' }}>
-                    <Field label="BD" value={detalhe.bd} />
-                    <Field label="Server BD" value={detalhe.serverbd} />
-                    <Field label="Qtd. Servidores" value={detalhe.qtdsrv} />
-                    <Field label="Shape" value={detalhe.shape} />
-                    <Field label="oCPU" value={detalhe.ocpu} />
-                    <Field label="Memória" value={detalhe.mem} />
-                    <Field label="TSPlus" value={detalhe.tsplus} />
-                    <Field label="Azure Agent" value={detalhe.agtazure} />
-                    <Field label="Infra Prod" value={detalhe.infraprod} />
-                    <Field label="Infra TS" value={detalhe.infrats} />
-                    <Field label="Integrações" value={detalhe.integracoes} />
-                  </div>
-
-                  {/* Contato */}
-                  <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.15em', color: '#00B0FA', borderBottom: '1px solid var(--ccm-line)', paddingBottom: 6, marginBottom: 14, marginTop: 8 }}>Contato</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0 24px' }}>
-                    <Field label="Contatos" value={detalhe.contatos} />
-                    <Field label="Telefones" value={detalhe.telefones} />
-                    <Field label="Emails" value={detalhe.emails} />
-                    <Field label="Próx. Contato" value={detalhe.prxcontat} />
-                  </div>
-
-                  {/* Implantação */}
-                  {detalhe.implat && <>
-                    <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.15em', color: '#00B0FA', borderBottom: '1px solid var(--ccm-line)', paddingBottom: 6, marginBottom: 14, marginTop: 8 }}>Implantação</div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0 24px' }}>
-                      <Field label="Implantador" value={detalhe.implat} />
+                  {[
+                    { title: 'Identificação', fields: [['Razão Social', detalhe.razao], ['Cliente', detalhe.cliente], ['Bandeira', detalhe.bandeira], ['CNPJ', detalhe.cnpj], ['Grupo', detalhe.grupo], ['UF Matriz', detalhe.ufmatriz], ['Franquia', detalhe.franq], ['Região', detalhe.reg], ['Local', detalhe.local], ['Data Start', detalhe.datastart]] },
+                    { title: 'Sistema', fields: [['Sistema', detalhe.sistema], ['Versão', detalhe.versao], ['Versão Atual', detalhe.versaoat], ['Pacote', detalhe.pacote], ['Tipo', detalhe.tipo], ['Qtd. Users', detalhe.qtdusers], ['Qtd. Sistemas', detalhe.qtdsistemas], ['Linx Web Ver.', detalhe.linxwebver], ['Últ. Atualização', detalhe.dt_atualiza]] },
+                    { title: 'Infraestrutura', fields: [['BD', detalhe.bd], ['Server BD', detalhe.serverbd], ['Qtd. Servidores', detalhe.qtdsrv], ['Shape', detalhe.shape], ['oCPU', detalhe.ocpu], ['Memória', detalhe.mem], ['TSPlus', detalhe.tsplus], ['Azure Agent', detalhe.agtazure], ['Infra Prod', detalhe.infraprod], ['Infra TS', detalhe.infrats], ['Integrações', detalhe.integracoes]] },
+                    { title: 'Contato', fields: [['Contatos', detalhe.contatos], ['Telefones', detalhe.telefones], ['Emails', detalhe.emails], ['Próx. Contato', detalhe.prxcontat]] },
+                  ].map(section => (
+                    <div key={section.title}>
+                      <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.15em', color: '#00B0FA', borderBottom: '1px solid var(--ccm-line)', paddingBottom: 6, marginBottom: 14, marginTop: 8 }}>{section.title}</div>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0 24px' }}>
+                        {section.fields.map(([label, val]) => <Field key={String(label)} label={String(label)} value={val} />)}
+                      </div>
                     </div>
-                  </>}
-
-                  {/* Observações */}
+                  ))}
                   {detalhe.detalhes && <>
                     <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.15em', color: '#00B0FA', borderBottom: '1px solid var(--ccm-line)', paddingBottom: 6, marginBottom: 14, marginTop: 8 }}>Observações</div>
                     <div style={{ fontSize: 13, color: 'var(--ccm-ink)', lineHeight: 1.6, background: '#F7F8FA', padding: '10px 14px', borderRadius: 4 }}>{detalhe.detalhes}</div>
                   </>}
                 </div>
-
                 <div style={{ padding: '12px 24px', borderTop: '1px solid var(--ccm-line)', textAlign: 'right' }}>
-                  <button className="btn btn-sm" style={{ background: 'var(--ccm-blue)', color: '#fff', fontSize: 12, padding: '7px 20px' }} onClick={() => setDetalhe(null)}>
-                    Fechar
-                  </button>
+                  <button className="btn btn-sm" style={{ background: 'var(--ccm-blue)', color: '#fff', fontSize: 12, padding: '7px 20px' }} onClick={() => setDetalhe(null)}>Fechar</button>
                 </div>
               </>
             )}
           </div>
         </div>
       )}
+
       {/* Modal Editar */}
       {editItem && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: 16 }}>
@@ -376,34 +281,24 @@ export default function ClientesListPage({ onBack }: { onBack: () => void }) {
               <button onClick={() => setEditItem(null)} style={{ background: 'transparent', border: 'none', color: '#9BA4AB', fontSize: 22, cursor: 'pointer' }}>×</button>
             </div>
             <div className="row g-3">
-              {[
-                { label: 'Razão Social', key: 'razao' },
-                { label: 'Sistema', key: 'sistema' },
-                { label: 'Versão', key: 'versao' },
-                { label: 'Server BD', key: 'serverbd' },
-                { label: 'Qtd. Usuários', key: 'qtdusers', type: 'number' },
-                { label: 'Status', key: 'status' },
-                { label: 'Franquia', key: 'franq' },
-                { label: 'Implantador', key: 'implat' },
-                { label: 'Contatos', key: 'contatos' },
-                { label: 'Telefones', key: 'telefones' },
-                { label: 'E-mails', key: 'emails' },
-                { label: 'Local', key: 'local' },
-                { label: 'Próx. Contato', key: 'prxcontat' },
-              ].map(({ label, key, type }) => (
+              {([
+                ['Razão Social', 'razao'], ['Sistema', 'sistema'], ['Versão', 'versao'],
+                ['Server BD', 'serverbd'], ['Qtd. Usuários', 'qtdusers'], ['Status', 'status'],
+                ['Franquia', 'franq'], ['Implantador', 'implat'], ['Contatos', 'contatos'],
+                ['Telefones', 'telefones'], ['E-mails', 'emails'], ['Local', 'local'],
+                ['Próx. Contato', 'prxcontat'],
+              ] as [string, keyof EditForm][]).map(([label, key]) => (
                 <div key={key} className="col-12 col-md-6">
-                  <label style={{ color: '#9BA4AB', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.14em' }}>{label}</label>
-                  <input type={type || 'text'} className="form-control mt-1"
-                    style={{ background: 'var(--ccm-ink)', border: '1px solid #1a3a6e', color: '#fff', fontSize: 13 }}
-                    value={(editForm as Record<string, string | number | undefined>)[key] ?? ''}
-                    onChange={e => setEditForm(f => ({ ...f, [key]: type === 'number' ? Number(e.target.value) : e.target.value }))} />
+                  <label style={labelStyle}>{label}</label>
+                  <input type="text" className="form-control mt-1" style={inputStyle}
+                    value={editForm[key]}
+                    onChange={e => setEditForm(f => ({ ...f, [key]: e.target.value }))} />
                 </div>
               ))}
               <div className="col-12">
-                <label style={{ color: '#9BA4AB', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.14em' }}>Observações</label>
-                <textarea className="form-control mt-1" rows={3}
-                  style={{ background: 'var(--ccm-ink)', border: '1px solid #1a3a6e', color: '#fff', fontSize: 13, resize: 'vertical' }}
-                  value={editForm.detalhes ?? ''}
+                <label style={labelStyle}>Observações</label>
+                <textarea className="form-control mt-1" rows={3} style={{ ...inputStyle, resize: 'vertical' }}
+                  value={editForm.detalhes}
                   onChange={e => setEditForm(f => ({ ...f, detalhes: e.target.value }))} />
               </div>
             </div>
