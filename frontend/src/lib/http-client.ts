@@ -1,36 +1,60 @@
 import { useAuthStore } from '../store/auth-store';
 
-const BASE_URL = import.meta.env.VITE_API_URL || '';
+const BASE = '';
 
-async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+async function request<T>(
+  method: string,
+  path: string,
+  body?: unknown,
+  retries = 2,
+): Promise<T> {
   const token = useAuthStore.getState().token;
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
 
-  const res = await fetch(`${BASE_URL}${path}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...options.headers,
-    },
-  });
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const res = await fetch(`${BASE}${path}`, {
+        method,
+        headers,
+        body: body !== undefined ? JSON.stringify(body) : undefined,
+      });
 
-  if (res.status === 401) {
-    useAuthStore.getState().logout();
-    window.location.href = '/login';
-    throw new Error('Session expired');
+      if (res.status === 401) {
+        useAuthStore.getState().logout();
+        window.location.href = '/login';
+        throw new Error('Não autenticado');
+      }
+
+      if (!res.ok) {
+        let detail = `HTTP ${res.status}`;
+        try {
+          const json = await res.json();
+          detail = json.detail || detail;
+        } catch { /* ignore */ }
+        throw new Error(detail);
+      }
+
+      if (res.status === 204) return undefined as T;
+      return res.json() as Promise<T>;
+    } catch (err) {
+      const isNetworkError = err instanceof TypeError && err.message === 'Failed to fetch';
+      if (isNetworkError && attempt < retries) {
+        // wait 800ms before retry
+        await new Promise(r => setTimeout(r, 800));
+        continue;
+      }
+      throw err;
+    }
   }
-
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body.error || `HTTP ${res.status}`);
-  }
-
-  return res.json() as Promise<T>;
+  throw new Error('Falha na requisição após múltiplas tentativas');
 }
 
 export const http = {
-  get:  <T>(path: string)                    => request<T>(path),
-  post: <T>(path: string, body: unknown)     => request<T>(path, { method: 'POST',  body: JSON.stringify(body) }),
-  put:  <T>(path: string, body: unknown)     => request<T>(path, { method: 'PUT',   body: JSON.stringify(body) }),
-  del:  <T>(path: string)                    => request<T>(path, { method: 'DELETE' }),
+  get:  <T>(path: string)                  => request<T>('GET',    path),
+  post: <T>(path: string, body: unknown)   => request<T>('POST',   path, body),
+  put:  <T>(path: string, body: unknown)   => request<T>('PUT',    path, body),
+  del:  <T>(path: string)                  => request<T>('DELETE', path),
 };

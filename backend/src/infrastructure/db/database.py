@@ -2,20 +2,17 @@ from collections.abc import AsyncGenerator
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy import event
 
 from src.config import settings
 
 engine = create_async_engine(
     settings.database_url,
-    pool_size=3,
-    max_overflow=2,
-    pool_pre_ping=True,       # testa conexão antes de usar
-    pool_recycle=900,          # recicla a cada 15min (antes do MySQL timeout de 28800s)
-    pool_timeout=20,
-    connect_args={
-        "connect_timeout": 10,
-        "autocommit": False,
-    },
+    pool_size=5,
+    max_overflow=3,
+    pool_pre_ping=True,
+    pool_recycle=600,       # recicla a cada 10min
+    pool_timeout=30,
     echo=False,
 )
 
