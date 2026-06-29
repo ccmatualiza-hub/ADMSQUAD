@@ -78,7 +78,7 @@ async def list_clientes(
             where += " AND status = :status"
             params["status"] = status_filter
         result = await session.execute(
-            text(f"SELECT cod, razao, cliente, sistema, versao, qtdusers, serverbd, status FROM tbl_linx {where} ORDER BY razao LIMIT 500"),
+            text(f"SELECT cod, razao, cliente, sistema, versao, qtdusers, serverbd, status FROM tbl_linx {where} ORDER BY razao"),
             params
         )
         rows = result.fetchall()
