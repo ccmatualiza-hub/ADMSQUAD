@@ -17,9 +17,8 @@ class TarefaItem(BaseModel):
     versao: str | None = None
     qtdusers: int | None = None
     serverbd: str | None = None
-    codigoc: str | None = None
-    grupo: str | None = None
-    dt_atualiza: str | None = None
+    status: str | None = None
+    qtdsistemas: int | None = None
 
 
 @router.get("/tarefas", response_model=list[TarefaItem])
@@ -35,7 +34,7 @@ async def list_tarefas(
             where += " AND (razao LIKE :q OR cliente LIKE :q OR sistema LIKE :q)"
             params["q"] = f"%{q}%"
         result = await session.execute(
-            text(f"SELECT cod, razao, cliente, sistema, versao, qtdusers, serverbd, codigoc, grupo, dt_atualiza FROM tbl_linx {where} ORDER BY razao"),
+            text(f"SELECT cod, razao, cliente, sistema, versao, qtdusers, serverbd, status, qtdsistemas FROM tbl_linx {where} ORDER BY razao"),
             params
         )
         rows = result.fetchall()

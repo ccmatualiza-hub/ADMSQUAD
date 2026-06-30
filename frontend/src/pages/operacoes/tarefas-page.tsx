@@ -5,8 +5,21 @@ interface ConsultaItem {
   cod: number; razao: string | null; cliente: string | null;
   sistema: string | null; versao: string | null;
   qtdusers: number | null; serverbd: string | null;
-  codigoc: string | null; grupo: string | null;
-  dt_atualiza: string | null;
+  status: string | null; qtdsistemas: number | null;
+}
+
+const STATUS_COLORS: Record<string, { color: string; bg: string }> = {
+  '6 - ATIVO':             { color: '#0E7E3B', bg: '#D4F5E2' },
+  '7 - ATIVO VPU':         { color: '#0E7E3B', bg: '#C8F0D8' },
+  '0 - IMPLANTAÇÃO':       { color: '#8A6800', bg: '#FFF8CC' },
+  'X - ATIVO COMPLEMENTO': { color: '#204294', bg: '#E8EDF7' },
+  '9 - INATIVO':           { color: '#9B2020', bg: '#FDDEDE' },
+};
+
+function statusBadge(s: string | null) {
+  if (!s) return <span style={{ color: 'var(--ccm-gray-medium)', fontSize: 11 }}>—</span>;
+  const c = STATUS_COLORS[s] ?? { color: '#444', bg: '#eee' };
+  return <span style={{ background: c.bg, color: c.color, borderRadius: 99, padding: '2px 9px', fontSize: 10, fontWeight: 700, whiteSpace: 'nowrap' }}>{s}</span>;
 }
 
 export default function TarefasPage({ onBack }: { onBack: () => void }) {
@@ -48,7 +61,7 @@ export default function TarefasPage({ onBack }: { onBack: () => void }) {
       <div className="table-card">
         <div style={{ background: 'var(--ccm-ink)', padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderRadius: '6px 6px 0 0' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <i className="bi bi-search" style={{ color: '#F9A825', fontSize: 16 }} />
+            <i className="bi bi-list-task" style={{ color: '#00B0FA', fontSize: 16 }} />
             <span style={{ color: '#fff', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.12em' }}>
               {loading ? 'Carregando...' : `${clientes.length} clientes`}
             </span>
@@ -79,14 +92,13 @@ export default function TarefasPage({ onBack }: { onBack: () => void }) {
                   <th style={th}>Versão</th>
                   <th style={{ ...th, textAlign: 'center' }}>Users</th>
                   <th style={th}>Server BD</th>
-                  <th style={th}>Código-C</th>
-                  <th style={th}>Grupo</th>
-                  <th style={th}>Última Atualização</th>
+                  <th style={th}>Status</th>
+                  <th style={{ ...th, textAlign: 'center' }}>Qtd. Sistemas</th>
                 </tr>
               </thead>
               <tbody>
                 {clientes.length === 0 ? (
-                  <tr><td colSpan={9} style={{ padding: 32, textAlign: 'center', color: 'var(--ccm-gray-dark)' }}>Nenhum cliente encontrado</td></tr>
+                  <tr><td colSpan={8} style={{ padding: 32, textAlign: 'center', color: 'var(--ccm-gray-dark)' }}>Nenhum cliente encontrado</td></tr>
                 ) : clientes.map((c, i) => (
                   <tr key={c.cod} style={{ background: i % 2 === 0 ? '#fff' : '#F7F8FA', borderBottom: '1px solid var(--ccm-line)' }}>
                     <td style={{ ...td, fontWeight: 600, color: 'var(--ccm-ink)', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.razao || '—'}</td>
@@ -95,9 +107,8 @@ export default function TarefasPage({ onBack }: { onBack: () => void }) {
                     <td style={td}>{c.versao || '—'}</td>
                     <td style={{ ...td, textAlign: 'center', fontWeight: 600 }}>{c.qtdusers ?? '—'}</td>
                     <td style={td}>{c.serverbd || '—'}</td>
-                    <td style={td}>{c.codigoc || '—'}</td>
-                    <td style={td}>{c.grupo || '—'}</td>
-                    <td style={td}>{c.dt_atualiza || '—'}</td>
+                    <td style={td}>{statusBadge(c.status)}</td>
+                    <td style={{ ...td, textAlign: 'center', fontWeight: 600 }}>{c.qtdsistemas ?? '—'}</td>
                   </tr>
                 ))}
               </tbody>
