@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import DailyPendencias from './daily-pendencias';
+import TarefasPage     from './tarefas-page';
 
-type SubPage = null | 'daily';
+type SubPage = null | 'daily' | 'tarefas';
 
 export default function OperacoesPage() {
   const [subPage, setSubPage] = useState<SubPage>(null);
 
-  if (subPage === 'daily') {
-    return <DailyPendencias onBack={() => setSubPage(null)} />;
-  }
+  if (subPage === 'daily')   return <DailyPendencias onBack={() => setSubPage(null)} />;
+  if (subPage === 'tarefas') return <TarefasPage     onBack={() => setSubPage(null)} />;
 
   return (
     <div>
@@ -34,6 +34,29 @@ export default function OperacoesPage() {
               Registrar pendências e impedimentos da equipe.
             </div>
             <div style={{ marginTop: 12, fontSize: 11, fontWeight: 700, color: '#D4A000', textTransform: 'uppercase', letterSpacing: '.1em' }}>
+              Acessar <i className="bi bi-arrow-right" />
+            </div>
+          </div>
+        </div>
+
+        {/* Card Tarefas */}
+        <div className="col-12 col-md-4 col-lg-3">
+          <div
+            onClick={() => setSubPage('tarefas')}
+            style={{ background: '#fff', border: '1px solid var(--ccm-line)', borderTop: '3px solid #00B0FA', borderRadius: 6, padding: '20px 22px', cursor: 'pointer', transition: 'box-shadow .15s, transform .15s', boxShadow: '0 1px 4px rgba(12,25,33,.07)' }}
+            onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = '0 4px 16px rgba(0,176,250,.25)'; (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-2px)'; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = '0 1px 4px rgba(12,25,33,.07)'; (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)'; }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
+              <div style={{ width: 40, height: 40, borderRadius: 8, background: '#E8F7FF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <i className="bi bi-list-task" style={{ fontSize: 20, color: '#00B0FA' }} />
+              </div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ccm-ink)', textTransform: 'uppercase', letterSpacing: '.06em' }}>Tarefas</div>
+            </div>
+            <div style={{ fontSize: 12, color: 'var(--ccm-gray-dark)', lineHeight: 1.5 }}>
+              Consultar tarefas e atualizações dos clientes.
+            </div>
+            <div style={{ marginTop: 12, fontSize: 11, fontWeight: 700, color: '#00B0FA', textTransform: 'uppercase', letterSpacing: '.1em' }}>
               Acessar <i className="bi bi-arrow-right" />
             </div>
           </div>

@@ -1,7 +1,7 @@
 import sys
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from src.api.routers import auth, user, dashboard, pendencias, cx, pmo, gestao
+from src.api.routers import auth, user, dashboard, pendencias, cx, pmo, gestao, operacoes
 from src.config import settings
 from src.logger import logger
 
@@ -25,6 +25,7 @@ app.include_router(pendencias.router)
 app.include_router(cx.router)
 app.include_router(pmo.router)
 app.include_router(gestao.router)
+app.include_router(operacoes.router)
 
 @app.get("/health", tags=["infra"])
 async def health() -> dict:
