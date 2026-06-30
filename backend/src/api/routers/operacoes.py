@@ -90,7 +90,9 @@ async def tarefas_stats(
         total = int(row[0]) if row and row[0] else 0
         sim = int(row[1]) if row and row[1] else 0
         nao = total - sim
-        return {"sim": sim, "nao": nao, "total": total, "todos_concluidos": nao == 0}
+        pct_sim = round(sim / total * 100, 1) if total > 0 else 0.0
+        pct_nao = round(nao / total * 100, 1) if total > 0 else 0.0
+        return {"sim": sim, "nao": nao, "total": total, "pct_sim": pct_sim, "pct_nao": pct_nao, "todos_concluidos": nao == 0}
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
 
@@ -144,6 +146,8 @@ async def create_tarefa_aberta(
             text("INSERT INTO tbl_tarefas (tarefa, descricao, datainicio, status) VALUES (:tarefa, :descricao, CURDATE(), 'aberto')"),
             {"tarefa": body.tarefa, "descricao": body.descricao or ""}
         )
+        # Reseta qtdsistemas para 0 em todos os registros da tbl_linx
+        await session.execute(text("UPDATE tbl_linx SET qtdsistemas = 0"))
         await session.commit()
         return {"created": True, "id": result.lastrowid}
     except HTTPException:

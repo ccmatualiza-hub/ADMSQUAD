@@ -41,7 +41,7 @@ export default function TarefasPage({ onBack }: { onBack: () => void }) {
   const [clientes, setClientes]   = useState<ConsultaItem[]>([]);
   const [loading, setLoading]     = useState(true);
   const [search, setSearch]       = useState('');
-  const [stats, setStats]         = useState<{ sim: number; nao: number; todos_concluidos: boolean } | null>(null);
+  const [stats, setStats]         = useState<{ sim: number; nao: number; pct_sim: number; pct_nao: number; todos_concluidos: boolean } | null>(null);
   const [tarefaAberta, setTarefaAberta] = useState<TarefaAberta | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [form, setForm]           = useState({ tarefa: '', descricao: '' });
@@ -54,7 +54,7 @@ export default function TarefasPage({ onBack }: { onBack: () => void }) {
       if (q) params.set('q', q);
       const [data, s, t] = await Promise.all([
         http.get<ConsultaItem[]>(`/api/operacoes/tarefas?${params}`),
-        http.get<{ sim: number; nao: number; total: number; todos_concluidos: boolean }>('/api/operacoes/tarefas-stats'),
+        http.get<{ sim: number; nao: number; total: number; pct_sim: number; pct_nao: number; todos_concluidos: boolean }>('/api/operacoes/tarefas-stats'),
         http.get<TarefaAberta | null>('/api/operacoes/tarefa-aberta'),
       ]);
       setClientes(data);
@@ -120,43 +120,47 @@ export default function TarefasPage({ onBack }: { onBack: () => void }) {
       </div>
       <div className="section-title mb-3" style={{ textAlign: 'center' }}>Tarefas</div>
 
-      {/* Tarefa Aberta */}
-      <div style={{ marginBottom: 20, textAlign: 'center' }}>
-        {tarefaAberta ? (
-          <div style={{ display: 'inline-block', background: '#fff', border: '1px solid var(--ccm-line)', borderTop: '3px solid #00B0FA', borderRadius: 6, padding: '14px 24px', boxShadow: '0 1px 4px rgba(12,25,33,.07)' }}>
-            <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.14em', color: '#00B0FA', marginBottom: 4 }}>Tarefa em Aberto</div>
-            <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--ccm-ink)' }}>{tarefaAberta.tarefa}</div>
-            {tarefaAberta.descricao && <div style={{ fontSize: 12, color: 'var(--ccm-gray-dark)', marginTop: 4 }}>{tarefaAberta.descricao}</div>}
-            <div style={{ fontSize: 11, color: 'var(--ccm-gray-medium)', marginTop: 6 }}>
-              Início: {tarefaAberta.datainicio ? new Date(tarefaAberta.datainicio).toLocaleDateString('pt-BR') : '—'}
-            </div>
-            <button className="btn btn-sm mt-2" style={{ background: '#1DB954', color: '#fff', fontSize: 11, fontWeight: 700, padding: '5px 16px' }}
-              onClick={handleEncerrarTarefa} disabled={!stats?.todos_concluidos}>
-              <i className="bi bi-check-circle me-1" />Encerrar Tarefa
-            </button>
-            {!stats?.todos_concluidos && (
-              <div style={{ fontSize: 10, color: '#9B2020', marginTop: 6 }}>Conclua todos os registros antes de encerrar</div>
+      {/* Tarefa Aberta + Contadores — mesma linha, mesmo tamanho */}
+      <div className="row g-3 mb-4">
+        <div className="col-12 col-md-4">
+          <div style={{ background: '#fff', borderRadius: 6, padding: '16px 18px', borderTop: '3px solid #00B0FA', boxShadow: '0 1px 4px rgba(12,25,33,.07)', textAlign: 'center', height: '100%' }}>
+            {tarefaAberta ? (
+              <>
+                <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.12em', color: '#00B0FA', marginBottom: 4 }}>Tarefa em Aberto</div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--ccm-ink)' }}>{tarefaAberta.tarefa}</div>
+                {tarefaAberta.descricao && <div style={{ fontSize: 11, color: 'var(--ccm-gray-dark)', marginTop: 4 }}>{tarefaAberta.descricao}</div>}
+                <div style={{ fontSize: 10, color: 'var(--ccm-gray-medium)', marginTop: 6 }}>
+                  Início: {tarefaAberta.datainicio ? new Date(tarefaAberta.datainicio).toLocaleDateString('pt-BR') : '—'}
+                </div>
+                <button className="btn btn-sm mt-2" style={{ background: '#1DB954', color: '#fff', fontSize: 11, fontWeight: 700, padding: '5px 16px' }}
+                  onClick={handleEncerrarTarefa} disabled={!stats?.todos_concluidos}>
+                  <i className="bi bi-check-circle me-1" />Encerrar Tarefa
+                </button>
+                {!stats?.todos_concluidos && (
+                  <div style={{ fontSize: 10, color: '#9B2020', marginTop: 6 }}>Conclua todos antes de encerrar</div>
+                )}
+              </>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', minHeight: 80 }}>
+                <button className="btn btn-ccm-primary" onClick={() => setShowModal(true)}>
+                  <i className="bi bi-plus-lg me-1" />Nova Tarefa
+                </button>
+              </div>
             )}
           </div>
-        ) : (
-          <button className="btn btn-ccm-primary" onClick={() => setShowModal(true)}>
-            <i className="bi bi-plus-lg me-1" />Nova Tarefa
-          </button>
-        )}
-      </div>
-
-      {/* Contadores SIM/NÃO */}
-      <div className="row g-3 mb-4">
-        <div className="col-6 col-md-3">
-          <div style={{ background: '#fff', borderRadius: 6, padding: '16px 18px', borderTop: '3px solid #1DB954', boxShadow: '0 1px 4px rgba(12,25,33,.07)', textAlign: 'center' }}>
+        </div>
+        <div className="col-6 col-md-4">
+          <div style={{ background: '#fff', borderRadius: 6, padding: '16px 18px', borderTop: '3px solid #1DB954', boxShadow: '0 1px 4px rgba(12,25,33,.07)', textAlign: 'center', height: '100%' }}>
             <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.12em', color: 'var(--ccm-gray-dark)' }}>Concluídos</div>
             <div style={{ fontSize: 26, fontWeight: 900, color: '#0E7E3B' }}>{stats?.sim ?? '—'}</div>
+            <div style={{ fontSize: 12, color: 'var(--ccm-gray-medium)' }}>{stats ? `${stats.pct_sim}%` : '—'}</div>
           </div>
         </div>
-        <div className="col-6 col-md-3">
-          <div style={{ background: '#fff', borderRadius: 6, padding: '16px 18px', borderTop: '3px solid #E74C3C', boxShadow: '0 1px 4px rgba(12,25,33,.07)', textAlign: 'center' }}>
+        <div className="col-6 col-md-4">
+          <div style={{ background: '#fff', borderRadius: 6, padding: '16px 18px', borderTop: '3px solid #E74C3C', boxShadow: '0 1px 4px rgba(12,25,33,.07)', textAlign: 'center', height: '100%' }}>
             <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.12em', color: 'var(--ccm-gray-dark)' }}>Falta Fazer</div>
             <div style={{ fontSize: 26, fontWeight: 900, color: '#9B2020' }}>{stats?.nao ?? '—'}</div>
+            <div style={{ fontSize: 12, color: 'var(--ccm-gray-medium)' }}>{stats ? `${stats.pct_nao}%` : '—'}</div>
           </div>
         </div>
       </div>
