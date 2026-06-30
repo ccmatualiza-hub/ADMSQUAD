@@ -42,3 +42,20 @@ async def list_tarefas(
         return [TarefaItem(**dict(zip(keys, r))) for r in rows]
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
+
+
+@router.put("/tarefas/{cod}/concluir")
+async def concluir_tarefa(
+    cod: int,
+    _: Annotated[dict, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> dict:
+    try:
+        await session.execute(
+            text("UPDATE tbl_linx SET qtdsistemas = 1 WHERE cod = :cod"),
+            {"cod": cod}
+        )
+        await session.commit()
+        return {"updated": True}
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))

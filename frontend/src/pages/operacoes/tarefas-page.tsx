@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { http } from '../../lib/http-client';
 
 interface ConsultaItem {
@@ -22,6 +23,19 @@ function statusBadge(s: string | null) {
   return <span style={{ background: c.bg, color: c.color, borderRadius: 99, padding: '2px 9px', fontSize: 10, fontWeight: 700, whiteSpace: 'nowrap' }}>{s}</span>;
 }
 
+function concluidoBadge(v: number | null) {
+  const isYes = v === 1;
+  return (
+    <span style={{
+      background: isYes ? '#D4F5E2' : '#FDDEDE',
+      color: isYes ? '#0E7E3B' : '#9B2020',
+      borderRadius: 99, padding: '2px 10px', fontSize: 11, fontWeight: 700,
+    }}>
+      {isYes ? 'SIM' : 'NÃO'}
+    </span>
+  );
+}
+
 export default function TarefasPage({ onBack }: { onBack: () => void }) {
   const [clientes, setClientes] = useState<ConsultaItem[]>([]);
   const [loading, setLoading]   = useState(true);
@@ -42,6 +56,14 @@ export default function TarefasPage({ onBack }: { onBack: () => void }) {
 
   const handleSearch = () => fetchClientes(search);
   const handleKeyDown = (e: React.KeyboardEvent) => { if (e.key === 'Enter') handleSearch(); };
+
+  const handleConcluir = async (cod: number) => {
+    try {
+      await http.put(`/api/operacoes/tarefas/${cod}/concluir`, {});
+      toast.success('Tarefa concluída!');
+      fetchClientes(search);
+    } catch { toast.error('Erro ao concluir tarefa'); }
+  };
 
   const th = { color: '#fff', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.05em', padding: '10px 12px', textAlign: 'left' as const, fontSize: 10, whiteSpace: 'nowrap' as const };
   const td = { padding: '9px 12px', fontSize: 12, whiteSpace: 'nowrap' as const };
@@ -93,12 +115,13 @@ export default function TarefasPage({ onBack }: { onBack: () => void }) {
                   <th style={{ ...th, textAlign: 'center' }}>Users</th>
                   <th style={th}>Server BD</th>
                   <th style={th}>Status</th>
-                  <th style={{ ...th, textAlign: 'center' }}>Qtd. Sistemas</th>
+                  <th style={{ ...th, textAlign: 'center' }}>Concluído</th>
+                  <th style={{ ...th, textAlign: 'center' }}>Ações</th>
                 </tr>
               </thead>
               <tbody>
                 {clientes.length === 0 ? (
-                  <tr><td colSpan={8} style={{ padding: 32, textAlign: 'center', color: 'var(--ccm-gray-dark)' }}>Nenhum cliente encontrado</td></tr>
+                  <tr><td colSpan={9} style={{ padding: 32, textAlign: 'center', color: 'var(--ccm-gray-dark)' }}>Nenhum cliente encontrado</td></tr>
                 ) : clientes.map((c, i) => (
                   <tr key={c.cod} style={{ background: i % 2 === 0 ? '#fff' : '#F7F8FA', borderBottom: '1px solid var(--ccm-line)' }}>
                     <td style={{ ...td, fontWeight: 600, color: 'var(--ccm-ink)', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.razao || '—'}</td>
@@ -108,7 +131,17 @@ export default function TarefasPage({ onBack }: { onBack: () => void }) {
                     <td style={{ ...td, textAlign: 'center', fontWeight: 600 }}>{c.qtdusers ?? '—'}</td>
                     <td style={td}>{c.serverbd || '—'}</td>
                     <td style={td}>{statusBadge(c.status)}</td>
-                    <td style={{ ...td, textAlign: 'center', fontWeight: 600 }}>{c.qtdsistemas ?? '—'}</td>
+                    <td style={{ ...td, textAlign: 'center' }}>{concluidoBadge(c.qtdsistemas)}</td>
+                    <td style={{ ...td, textAlign: 'center' }}>
+                      {c.qtdsistemas !== 1 ? (
+                        <button className="btn btn-sm" style={{ background: '#1DB954', color: '#fff', fontSize: 10, padding: '3px 10px' }}
+                          onClick={() => handleConcluir(c.cod)}>
+                          <i className="bi bi-check-lg me-1" />Concluir
+                        </button>
+                      ) : (
+                        <span style={{ color: 'var(--ccm-gray-medium)', fontSize: 11 }}>—</span>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
