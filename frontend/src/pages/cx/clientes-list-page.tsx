@@ -5,7 +5,8 @@ import { http } from '../../lib/http-client';
 interface Cliente {
   cod: number; razao: string | null; cliente: string | null;
   sistema: string | null; versao: string | null;
-  qtdusers: number | null; serverbd: string | null; status: string | null;
+  qtdusers: number | null; serverbd: string | null;
+  codigoc: string | null; status: string | null;
 }
 
 interface ClienteDetalhe {
@@ -205,6 +206,7 @@ export default function ClientesListPage({ onBack }: { onBack: () => void }) {
                   <th style={th}>Versão</th>
                   <th style={{ ...th, textAlign: 'center' }}>Users</th>
                   <th style={th}>Server BD</th>
+                  <th style={th}>Código</th>
                   <th style={th}>Status</th>
                   <th style={{ ...th, textAlign: 'center' }}>Ações</th>
                 </tr>
@@ -220,6 +222,7 @@ export default function ClientesListPage({ onBack }: { onBack: () => void }) {
                     <td style={td}>{c.versao || '—'}</td>
                     <td style={{ ...td, textAlign: 'center', fontWeight: 600 }}>{c.qtdusers ?? '—'}</td>
                     <td style={td}>{c.serverbd || '—'}</td>
+                    <td style={td}>{c.codigoc || '—'}</td>
                     <td style={td}>{statusBadge(c.status)}</td>
                     <td style={{ ...td, textAlign: 'center' }}>
                       <div style={{ display: 'flex', gap: 4, justifyContent: 'center' }}>
