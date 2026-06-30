@@ -157,22 +157,22 @@ export default function TarefasPage({ onBack }: { onBack: () => void }) {
                 <div style={{ fontSize: 10, color: 'var(--ccm-gray-medium)', marginTop: 6 }}>
                   Início: {tarefaAberta.datainicio ? new Date(tarefaAberta.datainicio).toLocaleDateString('pt-BR') : '—'}
                 </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, justifyContent: 'center', marginTop: 10 }}>
-                  <button className="btn btn-sm" style={{ background: '#F9E000', color: '#5a4000', fontSize: 10, fontWeight: 700, padding: '5px 10px' }}
+                <div style={{ display: 'flex', gap: 6, justifyContent: 'center', marginTop: 10, flexWrap: 'nowrap' }}>
+                  <button className="btn btn-sm" style={{ flex: 1, background: '#F9E000', color: '#5a4000', fontSize: 10, fontWeight: 700, padding: '6px 4px', whiteSpace: 'nowrap' }}
                     onClick={handleConcluirInativos}>
-                    <i className="bi bi-slash-circle me-1" />Concluir Inativos
+                    <i className="bi bi-slash-circle me-1" />Inativos
                   </button>
                   {canConcluirTodos && (
-                    <button className="btn btn-sm" style={{ background: '#7F77DD', color: '#fff', fontSize: 10, fontWeight: 700, padding: '5px 10px' }}
+                    <button className="btn btn-sm" style={{ flex: 1, background: '#7F77DD', color: '#fff', fontSize: 10, fontWeight: 700, padding: '6px 4px', whiteSpace: 'nowrap' }}
                       onClick={handleConcluirTodos}>
-                      <i className="bi bi-check-all me-1" />Concluir Todos
+                      <i className="bi bi-check-all me-1" />Todos
                     </button>
                   )}
+                  <button className="btn btn-sm" style={{ flex: 1, background: '#1DB954', color: '#fff', fontSize: 10, fontWeight: 700, padding: '6px 4px', whiteSpace: 'nowrap' }}
+                    onClick={handleEncerrarTarefa} disabled={!stats?.todos_concluidos}>
+                    <i className="bi bi-check-circle me-1" />Encerrar
+                  </button>
                 </div>
-                <button className="btn btn-sm mt-2" style={{ background: '#1DB954', color: '#fff', fontSize: 11, fontWeight: 700, padding: '5px 16px' }}
-                  onClick={handleEncerrarTarefa} disabled={!stats?.todos_concluidos}>
-                  <i className="bi bi-check-circle me-1" />Encerrar Tarefa
-                </button>
                 {!stats?.todos_concluidos && (
                   <div style={{ fontSize: 10, color: '#9B2020', marginTop: 6 }}>Conclua todos antes de encerrar</div>
                 )}
