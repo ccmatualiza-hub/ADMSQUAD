@@ -4,30 +4,45 @@ import { http } from '../../lib/http-client';
 interface ConsultaItem {
   cod: number; razao: string | null; cliente: string | null;
   sistema: string | null; versao: string | null;
-  qtdusers: number | null; serverbd: string | null;
-  codigoc: string | null; grupo: string | null;
-  dt_atualiza: string | null;
+  serverbd: string | null; codigoc: string | null; grupo: string | null;
+  dt_atualiza: string | null; concluido: string | number | null;
+}
+
+function concluidoBadge(val: string | number | null) {
+  const v = String(val ?? '0').trim();
+  if (v === '100') return <span style={{ background: '#D4F5E2', color: '#0E7E3B', borderRadius: 4, padding: '2px 8px', fontWeight: 700, fontSize: 11 }}>100</span>;
+  if (v === '0' || v === '') return <span style={{ background: '#fff', color: '#333', borderRadius: 4, padding: '2px 8px', fontWeight: 700, fontSize: 11, border: '1px solid #ddd' }}>0</span>;
+  return <span style={{ background: '#F9E000', color: '#5a4000', borderRadius: 4, padding: '2px 8px', fontWeight: 700, fontSize: 11 }}>{v}</span>;
+}
+
+function formatDateInput(d: string) {
+  // converte yyyy-mm-dd (input date) para dd/mm/yyyy (formato do banco)
+  if (!d) return '';
+  const [y, m, day] = d.split('-');
+  return `${day}/${m}/${y}`;
 }
 
 export default function ConsultarAtualizacaoLinx({ onBack }: { onBack: () => void }) {
   const [clientes, setClientes] = useState<ConsultaItem[]>([]);
   const [loading, setLoading]   = useState(true);
   const [search, setSearch]     = useState('');
+  const [dataFiltro, setDataFiltro] = useState('');
 
-  const fetchClientes = async (q = '') => {
+  const fetchClientes = async (q = '', data = '') => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
       if (q) params.set('q', q);
-      const data = await http.get<ConsultaItem[]>(`/api/cx/consultar-atualizacao?${params}`);
-      setClientes(data);
+      if (data) params.set('data_filter', formatDateInput(data));
+      const result = await http.get<ConsultaItem[]>(`/api/cx/consultar-atualizacao?${params}`);
+      setClientes(result);
     } catch { /* silent */ }
     finally { setLoading(false); }
   };
 
   useEffect(() => { fetchClientes(); }, []);
 
-  const handleSearch = () => fetchClientes(search);
+  const handleSearch = () => fetchClientes(search, dataFiltro);
   const handleKeyDown = (e: React.KeyboardEvent) => { if (e.key === 'Enter') handleSearch(); };
 
   const th = { color: '#fff', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '.05em', padding: '10px 12px', textAlign: 'left' as const, fontSize: 10, whiteSpace: 'nowrap' as const };
@@ -58,7 +73,10 @@ export default function ConsultarAtualizacaoLinx({ onBack }: { onBack: () => voi
         <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--ccm-line)', display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
           <input type="text" className="form-control" placeholder="Buscar por razão, cliente ou sistema..."
             value={search} onChange={e => setSearch(e.target.value)} onKeyDown={handleKeyDown}
-            style={{ maxWidth: 340, fontSize: 13 }} />
+            style={{ maxWidth: 320, fontSize: 13 }} />
+          <input type="date" className="form-control" value={dataFiltro}
+            onChange={e => setDataFiltro(e.target.value)} onKeyDown={handleKeyDown}
+            style={{ maxWidth: 180, fontSize: 13 }} title="Filtrar por última atualização" />
           <button className="btn btn-ccm-primary btn-sm" onClick={handleSearch} style={{ padding: '7px 18px' }}>
             <i className="bi bi-search me-1" />Buscar
           </button>
@@ -77,11 +95,11 @@ export default function ConsultarAtualizacaoLinx({ onBack }: { onBack: () => voi
                   <th style={th}>Cliente</th>
                   <th style={th}>Sistema</th>
                   <th style={th}>Versão</th>
-                  <th style={{ ...th, textAlign: 'center' }}>Users</th>
                   <th style={th}>Server BD</th>
                   <th style={th}>Código-C</th>
                   <th style={th}>Grupo</th>
                   <th style={th}>Última Atualização</th>
+                  <th style={{ ...th, textAlign: 'center' }}>Concluído</th>
                 </tr>
               </thead>
               <tbody>
@@ -93,11 +111,11 @@ export default function ConsultarAtualizacaoLinx({ onBack }: { onBack: () => voi
                     <td style={{ ...td, color: 'var(--ccm-gray-dark)', maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.cliente || '—'}</td>
                     <td style={{ ...td, color: 'var(--ccm-blue)', fontWeight: 600 }}>{c.sistema || '—'}</td>
                     <td style={td}>{c.versao || '—'}</td>
-                    <td style={{ ...td, textAlign: 'center', fontWeight: 600 }}>{c.qtdusers ?? '—'}</td>
                     <td style={td}>{c.serverbd || '—'}</td>
                     <td style={td}>{c.codigoc || '—'}</td>
                     <td style={td}>{c.grupo || '—'}</td>
                     <td style={td}>{c.dt_atualiza || '—'}</td>
+                    <td style={{ ...td, textAlign: 'center' }}>{concluidoBadge(c.concluido)}</td>
                   </tr>
                 ))}
               </tbody>

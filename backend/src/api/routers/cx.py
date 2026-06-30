@@ -568,17 +568,17 @@ class ConsultaItem(BaseModel):
     cliente: str | None = None
     sistema: str | None = None
     versao: str | None = None
-    qtdusers: int | None = None
     serverbd: str | None = None
     codigoc: str | None = None
     grupo: str | None = None
     dt_atualiza: str | None = None
+    concluido: str | int | None = None
 
 
 @router.get("/consultar-atualizacao", response_model=list[ConsultaItem])
 async def list_consultar_atualizacao(
     q: str = "",
-    status_filter: str = "",
+    data_filter: str = "",
     _: Annotated[dict, Depends(get_current_user)] = None,
     session: Annotated[AsyncSession, Depends(get_db)] = None,
 ) -> list[ConsultaItem]:
@@ -588,11 +588,11 @@ async def list_consultar_atualizacao(
         if q:
             where += " AND (razao LIKE :q OR cliente LIKE :q OR sistema LIKE :q)"
             params["q"] = f"%{q}%"
-        if status_filter:
-            where += " AND status = :status"
-            params["status"] = status_filter
+        if data_filter:
+            where += " AND dt_atualiza = :data_filter"
+            params["data_filter"] = data_filter
         result = await session.execute(
-            text(f"SELECT cod, razao, cliente, sistema, versao, qtdusers, serverbd, codigoc, grupo, dt_atualiza FROM tbl_linx {where} ORDER BY razao"),
+            text(f"SELECT cod, razao, cliente, sistema, versao, serverbd, codigoc, grupo, dt_atualiza, concluido FROM tbl_linx {where} ORDER BY razao"),
             params
         )
         rows = result.fetchall()
