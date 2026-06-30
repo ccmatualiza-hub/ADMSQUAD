@@ -568,7 +568,7 @@ class ConsultaItem(BaseModel):
     cliente: str | None = None
     sistema: str | None = None
     versao: str | None = None
-    serverbd: str | None = None
+    useragend: str | None = None
     codigoc: str | None = None
     grupo: str | None = None
     dt_atualiza: str | None = None
@@ -592,7 +592,7 @@ async def list_consultar_atualizacao(
             where += " AND dt_atualiza = :data_filter"
             params["data_filter"] = data_filter
         result = await session.execute(
-            text(f"SELECT cod, razao, cliente, sistema, versao, serverbd, codigoc, grupo, dt_atualiza, concluido FROM tbl_linx {where} ORDER BY razao"),
+            text(f"SELECT cod, razao, cliente, sistema, versao, useragend, codigoc, grupo, dt_atualiza, concluido FROM tbl_linx {where} ORDER BY razao"),
             params
         )
         rows = result.fetchall()

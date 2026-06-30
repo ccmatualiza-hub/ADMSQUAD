@@ -4,7 +4,7 @@ import { http } from '../../lib/http-client';
 interface ConsultaItem {
   cod: number; razao: string | null; cliente: string | null;
   sistema: string | null; versao: string | null;
-  serverbd: string | null; codigoc: string | null; grupo: string | null;
+  useragend: string | null; codigoc: string | null; grupo: string | null;
   dt_atualiza: string | null; concluido: string | number | null;
 }
 
@@ -95,7 +95,7 @@ export default function ConsultarAtualizacaoLinx({ onBack }: { onBack: () => voi
                   <th style={th}>Cliente</th>
                   <th style={th}>Sistema</th>
                   <th style={th}>Versão</th>
-                  <th style={th}>Server BD</th>
+                  <th style={th}>Agendado</th>
                   <th style={th}>Código-C</th>
                   <th style={th}>Grupo</th>
                   <th style={th}>Última Atualização</th>
@@ -111,7 +111,7 @@ export default function ConsultarAtualizacaoLinx({ onBack }: { onBack: () => voi
                     <td style={{ ...td, color: 'var(--ccm-gray-dark)', maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.cliente || '—'}</td>
                     <td style={{ ...td, color: 'var(--ccm-blue)', fontWeight: 600 }}>{c.sistema || '—'}</td>
                     <td style={td}>{c.versao || '—'}</td>
-                    <td style={td}>{c.serverbd || '—'}</td>
+                    <td style={td}>{c.useragend || '—'}</td>
                     <td style={td}>{c.codigoc || '—'}</td>
                     <td style={td}>{c.grupo || '—'}</td>
                     <td style={td}>{c.dt_atualiza || '—'}</td>
