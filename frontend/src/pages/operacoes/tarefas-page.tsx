@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { http } from '../../lib/http-client';
+import { useAuthStore } from '../../store/auth-store';
 
 interface ConsultaItem {
   cod: number; razao: string | null; cliente: string | null;
@@ -38,6 +39,8 @@ function concluidoBadge(v: number | null) {
 }
 
 export default function TarefasPage({ onBack }: { onBack: () => void }) {
+  const role = useAuthStore(s => s.user?.role);
+  const canConcluirTodos = role === 'admin' || role === 'gestor';
   const [clientes, setClientes]   = useState<ConsultaItem[]>([]);
   const [loading, setLoading]     = useState(true);
   const [search, setSearch]       = useState('');
@@ -91,6 +94,28 @@ export default function TarefasPage({ onBack }: { onBack: () => void }) {
     } finally { setSaving(false); }
   };
 
+  const handleConcluirInativos = async () => {
+    if (!confirm('Concluir todos os registros com status 9 - INATIVO?')) return;
+    try {
+      const res = await http.put<{ updated: number }>('/api/operacoes/tarefas/concluir-inativos', {});
+      toast.success(`${res.updated} registro(s) inativos concluídos!`);
+      fetchAll(search);
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Erro ao concluir inativos');
+    }
+  };
+
+  const handleConcluirTodos = async () => {
+    if (!confirm('Concluir TODOS os registros da tbl_linx? Esta ação não pode ser desfeita.')) return;
+    try {
+      const res = await http.put<{ updated: number }>('/api/operacoes/tarefas/concluir-todos', {});
+      toast.success(`${res.updated} registro(s) concluídos!`);
+      fetchAll(search);
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Erro ao concluir todos');
+    }
+  };
+
   const handleEncerrarTarefa = async () => {
     if (!tarefaAberta) return;
     if (!confirm('Deseja encerrar esta tarefa?')) return;
@@ -132,6 +157,18 @@ export default function TarefasPage({ onBack }: { onBack: () => void }) {
                 <div style={{ fontSize: 10, color: 'var(--ccm-gray-medium)', marginTop: 6 }}>
                   Início: {tarefaAberta.datainicio ? new Date(tarefaAberta.datainicio).toLocaleDateString('pt-BR') : '—'}
                 </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, justifyContent: 'center', marginTop: 10 }}>
+                  <button className="btn btn-sm" style={{ background: '#F9E000', color: '#5a4000', fontSize: 10, fontWeight: 700, padding: '5px 10px' }}
+                    onClick={handleConcluirInativos}>
+                    <i className="bi bi-slash-circle me-1" />Concluir Inativos
+                  </button>
+                  {canConcluirTodos && (
+                    <button className="btn btn-sm" style={{ background: '#7F77DD', color: '#fff', fontSize: 10, fontWeight: 700, padding: '5px 10px' }}
+                      onClick={handleConcluirTodos}>
+                      <i className="bi bi-check-all me-1" />Concluir Todos
+                    </button>
+                  )}
+                </div>
                 <button className="btn btn-sm mt-2" style={{ background: '#1DB954', color: '#fff', fontSize: 11, fontWeight: 700, padding: '5px 16px' }}
                   onClick={handleEncerrarTarefa} disabled={!stats?.todos_concluidos}>
                   <i className="bi bi-check-circle me-1" />Encerrar Tarefa
@@ -151,16 +188,16 @@ export default function TarefasPage({ onBack }: { onBack: () => void }) {
         </div>
         <div className="col-6 col-md-4">
           <div style={{ background: '#fff', borderRadius: 6, padding: '16px 18px', borderTop: '3px solid #1DB954', boxShadow: '0 1px 4px rgba(12,25,33,.07)', textAlign: 'center', height: '100%' }}>
-            <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.12em', color: 'var(--ccm-gray-dark)' }}>Concluídos</div>
-            <div style={{ fontSize: 26, fontWeight: 900, color: '#0E7E3B' }}>{stats?.sim ?? '—'}</div>
-            <div style={{ fontSize: 12, color: 'var(--ccm-gray-medium)' }}>{stats ? `${stats.pct_sim}%` : '—'}</div>
+            <div style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.12em', color: 'var(--ccm-gray-dark)' }}>Concluídos</div>
+            <div style={{ fontSize: 38, fontWeight: 900, color: '#0E7E3B' }}>{stats?.sim ?? '—'}</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--ccm-gray-dark)' }}>{stats ? `${stats.pct_sim}%` : '—'}</div>
           </div>
         </div>
         <div className="col-6 col-md-4">
           <div style={{ background: '#fff', borderRadius: 6, padding: '16px 18px', borderTop: '3px solid #E74C3C', boxShadow: '0 1px 4px rgba(12,25,33,.07)', textAlign: 'center', height: '100%' }}>
-            <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.12em', color: 'var(--ccm-gray-dark)' }}>Falta Fazer</div>
-            <div style={{ fontSize: 26, fontWeight: 900, color: '#9B2020' }}>{stats?.nao ?? '—'}</div>
-            <div style={{ fontSize: 12, color: 'var(--ccm-gray-medium)' }}>{stats ? `${stats.pct_nao}%` : '—'}</div>
+            <div style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.12em', color: 'var(--ccm-gray-dark)' }}>Falta Fazer</div>
+            <div style={{ fontSize: 38, fontWeight: 900, color: '#9B2020' }}>{stats?.nao ?? '—'}</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--ccm-gray-dark)' }}>{stats ? `${stats.pct_nao}%` : '—'}</div>
           </div>
         </div>
       </div>

@@ -182,3 +182,33 @@ async def concluir_tarefa_aberta(
         raise
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
+
+
+@router.put("/tarefas/concluir-inativos")
+async def concluir_inativos(
+    _: Annotated[dict, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> dict:
+    try:
+        result = await session.execute(
+            text("UPDATE tbl_linx SET qtdsistemas = 1 WHERE status = '9 - INATIVO'")
+        )
+        await session.commit()
+        return {"updated": result.rowcount}
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
+@router.put("/tarefas/concluir-todos")
+async def concluir_todos(
+    current_user: Annotated[dict, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> dict:
+    if current_user.get("role") not in ("admin", "gestor"):
+        raise HTTPException(status_code=403, detail="Apenas Admin e Gestor podem concluir todos os registros")
+    try:
+        result = await session.execute(text("UPDATE tbl_linx SET qtdsistemas = 1"))
+        await session.commit()
+        return {"updated": result.rowcount}
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
