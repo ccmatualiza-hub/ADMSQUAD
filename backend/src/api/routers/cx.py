@@ -560,3 +560,43 @@ async def update_cliente(
         return {"updated": True}
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
+
+
+class ConsultaItem(BaseModel):
+    cod: int
+    razao: str | None = None
+    cliente: str | None = None
+    sistema: str | None = None
+    versao: str | None = None
+    qtdusers: int | None = None
+    serverbd: str | None = None
+    codigoc: str | None = None
+    grupo: str | None = None
+    dt_atualiza: str | None = None
+
+
+@router.get("/consultar-atualizacao", response_model=list[ConsultaItem])
+async def list_consultar_atualizacao(
+    q: str = "",
+    status_filter: str = "",
+    _: Annotated[dict, Depends(get_current_user)] = None,
+    session: Annotated[AsyncSession, Depends(get_db)] = None,
+) -> list[ConsultaItem]:
+    try:
+        where = "WHERE 1=1"
+        params: dict = {}
+        if q:
+            where += " AND (razao LIKE :q OR cliente LIKE :q OR sistema LIKE :q)"
+            params["q"] = f"%{q}%"
+        if status_filter:
+            where += " AND status = :status"
+            params["status"] = status_filter
+        result = await session.execute(
+            text(f"SELECT cod, razao, cliente, sistema, versao, qtdusers, serverbd, codigoc, grupo, dt_atualiza FROM tbl_linx {where} ORDER BY razao"),
+            params
+        )
+        rows = result.fetchall()
+        keys = list(result.keys())
+        return [ConsultaItem(**dict(zip(keys, r))) for r in rows]
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
