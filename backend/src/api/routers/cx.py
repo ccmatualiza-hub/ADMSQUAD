@@ -62,6 +62,7 @@ class ClienteDetalhe(BaseModel):
     codigoc: str | None = None
     agtazure: str | None = None
     linxwebver: str | None = None
+    doc: str | None = None
 
 
 @router.get("/clientes", response_model=list[ClienteItem])
@@ -113,7 +114,7 @@ async def get_cliente(
                        qtdusers, qtdsistemas, qtdsrv, status, contatos, telefones, emails,
                        reg, local, grupo, tipo, pacote, dt_atualiza, versaoat, franq, ufmatriz,
                        integracoes, infraprod, infrats, shape, ocpu, mem, tsplus, detalhes,
-                       implat, datastart, prxcontat, cnpj, codigoc, agtazure, linxwebver
+                       implat, datastart, prxcontat, cnpj, codigoc, agtazure, linxwebver, doc
                 FROM tbl_linx WHERE cod = :cod"""),
         {"cod": cod}
     )
@@ -546,7 +547,7 @@ async def update_cliente(
                    "tipo", "pacote", "dt_atualiza", "versaoat", "franq", "ufmatriz",
                    "integracoes", "infraprod", "infrats", "shape", "ocpu", "mem",
                    "tsplus", "detalhes", "implat", "datastart", "prxcontat", "cnpj", "codigoc",
-                   "agtazure", "linxwebver", "bandeira", "bd"]
+                   "agtazure", "linxwebver", "bandeira", "bd", "doc"]
         sets, params = [], {"cod": cod}
         for k, v in body.items():
             if k in allowed:

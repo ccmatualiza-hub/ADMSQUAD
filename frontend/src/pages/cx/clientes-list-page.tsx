@@ -6,7 +6,7 @@ interface Cliente {
   cod: number; razao: string | null; cliente: string | null;
   sistema: string | null; versao: string | null;
   qtdusers: number | null; serverbd: string | null;
-  codigoc: string | null; grupo: string | null; status: string | null;
+  codigoc: string | null; grupo: string | null; status: string | null; doc: string | null;
 }
 
 interface ClienteDetalhe {
@@ -19,7 +19,7 @@ interface ClienteDetalhe {
   integracoes: string | null; infraprod: string | null; infrats: string | null; shape: string | null;
   ocpu: string | null; mem: string | null; tsplus: string | null; detalhes: string | null;
   implat: string | null; datastart: string | null; prxcontat: string | null; cnpj: string | null;
-  codigoc: string | null; agtazure: string | null; linxwebver: string | null;
+  codigoc: string | null; agtazure: string | null; linxwebver: string | null; doc: string | null;
 }
 
 type EditForm = {
@@ -31,7 +31,7 @@ type EditForm = {
   tipo: string; pacote: string; dt_atualiza: string; versaoat: string;
   datastart: string; agtazure: string; linxwebver: string;
   shape: string; ocpu: string; mem: string; tsplus: string;
-  integracoes: string; infraprod: string; infrats: string; detalhes: string;
+  integracoes: string; infraprod: string; infrats: string; detalhes: string; doc: string;
 };
 
 const STATUS_COLORS: Record<string, { color: string; bg: string }> = {
@@ -67,7 +67,7 @@ const emptyEditForm: EditForm = {
   tipo: '', pacote: '', dt_atualiza: '', versaoat: '',
   datastart: '', agtazure: '', linxwebver: '',
   shape: '', ocpu: '', mem: '', tsplus: '',
-  integracoes: '', infraprod: '', infrats: '', detalhes: '',
+  integracoes: '', infraprod: '', infrats: '', detalhes: '', doc: '',
 };
 
 export default function ClientesListPage({ onBack }: { onBack: () => void }) {
@@ -131,7 +131,7 @@ export default function ClientesListPage({ onBack }: { onBack: () => void }) {
         linxwebver: d.linxwebver ?? '', shape: d.shape ?? '',
         ocpu: d.ocpu ?? '', mem: d.mem ?? '', tsplus: d.tsplus ?? '',
         integracoes: d.integracoes ?? '', infraprod: d.infraprod ?? '',
-        infrats: d.infrats ?? '', detalhes: d.detalhes ?? '',
+        infrats: d.infrats ?? '', detalhes: d.detalhes ?? '', doc: d.doc ?? '',
       });
     } catch { toast.error('Erro ao carregar dados do cliente'); }
   };
@@ -268,7 +268,7 @@ export default function ClientesListPage({ onBack }: { onBack: () => void }) {
                 </div>
                 <div style={{ padding: '20px 24px' }}>
                   {[
-                    { title: 'Identificação', fields: [['Razão Social', detalhe.razao], ['Cliente', detalhe.cliente], ['Bandeira', detalhe.bandeira], ['CNPJ', detalhe.cnpj], ['Grupo', detalhe.grupo], ['UF Matriz', detalhe.ufmatriz], ['Franquia', detalhe.franq], ['Região', detalhe.reg], ['Local', detalhe.local], ['Data Start', detalhe.datastart]] },
+                    { title: 'Identificação', fields: [['Razão Social', detalhe.razao], ['Cliente', detalhe.cliente], ['Bandeira', detalhe.bandeira], ['CNPJ', detalhe.cnpj], ['Grupo', detalhe.grupo], ['UF Matriz', detalhe.ufmatriz], ['Franquia', detalhe.franq], ['Região', detalhe.reg], ['Local', detalhe.local], ['Data Start', detalhe.datastart], ['Documentação', detalhe.doc]] },
                     { title: 'Sistema', fields: [['Sistema', detalhe.sistema], ['Versão', detalhe.versao], ['Versão Atual', detalhe.versaoat], ['Pacote', detalhe.pacote], ['Tipo', detalhe.tipo], ['Qtd. Users', detalhe.qtdusers], ['Qtd. Sistemas', detalhe.qtdsistemas], ['Linx Web Ver.', detalhe.linxwebver], ['Últ. Atualização', detalhe.dt_atualiza]] },
                     { title: 'Infraestrutura', fields: [['BD', detalhe.bd], ['Server BD', detalhe.serverbd], ['Qtd. Servidores', detalhe.qtdsrv], ['Shape', detalhe.shape], ['oCPU', detalhe.ocpu], ['Memória', detalhe.mem], ['TSPlus', detalhe.tsplus], ['Azure Agent', detalhe.agtazure], ['Infra Prod', detalhe.infraprod], ['Infra TS', detalhe.infrats], ['Integrações', detalhe.integracoes]] },
                     { title: 'Contato', fields: [['Contatos', detalhe.contatos], ['Telefones', detalhe.telefones], ['Emails', detalhe.emails], ['Próx. Contato', detalhe.prxcontat]] },
@@ -339,7 +339,7 @@ export default function ClientesListPage({ onBack }: { onBack: () => void }) {
               {/* Infraestrutura */}
               <div className="col-12"><div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.15em', color: '#00B0FA', borderBottom: '1px solid #1a3a6e', paddingBottom: 4, marginBottom: 4, marginTop: 4 }}>Infraestrutura</div></div>
               {([
-                ['BD', 'bd'], ['Server BD', 'serverbd'], ['Qtd. Servidores', 'qtdsrv'],
+                ['BD', 'bd'], ['Server BD', 'serverbd'], ['Qtd. Servidores', 'qtdsrv'], ['Documentação (URL)', 'doc'],
                 ['Shape', 'shape'], ['oCPU', 'ocpu'], ['Memória', 'mem'],
                 ['TSPlus', 'tsplus'], ['Azure Agent', 'agtazure'],
                 ['Infra Prod', 'infraprod'], ['Infra TS', 'infrats'], ['Integrações', 'integracoes'],
