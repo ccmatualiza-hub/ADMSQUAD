@@ -5,7 +5,7 @@ import { useAuthStore } from '../../store/auth-store';
 
 interface Atividade {
   cod: number; cliente: string; analista: string;
-  atividade: string; tipoatividade: string; data: string;
+  ticketproj: string; atividade: string; tipoatividade: string; data: string;
   horainicio: string | null; horafim: string | null;
   duracao: string | null; status: string;
 }
@@ -18,7 +18,7 @@ const STATUS_INFO: Record<string, { label: string; color: string; bg: string }> 
 };
 
 const ATIVIDADE_OPTS = ['Incidente', 'Requisição', 'Implantação', 'Migração', 'Manutenção'];
-const emptyForm = { cliente: '', analista: '', atividade: 'Incidente', tipoatividade: '', data: new Date().toISOString().split('T')[0] };
+const emptyForm = { cliente: '', analista: '', ticketproj: '', atividade: 'Incidente', tipoatividade: '', data: new Date().toISOString().split('T')[0] };
 const inputStyle = { background: 'var(--ccm-ink)', border: '1px solid #1a3a6e', color: '#fff', fontSize: 13 };
 const labelStyle = { color: '#9BA4AB', fontSize: 10, fontWeight: 700 as const, textTransform: 'uppercase' as const, letterSpacing: '.14em' };
 
@@ -154,6 +154,7 @@ export default function MonitorAtividades({ onBack }: { onBack: () => void }) {
                 <tr style={{ background: 'var(--ccm-blue)' }}>
                   <th style={th}>Cliente</th>
                   <th style={th}>Analista</th>
+                  <th style={th}>Ticket/Proj</th>
                   <th style={th}>Atividade</th>
                   <th style={th}>Tipo</th>
                   <th style={th}>Data</th>
@@ -166,7 +167,7 @@ export default function MonitorAtividades({ onBack }: { onBack: () => void }) {
               </thead>
               <tbody>
                 {filtered.length === 0 ? (
-                  <tr><td colSpan={10} style={{ padding: 32, textAlign: 'center', color: 'var(--ccm-gray-dark)' }}>Nenhuma atividade encontrada</td></tr>
+                  <tr><td colSpan={11} style={{ padding: 32, textAlign: 'center', color: 'var(--ccm-gray-dark)' }}>Nenhuma atividade encontrada</td></tr>
                 ) : filtered.map((a, i) => {
                   const si = STATUS_INFO[a.status] ?? { label: a.status, color: '#444', bg: '#eee' };
                   const owner = isOwner(a.analista);
@@ -174,6 +175,7 @@ export default function MonitorAtividades({ onBack }: { onBack: () => void }) {
                     <tr key={a.cod} style={{ background: i % 2 === 0 ? '#fff' : '#F7F8FA', borderBottom: '1px solid var(--ccm-line)' }}>
                       <td style={{ ...td, fontWeight: 600, maxWidth: 150, overflow: 'hidden', textOverflow: 'ellipsis' }}>{a.cliente}</td>
                       <td style={td}>{a.analista}</td>
+                      <td style={{ ...td, color: 'var(--ccm-blue)', fontWeight: 600 }}>{a.ticketproj || '—'}</td>
                       <td style={td}>{a.atividade}</td>
                       <td style={{ ...td, maxWidth: 130, overflow: 'hidden', textOverflow: 'ellipsis' }}>{a.tipoatividade}</td>
                       <td style={td}>{new Date(a.data + 'T12:00:00').toLocaleDateString('pt-BR')}</td>
@@ -253,6 +255,13 @@ export default function MonitorAtividades({ onBack }: { onBack: () => void }) {
                 <label style={labelStyle}>Data *</label>
                 <input type="date" className="form-control mt-1" style={inputStyle}
                   value={form.data} onChange={e => setForm(f => ({ ...f, data: e.target.value }))} />
+              </div>
+
+              <div className="col-12 col-md-6">
+                <label style={labelStyle}>Ticket / Proj</label>
+                <input type="text" className="form-control mt-1" style={inputStyle}
+                  value={form.ticketproj} onChange={e => setForm(f => ({ ...f, ticketproj: e.target.value }))}
+                  placeholder="Nº Ticket ou Projeto" />
               </div>
 
               <div className="col-12 col-md-6">
