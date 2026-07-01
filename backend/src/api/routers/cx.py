@@ -59,6 +59,7 @@ class ClienteDetalhe(BaseModel):
     datastart: str | None = None
     prxcontat: str | None = None
     cnpj: str | None = None
+    codigoc: str | None = None
     agtazure: str | None = None
     linxwebver: str | None = None
 
@@ -112,7 +113,7 @@ async def get_cliente(
                        qtdusers, qtdsistemas, qtdsrv, status, contatos, telefones, emails,
                        reg, local, grupo, tipo, pacote, dt_atualiza, versaoat, franq, ufmatriz,
                        integracoes, infraprod, infrats, shape, ocpu, mem, tsplus, detalhes,
-                       implat, datastart, prxcontat, cnpj, agtazure, linxwebver
+                       implat, datastart, prxcontat, cnpj, codigoc, agtazure, linxwebver
                 FROM tbl_linx WHERE cod = :cod"""),
         {"cod": cod}
     )
