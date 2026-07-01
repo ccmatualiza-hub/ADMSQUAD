@@ -27,7 +27,7 @@ type EditForm = {
   qtdusers: string; qtdsistemas: string; qtdsrv: string;
   status: string; franq: string; ufmatriz: string; reg: string; bandeira: string;
   implat: string; contatos: string; telefones: string; emails: string;
-  local: string; prxcontat: string; cnpj: string; grupo: string;
+  local: string; prxcontat: string; codigoc: string; cnpj: string; grupo: string;
   tipo: string; pacote: string; dt_atualiza: string; versaoat: string;
   datastart: string; agtazure: string; linxwebver: string;
   shape: string; ocpu: string; mem: string; tsplus: string;
@@ -63,7 +63,7 @@ const emptyEditForm: EditForm = {
   qtdusers: '', qtdsistemas: '', qtdsrv: '',
   status: '', franq: '', ufmatriz: '', reg: '', bandeira: '',
   implat: '', contatos: '', telefones: '', emails: '',
-  local: '', prxcontat: '', cnpj: '', grupo: '',
+  local: '', prxcontat: '', codigoc: '', cnpj: '', grupo: '',
   tipo: '', pacote: '', dt_atualiza: '', versaoat: '',
   datastart: '', agtazure: '', linxwebver: '',
   shape: '', ocpu: '', mem: '', tsplus: '',
