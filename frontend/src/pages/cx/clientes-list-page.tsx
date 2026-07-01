@@ -236,6 +236,12 @@ export default function ClientesListPage({ onBack }: { onBack: () => void }) {
                           onClick={() => openEdit(c.cod)}>
                           <i className="bi bi-pencil-fill me-1" />Editar
                         </button>
+                        {c.doc && (
+                          <button className="btn btn-sm" style={{ background: '#1DB954', color: '#fff', fontSize: 10, padding: '3px 8px' }}
+                            onClick={() => window.open(c.doc!, '_blank')} title="Abrir documentação">
+                            <i className="bi bi-file-earmark-text me-1" />Doc
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

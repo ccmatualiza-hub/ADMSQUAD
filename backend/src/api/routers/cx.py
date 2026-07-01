@@ -20,6 +20,7 @@ class ClienteItem(BaseModel):
     codigoc: str | None = None
     grupo: str | None = None
     status: str | None = None
+    doc: str | None = None
 
 
 class ClienteDetalhe(BaseModel):
@@ -82,7 +83,7 @@ async def list_clientes(
             where += " AND status = :status"
             params["status"] = status_filter
         result = await session.execute(
-            text(f"SELECT cod, razao, cliente, sistema, versao, qtdusers, serverbd, codigoc, grupo, status FROM tbl_linx {where} ORDER BY razao"),
+            text(f"SELECT cod, razao, cliente, sistema, versao, qtdusers, serverbd, codigoc, grupo, status, doc FROM tbl_linx {where} ORDER BY razao"),
             params
         )
         rows = result.fetchall()
