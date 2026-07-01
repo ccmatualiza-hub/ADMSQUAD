@@ -19,7 +19,7 @@ interface ClienteDetalhe {
   integracoes: string | null; infraprod: string | null; infrats: string | null; shape: string | null;
   ocpu: string | null; mem: string | null; tsplus: string | null; detalhes: string | null;
   implat: string | null; datastart: string | null; prxcontat: string | null; cnpj: string | null;
-  agtazure: string | null; linxwebver: string | null;
+  codigoc: string | null; agtazure: string | null; linxwebver: string | null;
 }
 
 type EditForm = {
