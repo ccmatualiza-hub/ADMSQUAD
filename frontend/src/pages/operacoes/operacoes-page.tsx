@@ -2,8 +2,9 @@ import { useState } from 'react';
 import DailyPendencias  from './daily-pendencias';
 import TarefasPage      from './tarefas-page';
 import MonitorAtividades from './monitor-atividades';
+import GeradorCodigoCCM from './gerador-codigo-ccm';
 
-type SubPage = null | 'daily' | 'tarefas' | 'atividades';
+type SubPage = null | 'daily' | 'tarefas' | 'atividades' | 'gerador';
 
 export default function OperacoesPage() {
   const [subPage, setSubPage] = useState<SubPage>(null);
@@ -11,6 +12,7 @@ export default function OperacoesPage() {
   if (subPage === 'daily')      return <DailyPendencias   onBack={() => setSubPage(null)} />;
   if (subPage === 'tarefas')    return <TarefasPage        onBack={() => setSubPage(null)} />;
   if (subPage === 'atividades') return <MonitorAtividades  onBack={() => setSubPage(null)} />;
+  if (subPage === 'gerador')    return <GeradorCodigoCCM    onBack={() => setSubPage(null)} />;
 
   const Card = ({ title, desc, color, bg, icon, onClick, external }: { title: string; desc: string; color: string; bg: string; icon: string; onClick?: () => void; external?: string }) => (
     <div className="col-12 col-md-4 col-lg-3">
@@ -44,6 +46,7 @@ export default function OperacoesPage() {
         <Card title="Evolution API"         desc="Acessar o painel da Evolution API."                   color="#7F77DD" bg="#F0EEFF" icon="bi-broadcast"                 external="https://evolution-evolution-api.2jgevz.easypanel.host/manager/login" />
         <Card title="PHPMyAdmin"            desc="Acessar o gerenciador de banco de dados."             color="#E74C3C" bg="#FDE8E8" icon="bi-database-fill"              external="https://databases-phpmyadmin.2jgevz.easypanel.host/" />
         <Card title="N8N"                   desc="Acessar o N8N."                                      color="#F9A825" bg="#FFF8E1" icon="bi-diagram-3-fill"            external="https://apps-n8n.2jgevz.easypanel.host/signin?redirect=%252Fworkflow%252Fd1WIDrGFsoFflbqe" />
+        <Card title="Gerador de Código CCM"  desc="Gerar códigos CCM integrado ao sistema."             color=
         <div className="col-12 col-md-4 col-lg-3">
           <div style={{ background: '#F7F8FA', border: '1px dashed var(--ccm-line)', borderRadius: 6, padding: '20px 22px', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 120, color: 'var(--ccm-gray-medium)', fontSize: 12, letterSpacing: '.08em' }}>
             <i className="bi bi-plus-circle me-2" />Em breve
