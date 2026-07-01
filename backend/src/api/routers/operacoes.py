@@ -212,3 +212,133 @@ async def concluir_todos(
         return {"updated": result.rowcount}
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
+
+
+# ── Monitor de Atividades ─────────────────────────────────────────────────────
+
+class AtividadeItem(BaseModel):
+    cod: int
+    cliente: str
+    analista: str
+    tipoatividade: str
+    data: str
+    horainicio: str | None = None
+    horafim: str | None = None
+    status: str
+    created_at: str | None = None
+
+
+class AtividadeCreate(BaseModel):
+    cliente: str
+    analista: str
+    tipoatividade: str
+    data: str
+
+
+class AtividadeUpdate(BaseModel):
+    cliente: str | None = None
+    analista: str | None = None
+    tipoatividade: str | None = None
+    data: str | None = None
+    status: str | None = None
+
+
+def row_to_atividade(row, keys) -> AtividadeItem:
+    d = dict(zip(keys, row))
+    return AtividadeItem(
+        cod=d["cod"], cliente=d["cliente"],
+        analista=d["analista"], tipoatividade=d["tipoatividade"],
+        data=str(d["data"]), horainicio=d.get("horainicio"),
+        horafim=d.get("horafim"), status=d["status"],
+        created_at=str(d["created_at"]) if d.get("created_at") else None,
+    )
+
+
+@router.get("/atividades", response_model=list[AtividadeItem])
+async def list_atividades(
+    _: Annotated[dict, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> list[AtividadeItem]:
+    try:
+        result = await session.execute(
+            text("SELECT cod, cliente, analista, tipoatividade, data, horainicio, horafim, status, created_at FROM tbl_atividades ORDER BY data DESC, cod DESC")
+        )
+        rows = result.fetchall()
+        keys = list(result.keys())
+        return [row_to_atividade(r, keys) for r in rows]
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
+@router.post("/atividades", response_model=AtividadeItem, status_code=status.HTTP_201_CREATED)
+async def create_atividade(
+    body: AtividadeCreate,
+    current_user: Annotated[dict, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> AtividadeItem:
+    try:
+        result = await session.execute(
+            text("INSERT INTO tbl_atividades (cliente, analista, tipoatividade, data, status) VALUES (:cliente, :analista, :tipoatividade, :data, 'Nao Iniciado')"),
+            {"cliente": body.cliente, "analista": body.analista.upper(),
+             "tipoatividade": body.tipoatividade, "data": body.data}
+        )
+        await session.commit()
+        r2 = await session.execute(
+            text("SELECT cod, cliente, analista, tipoatividade, data, horainicio, horafim, status, created_at FROM tbl_atividades WHERE cod = :cod"),
+            {"cod": result.lastrowid}
+        )
+        row = r2.fetchone()
+        return row_to_atividade(row, list(r2.keys()))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
+@router.put("/atividades/{cod}/iniciar")
+async def iniciar_atividade(
+    cod: int,
+    _: Annotated[dict, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> dict:
+    try:
+        await session.execute(
+            text("UPDATE tbl_atividades SET status='Em Andamento', horainicio=DATE_FORMAT(NOW(),'%H:%i') WHERE cod=:cod"),
+            {"cod": cod}
+        )
+        await session.commit()
+        return {"updated": True}
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
+@router.put("/atividades/{cod}/terminar")
+async def terminar_atividade(
+    cod: int,
+    _: Annotated[dict, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> dict:
+    try:
+        await session.execute(
+            text("UPDATE tbl_atividades SET status='Concluido', horafim=DATE_FORMAT(NOW(),'%H:%i') WHERE cod=:cod"),
+            {"cod": cod}
+        )
+        await session.commit()
+        return {"updated": True}
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
+@router.put("/atividades/{cod}/cancelar")
+async def cancelar_atividade(
+    cod: int,
+    _: Annotated[dict, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> dict:
+    try:
+        await session.execute(
+            text("UPDATE tbl_atividades SET status='Cancelado' WHERE cod=:cod"),
+            {"cod": cod}
+        )
+        await session.commit()
+        return {"updated": True}
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
