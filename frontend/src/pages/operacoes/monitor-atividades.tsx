@@ -32,6 +32,7 @@ export default function MonitorAtividades({ onBack }: { onBack: () => void }) {
   const [saving, setSaving]       = useState(false);
   const [filterStatus, setFilterStatus]   = useState('');
   const [filterCliente, setFilterCliente] = useState('');
+  const [filterAtividade, setFilterAtividade] = useState('');
   const [filterAnalista, setFilterAnalista] = useState('');
   const [filterData, setFilterData]       = useState('');
   const [clienteSugs, setClienteSugs]     = useState<string[]>([]);
@@ -42,9 +43,10 @@ export default function MonitorAtividades({ onBack }: { onBack: () => void }) {
     setLoading(true);
     try {
       const params = new URLSearchParams();
-      if (filterCliente)  params.set('q_cliente', filterCliente);
-      if (filterAnalista) params.set('q_analista', filterAnalista);
-      if (filterData)     params.set('q_data', filterData);
+      if (filterCliente)   params.set('q_cliente', filterCliente);
+      if (filterAnalista)  params.set('q_analista', filterAnalista);
+      if (filterData)      params.set('q_data', filterData);
+      if (filterAtividade) params.set('q_atividade', filterAtividade);
       const [data, anal] = await Promise.all([
         http.get<Atividade[]>(`/api/operacoes/atividades?${params}`),
         http.get<{ id: number; name: string }[]>('/api/pendencias/analistas'),
@@ -133,6 +135,11 @@ export default function MonitorAtividades({ onBack }: { onBack: () => void }) {
             onChange={e => setFilterAnalista(e.target.value)} style={{ maxWidth: 150, fontSize: 12 }} />
           <input type="date" className="form-control" value={filterData}
             onChange={e => setFilterData(e.target.value)} style={{ maxWidth: 160, fontSize: 12 }} />
+          <select className="form-select" value={filterAtividade} onChange={e => setFilterAtividade(e.target.value)}
+            style={{ maxWidth: 150, fontSize: 12 }}>
+            <option value="">Atividade...</option>
+            {ATIVIDADE_OPTS.map(o => <option key={o} value={o}>{o}</option>)}
+          </select>
           <select className="form-select" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
             style={{ maxWidth: 160, fontSize: 12 }}>
             <option value="">Todos status</option>

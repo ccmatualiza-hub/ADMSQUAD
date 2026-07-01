@@ -239,15 +239,17 @@ async def list_atividades(
     q_cliente: str = "",
     q_analista: str = "",
     q_data: str = "",
+    q_atividade: str = "",
     _: Annotated[dict, Depends(get_current_user)] = None,
     session: Annotated[AsyncSession, Depends(get_db)] = None,
 ) -> list[AtividadeItem]:
     try:
         where = "WHERE 1=1"
         params: dict = {}
-        if q_cliente:  where += " AND cliente LIKE :q_cliente";  params["q_cliente"]  = f"%{q_cliente}%"
-        if q_analista: where += " AND analista LIKE :q_analista"; params["q_analista"] = f"%{q_analista}%"
-        if q_data:     where += " AND data = :q_data";            params["q_data"]     = q_data
+        if q_cliente:   where += " AND cliente LIKE :q_cliente";    params["q_cliente"]   = f"%{q_cliente}%"
+        if q_analista:  where += " AND analista LIKE :q_analista";  params["q_analista"]  = f"%{q_analista}%"
+        if q_data:      where += " AND data = :q_data";             params["q_data"]      = q_data
+        if q_atividade: where += " AND atividade = :q_atividade";   params["q_atividade"] = q_atividade
         result = await session.execute(
             text(f"SELECT cod, cliente, analista, ticketproj, atividade, tipoatividade, data, horainicio, horafim, duracao, status, created_at FROM tbl_atividades {where} ORDER BY data DESC, cod DESC"),
             params
@@ -342,7 +344,7 @@ async def cancelar_atividade(
 ) -> dict:
     try:
         await session.execute(
-            text("UPDATE tbl_atividades SET status='Cancelado' WHERE cod=:cod"),
+            text("UPDATE tbl_atividades SET status='Cancelado', horainicio=NULL, horafim=NULL, duracao=NULL WHERE cod=:cod"),
             {"cod": cod}
         )
         await session.commit()
