@@ -318,7 +318,15 @@ async def terminar_atividade(
 ) -> dict:
     try:
         await session.execute(
-            text("UPDATE tbl_atividades SET status='Concluido', horafim=DATE_FORMAT(NOW(),'%H:%i') WHERE cod=:cod"),
+            text(
+                "UPDATE tbl_atividades SET status='Concluido',"
+                " horafim=DATE_FORMAT(NOW(),'%H:%i'),"
+                " duracao=CONCAT(LPAD(FLOOR(TIMESTAMPDIFF(MINUTE,"
+                " STR_TO_DATE(CONCAT(data,' ',horainicio),'%Y-%m-%d %H:%i'), NOW())/60),2,'0'),'h',"
+                " LPAD(MOD(TIMESTAMPDIFF(MINUTE,"
+                " STR_TO_DATE(CONCAT(data,' ',horainicio),'%Y-%m-%d %H:%i'), NOW()),60),2,'0'),'m')"
+                " WHERE cod=:cod"
+            ),
             {"cod": cod}
         )
         await session.commit()
