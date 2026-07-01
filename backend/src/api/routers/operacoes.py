@@ -9,6 +9,8 @@ from src.api.deps.auth import get_current_user, get_db
 router = APIRouter(prefix="/api/operacoes", tags=["operacoes"])
 
 
+# ── Tarefas tbl_linx ─────────────────────────────────────────────────────────
+
 class TarefaItem(BaseModel):
     cod: int
     razao: str | None = None
@@ -51,26 +53,14 @@ async def concluir_tarefa(
     session: Annotated[AsyncSession, Depends(get_db)],
 ) -> dict:
     try:
-        await session.execute(
-            text("UPDATE tbl_linx SET qtdsistemas = 1 WHERE cod = :cod"),
-            {"cod": cod}
-        )
+        await session.execute(text("UPDATE tbl_linx SET qtdsistemas = 1 WHERE cod = :cod"), {"cod": cod})
         await session.commit()
         return {"updated": True}
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
 
 
-# ── Tarefas (controle de tarefa aberta) ──────────────────────────────────────
-
-class TarefaAbertaItem(BaseModel):
-    cod: int
-    tarefa: str
-    descricao: str | None = None
-    datainicio: str | None = None
-    dataconclusao: str | None = None
-    status: str
-
+# ── Tarefas abertas (tbl_tarefas) ────────────────────────────────────────────
 
 class TarefaAbertaCreate(BaseModel):
     tarefa: str
@@ -128,25 +118,20 @@ async def create_tarefa_aberta(
     session: Annotated[AsyncSession, Depends(get_db)],
 ) -> dict:
     try:
-        # Verifica se já existe tarefa aberta
         check = await session.execute(text("SELECT cod FROM tbl_tarefas WHERE status = 'aberto' LIMIT 1"))
         if check.fetchone():
             raise HTTPException(status_code=400, detail="Já existe uma tarefa aberta. Conclua-a antes de abrir outra.")
-
-        # Verifica se todos os clientes estão com qtdsistemas = 1
         stats = await session.execute(
             text("SELECT SUM(CASE WHEN qtdsistemas != 1 OR qtdsistemas IS NULL THEN 1 ELSE 0 END) as pendentes FROM tbl_linx")
         )
         row = stats.fetchone()
         pendentes = int(row[0]) if row and row[0] else 0
         if pendentes > 0:
-            raise HTTPException(status_code=400, detail=f"Existem {pendentes} registro(s) pendentes (Concluído = NÃO). Conclua todos antes de abrir uma nova tarefa.")
-
+            raise HTTPException(status_code=400, detail=f"Existem {pendentes} registro(s) pendentes. Conclua todos antes de abrir uma nova tarefa.")
         result = await session.execute(
             text("INSERT INTO tbl_tarefas (tarefa, descricao, datainicio, status) VALUES (:tarefa, :descricao, CURDATE(), 'aberto')"),
             {"tarefa": body.tarefa, "descricao": body.descricao or ""}
         )
-        # Reseta qtdsistemas para 0 em todos os registros da tbl_linx
         await session.execute(text("UPDATE tbl_linx SET qtdsistemas = 0"))
         await session.commit()
         return {"created": True, "id": result.lastrowid}
@@ -163,15 +148,13 @@ async def concluir_tarefa_aberta(
     session: Annotated[AsyncSession, Depends(get_db)],
 ) -> dict:
     try:
-        # Verifica se todos os clientes estão com qtdsistemas = 1
         stats = await session.execute(
             text("SELECT SUM(CASE WHEN qtdsistemas != 1 OR qtdsistemas IS NULL THEN 1 ELSE 0 END) as pendentes FROM tbl_linx")
         )
         row = stats.fetchone()
         pendentes = int(row[0]) if row and row[0] else 0
         if pendentes > 0:
-            raise HTTPException(status_code=400, detail=f"Existem {pendentes} registro(s) pendentes (Concluído = NÃO). Conclua todos antes de encerrar a tarefa.")
-
+            raise HTTPException(status_code=400, detail=f"Existem {pendentes} registro(s) pendentes. Conclua todos antes de encerrar a tarefa.")
         await session.execute(
             text("UPDATE tbl_tarefas SET status = 'concluido', dataconclusao = CURDATE() WHERE cod = :cod"),
             {"cod": cod}
@@ -190,9 +173,7 @@ async def concluir_inativos(
     session: Annotated[AsyncSession, Depends(get_db)],
 ) -> dict:
     try:
-        result = await session.execute(
-            text("UPDATE tbl_linx SET qtdsistemas = 1 WHERE status = '9 - INATIVO'")
-        )
+        result = await session.execute(text("UPDATE tbl_linx SET qtdsistemas = 1 WHERE status = '9 - INATIVO'"))
         await session.commit()
         return {"updated": result.rowcount}
     except Exception as exc:
@@ -220,10 +201,13 @@ class AtividadeItem(BaseModel):
     cod: int
     cliente: str
     analista: str
+    ticketproj: str | None = None
+    atividade: str | None = None
     tipoatividade: str
     data: str
     horainicio: str | None = None
     horafim: str | None = None
+    duracao: str | None = None
     status: str
     created_at: str | None = None
 
@@ -231,37 +215,42 @@ class AtividadeItem(BaseModel):
 class AtividadeCreate(BaseModel):
     cliente: str
     analista: str
+    ticketproj: str = ""
+    atividade: str = "Incidente"
     tipoatividade: str
     data: str
-
-
-class AtividadeUpdate(BaseModel):
-    cliente: str | None = None
-    analista: str | None = None
-    tipoatividade: str | None = None
-    data: str | None = None
-    status: str | None = None
 
 
 def row_to_atividade(row, keys) -> AtividadeItem:
     d = dict(zip(keys, row))
     return AtividadeItem(
         cod=d["cod"], cliente=d["cliente"],
-        analista=d["analista"], tipoatividade=d["tipoatividade"],
+        analista=d["analista"], ticketproj=d.get("ticketproj", ""),
+        atividade=d.get("atividade", ""), tipoatividade=d["tipoatividade"],
         data=str(d["data"]), horainicio=d.get("horainicio"),
-        horafim=d.get("horafim"), status=d["status"],
+        horafim=d.get("horafim"), duracao=d.get("duracao"),
+        status=d["status"],
         created_at=str(d["created_at"]) if d.get("created_at") else None,
     )
 
 
 @router.get("/atividades", response_model=list[AtividadeItem])
 async def list_atividades(
-    _: Annotated[dict, Depends(get_current_user)],
-    session: Annotated[AsyncSession, Depends(get_db)],
+    q_cliente: str = "",
+    q_analista: str = "",
+    q_data: str = "",
+    _: Annotated[dict, Depends(get_current_user)] = None,
+    session: Annotated[AsyncSession, Depends(get_db)] = None,
 ) -> list[AtividadeItem]:
     try:
+        where = "WHERE 1=1"
+        params: dict = {}
+        if q_cliente:  where += " AND cliente LIKE :q_cliente";  params["q_cliente"]  = f"%{q_cliente}%"
+        if q_analista: where += " AND analista LIKE :q_analista"; params["q_analista"] = f"%{q_analista}%"
+        if q_data:     where += " AND data = :q_data";            params["q_data"]     = q_data
         result = await session.execute(
-            text("SELECT cod, cliente, analista, tipoatividade, data, horainicio, horafim, status, created_at FROM tbl_atividades ORDER BY data DESC, cod DESC")
+            text(f"SELECT cod, cliente, analista, ticketproj, atividade, tipoatividade, data, horainicio, horafim, duracao, status, created_at FROM tbl_atividades {where} ORDER BY data DESC, cod DESC"),
+            params
         )
         rows = result.fetchall()
         keys = list(result.keys())
@@ -273,18 +262,19 @@ async def list_atividades(
 @router.post("/atividades", response_model=AtividadeItem, status_code=status.HTTP_201_CREATED)
 async def create_atividade(
     body: AtividadeCreate,
-    current_user: Annotated[dict, Depends(get_current_user)],
+    _: Annotated[dict, Depends(get_current_user)],
     session: Annotated[AsyncSession, Depends(get_db)],
 ) -> AtividadeItem:
     try:
         result = await session.execute(
-            text("INSERT INTO tbl_atividades (cliente, analista, tipoatividade, data, status) VALUES (:cliente, :analista, :tipoatividade, :data, 'Nao Iniciado')"),
+            text("INSERT INTO tbl_atividades (cliente, analista, ticketproj, atividade, tipoatividade, data, status) VALUES (:cliente, :analista, :ticketproj, :atividade, :tipoatividade, :data, 'Nao Iniciado')"),
             {"cliente": body.cliente, "analista": body.analista.upper(),
+             "ticketproj": body.ticketproj, "atividade": body.atividade,
              "tipoatividade": body.tipoatividade, "data": body.data}
         )
         await session.commit()
         r2 = await session.execute(
-            text("SELECT cod, cliente, analista, tipoatividade, data, horainicio, horafim, status, created_at FROM tbl_atividades WHERE cod = :cod"),
+            text("SELECT cod, cliente, analista, ticketproj, atividade, tipoatividade, data, horainicio, horafim, duracao, status, created_at FROM tbl_atividades WHERE cod = :cod"),
             {"cod": result.lastrowid}
         )
         row = r2.fetchone()
