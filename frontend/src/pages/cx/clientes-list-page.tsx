@@ -124,7 +124,7 @@ export default function ClientesListPage({ onBack }: { onBack: () => void }) {
         bandeira: d.bandeira ?? '', implat: d.implat ?? '',
         contatos: d.contatos ?? '', telefones: d.telefones ?? '',
         emails: d.emails ?? '', local: d.local ?? '',
-        prxcontat: d.prxcontat ?? '', cnpj: d.cnpj ?? '', grupo: d.grupo ?? '',
+        prxcontat: d.prxcontat ?? '', codigoc: d.codigoc ?? '', cnpj: d.cnpj ?? '', grupo: d.grupo ?? '',
         tipo: d.tipo ?? '', pacote: d.pacote ?? '',
         dt_atualiza: d.dt_atualiza ?? '', versaoat: d.versaoat ?? '',
         datastart: d.datastart ?? '', agtazure: d.agtazure ?? '',
