@@ -307,14 +307,23 @@ async def terminar_atividade(
     session: Annotated[AsyncSession, Depends(get_db)],
 ) -> dict:
     try:
+        # Grava horafim primeiro
+        horafim_now = "DATE_FORMAT(NOW(),'%H:%i')"
         await session.execute(
             text(
-                "UPDATE tbl_atividades SET status='Concluido',"
+                "UPDATE tbl_atividades SET"
+                " status='Concluido',"
                 " horafim=DATE_FORMAT(NOW(),'%H:%i'),"
-                " duracao=CONCAT(LPAD(FLOOR(TIMESTAMPDIFF(MINUTE,"
-                " STR_TO_DATE(CONCAT(data,' ',horainicio),'%Y-%m-%d %H:%i'), NOW())/60),2,'0'),'h',"
-                " LPAD(MOD(TIMESTAMPDIFF(MINUTE,"
-                " STR_TO_DATE(CONCAT(data,' ',horainicio),'%Y-%m-%d %H:%i'), NOW()),60),2,'0'),'m')"
+                " duracao=CONCAT("
+                "   LPAD(FLOOR(TIMESTAMPDIFF(MINUTE,"
+                "     STR_TO_DATE(CONCAT(data,' ',horainicio),'%Y-%m-%d %H:%i'),"
+                "     STR_TO_DATE(CONCAT(data,' ',DATE_FORMAT(NOW(),'%H:%i')),'%Y-%m-%d %H:%i')"
+                "   )/60),2,'0'),'h',"
+                "   LPAD(MOD(TIMESTAMPDIFF(MINUTE,"
+                "     STR_TO_DATE(CONCAT(data,' ',horainicio),'%Y-%m-%d %H:%i'),"
+                "     STR_TO_DATE(CONCAT(data,' ',DATE_FORMAT(NOW(),'%H:%i')),'%Y-%m-%d %H:%i')"
+                "   ),60),2,'0'),'m'"
+                " )"
                 " WHERE cod=:cod"
             ),
             {"cod": cod}
