@@ -312,7 +312,7 @@ export default function ClientesListPage({ onBack }: { onBack: () => void }) {
                 ['Razão Social', 'razao'], ['Bandeira', 'bandeira'], ['CNPJ', 'cnpj'],
                 ['Grupo', 'grupo'], ['UF Matriz', 'ufmatriz'], ['Região', 'reg'],
                 ['Franquia', 'franq'], ['Implantador', 'implat'],
-                ['Local', 'local'], ['Data Start', 'datastart'], ['Próx. Contato', 'prxcontat'],
+                ['Local', 'local'], ['Data Start', 'datastart'], ['Próx. Contato', 'prxcontat'], ['Código-C', 'codigoc'],
               ] as [string, keyof EditForm][]).map(([label, key]) => (
                 <div key={key} className="col-12 col-md-6">
                   <label style={labelStyle}>{label}</label>
