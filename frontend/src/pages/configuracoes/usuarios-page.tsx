@@ -30,9 +30,12 @@ function fmtDate(d: string | null) {
   if (!d) return '—';
   return new Date(d).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
-function fmtDatetime(d: string | null) {
+function fmtDatetime(d: string | null): string {
   if (!d) return '—';
-  return new Date(d).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  // O servidor grava em UTC, ajusta para BRT (UTC-3)
+  const date = new Date(d.includes('T') ? d : d.replace(' ', 'T') + 'Z');
+  return date.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
 }
 
 const emptyForm = { name: '', email: '', password: '', role: 'operador_cx' };
