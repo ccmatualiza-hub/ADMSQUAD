@@ -14,6 +14,8 @@ interface ClientePmo {
   status: string | null;
 }
 
+interface Franquia { cod: number; contato: string | null; nome: string | null; }
+
 const emptyForm = {
   razao: '', cliente: '', qtdusers: '' as string | number,
   datprev: '', sistema: '', prxcontat: '',
@@ -26,28 +28,54 @@ const labelStyle = { color: '#9BA4AB', fontSize: 10, fontWeight: 700 as const, t
 const SISTEMA_OPTS = ['APOLLO', 'AUTOSHOP', 'BRAVOS', 'HPE', 'APOLLO / HPE', 'APOLLO / BRAVOS'];
 const STIMPLANT_OPTS = ['EM ANDAMENTO', 'AGUARDANDO', 'PAUSADO', 'CONCLUÍDO'];
 
+function toDateInput(val: string): string {
+  if (!val) return '';
+  const m = val.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (m) return `${m[3]}-${m[2]}-${m[1]}`;
+  return '';
+}
+
+function fromDateInput(val: string): string {
+  if (!val) return '';
+  const [y, m, d] = val.split('-');
+  return `${d}/${m}/${y}`;
+}
+
 export default function ClientesPmoPage({ onBack }: { onBack: () => void }) {
   const [clientes, setClientes]   = useState<ClientePmo[]>([]);
+  const [franquias, setFranquias] = useState<Franquia[]>([]);
   const [loading, setLoading]     = useState(true);
   const [search, setSearch]       = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editCod, setEditCod]     = useState<number | null>(null);
   const [form, setForm]           = useState(emptyForm);
   const [saving, setSaving]       = useState(false);
+  // date input states (yyyy-mm-dd)
+  const [datprevInput, setDatprevInput]   = useState('');
+  const [prxcontatInput, setPrxcontatInput] = useState('');
 
   const fetchData = async (q = '') => {
     setLoading(true);
     try {
       const params = q ? `?q=${encodeURIComponent(q)}` : '';
-      const data = await http.get<ClientePmo[]>(`/api/pmo/clientes${params}`);
+      const [data, frqs] = await Promise.all([
+        http.get<ClientePmo[]>(`/api/pmo/clientes${params}`),
+        http.get<Franquia[]>('/api/pmo/franquias'),
+      ]);
       setClientes(data);
+      setFranquias(frqs);
     } catch { toast.error('Erro ao carregar clientes'); }
     finally { setLoading(false); }
   };
 
   useEffect(() => { fetchData(); }, []);
 
-  const openCreate = () => { setEditCod(null); setForm(emptyForm); setShowModal(true); };
+  const openCreate = () => {
+    setEditCod(null); setForm(emptyForm);
+    setDatprevInput(''); setPrxcontatInput('');
+    setShowModal(true);
+  };
+
   const openEdit = (c: ClientePmo) => {
     setEditCod(c.cod);
     setForm({
@@ -58,6 +86,8 @@ export default function ClientesPmoPage({ onBack }: { onBack: () => void }) {
       franq: c.franq ?? '', implat: c.implat ?? '',
       stimplant: c.stimplant ?? '',
     });
+    setDatprevInput(toDateInput(c.datprev ?? ''));
+    setPrxcontatInput(toDateInput(c.prxcontat ?? ''));
     setShowModal(true);
   };
 
@@ -67,7 +97,12 @@ export default function ClientesPmoPage({ onBack }: { onBack: () => void }) {
     }
     setSaving(true);
     try {
-      const body = { ...form, qtdusers: form.qtdusers ? Number(form.qtdusers) : null };
+      const body = {
+        ...form,
+        qtdusers: form.qtdusers ? Number(form.qtdusers) : null,
+        datprev: fromDateInput(datprevInput) || form.datprev,
+        prxcontat: fromDateInput(prxcontatInput) || form.prxcontat,
+      };
       if (editCod !== null) {
         await http.put(`/api/pmo/clientes/${editCod}`, body);
         toast.success('Cliente atualizado!');
@@ -87,7 +122,6 @@ export default function ClientesPmoPage({ onBack }: { onBack: () => void }) {
 
   return (
     <div>
-      {/* Breadcrumb */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
         <button onClick={onBack} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'var(--ccm-blue)', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.1em' }}>
           <i className="bi bi-arrow-left me-1" />PMO
@@ -131,7 +165,7 @@ export default function ClientesPmoPage({ onBack }: { onBack: () => void }) {
                 <tr style={{ background: 'var(--ccm-blue)' }}>
                   <th style={th}>Razão Social</th>
                   <th style={th}>Implantador</th>
-                  <th style={th}>Franquia</th>
+                  <th style={th}>Franqueado</th>
                   <th style={{ ...th, textAlign: 'center' }}>Users</th>
                   <th style={th}>Próx. Contato</th>
                   <th style={th}>Prev. Conclusão</th>
@@ -216,20 +250,25 @@ export default function ClientesPmoPage({ onBack }: { onBack: () => void }) {
 
               <div className="col-12 col-md-6">
                 <label style={labelStyle}>Previsão de Conclusão</label>
-                <input type="text" className="form-control mt-1" style={inputStyle}
-                  value={form.datprev} onChange={e => setForm(f => ({ ...f, datprev: e.target.value }))} placeholder="dd/mm/yyyy" />
+                <input type="date" className="form-control mt-1" style={inputStyle}
+                  value={datprevInput} onChange={e => setDatprevInput(e.target.value)} />
               </div>
 
               <div className="col-12 col-md-6">
                 <label style={labelStyle}>Próximo Contato</label>
-                <input type="text" className="form-control mt-1" style={inputStyle}
-                  value={form.prxcontat} onChange={e => setForm(f => ({ ...f, prxcontat: e.target.value }))} placeholder="dd/mm/yyyy" />
+                <input type="date" className="form-control mt-1" style={inputStyle}
+                  value={prxcontatInput} onChange={e => setPrxcontatInput(e.target.value)} />
               </div>
 
               <div className="col-12 col-md-6">
-                <label style={labelStyle}>Franquia</label>
-                <input type="text" className="form-control mt-1" style={inputStyle}
-                  value={form.franq} onChange={e => setForm(f => ({ ...f, franq: e.target.value }))} placeholder="Nome da franquia" />
+                <label style={labelStyle}>Franqueado</label>
+                <select className="form-select mt-1" style={inputStyle}
+                  value={form.franq} onChange={e => setForm(f => ({ ...f, franq: e.target.value }))}>
+                  <option value="">Selecione...</option>
+                  {franquias.map(f => (
+                    <option key={f.cod} value={f.contato ?? f.nome ?? ''}>{f.contato || f.nome || '—'}</option>
+                  ))}
+                </select>
               </div>
 
               <div className="col-12 col-md-6">
@@ -247,7 +286,6 @@ export default function ClientesPmoPage({ onBack }: { onBack: () => void }) {
                 </select>
               </div>
 
-              {/* Status fixo */}
               <div className="col-12 col-md-6">
                 <label style={labelStyle}>Status</label>
                 <input type="text" className="form-control mt-1" style={{ ...inputStyle, opacity: 0.6 }}
