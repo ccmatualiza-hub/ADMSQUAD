@@ -49,10 +49,13 @@ class SQLUserRepository:
         return self._to_domain(model)
 
     async def update_last_login(self, user_id: int) -> None:
+        from zoneinfo import ZoneInfo
+        brt = ZoneInfo("America/Sao_Paulo")
+        now_brt = datetime.now(brt).replace(tzinfo=None)  # grava sem tz para MySQL
         await self._session.execute(
             update(UserModel)
             .where(UserModel.id == user_id)
-            .values(last_login=datetime.now(timezone.utc))
+            .values(last_login=now_brt)
         )
         await self._session.commit()
 
