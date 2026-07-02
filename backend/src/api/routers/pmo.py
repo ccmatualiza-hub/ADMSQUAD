@@ -228,3 +228,38 @@ async def update_franquia(
         return {"updated": True}
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
+
+
+# ── Cancelamento de Clientes (Inativos) ──────────────────────────────────────
+
+class ClienteInativoItem(BaseModel):
+    cod: int
+    razao: str | None = None
+    bandeira: str | None = None
+    sistema: str | None = None
+    serverbd: str | None = None
+    status: str | None = None
+    qtdusers: int | None = None
+
+
+@router.get("/inativos", response_model=list[ClienteInativoItem])
+async def list_inativos(
+    q: str = "",
+    _: Annotated[dict, Depends(get_current_user)] = None,
+    session: Annotated[AsyncSession, Depends(get_db)] = None,
+) -> list[ClienteInativoItem]:
+    try:
+        where = "WHERE status = '9 - INATIVO'"
+        params: dict = {}
+        if q:
+            where += " AND (razao LIKE :q OR sistema LIKE :q OR serverbd LIKE :q)"
+            params["q"] = f"%{q}%"
+        result = await session.execute(
+            text(f"SELECT cod, razao, bandeira, sistema, serverbd, status, qtdusers FROM tbl_linx {where} ORDER BY razao"),
+            params
+        )
+        rows = result.fetchall()
+        keys = list(result.keys())
+        return [ClienteInativoItem(**dict(zip(keys, r))) for r in rows]
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
