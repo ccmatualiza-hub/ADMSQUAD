@@ -59,14 +59,16 @@ export default function ClientesPmoPage({ onBack }: { onBack: () => void }) {
     setLoading(true);
     try {
       const params = q ? `?q=${encodeURIComponent(q)}` : '';
-      const [data, frqs, imps] = await Promise.all([
+      const [data, frqs] = await Promise.all([
         http.get<ClientePmo[]>(`/api/pmo/clientes${params}`),
         http.get<Franquia[]>('/api/pmo/franquias'),
-        http.get<{ id: number; name: string }[]>('/api/user/by-role?role=operador_pmo'),
       ]);
       setClientes(data);
       setFranquias(frqs);
-      setImplantadores(imps);
+      // busca implantadores separado para não quebrar se falhar
+      http.get<{ id: number; name: string }[]>('/api/user/by-role?role=operador_pmo')
+        .then(setImplantadores)
+        .catch(() => {});
     } catch { toast.error('Erro ao carregar clientes'); }
     finally { setLoading(false); }
   };
