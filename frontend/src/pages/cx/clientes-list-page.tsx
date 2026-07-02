@@ -58,6 +58,13 @@ function Field({ label, value }: { label: string; value: string | number | null 
   );
 }
 
+const GRUPO_OPTS = ['SEG','SMT','TER','QUA','QUI','SEX','CCM','INT','PMO','FRQ','CLI','AUT','2AI','3AI','4AI','5AI'];
+const STATUS_OPTS = [
+  '0 - IMPLANTAÇÃO','1 - PRIMEIRO CONTATO','2 - SMART CLOUD','3 - SMART DBA',
+  '4 - BASE','5 - CONFIGURAR ATUALIZADOR','6 - ATIVO','7 - ATIVO VPU',
+  '8 - CONSULTA','9 - INATIVO','X - ATIVO COMPLEMENTO',
+];
+
 const emptyEditForm: EditForm = {
   razao: '', sistema: '', versao: '', bd: '', serverbd: '',
   qtdusers: '', qtdsistemas: '', qtdsrv: '',
@@ -316,7 +323,7 @@ export default function ClientesListPage({ onBack }: { onBack: () => void }) {
               <div className="col-12"><div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.15em', color: '#00B0FA', borderBottom: '1px solid #1a3a6e', paddingBottom: 4, marginBottom: 4 }}>Identificação</div></div>
               {([
                 ['Razão Social', 'razao'], ['Bandeira', 'bandeira'], ['CNPJ', 'cnpj'],
-                ['Grupo', 'grupo'], ['UF Matriz', 'ufmatriz'], ['Região', 'reg'],
+                ['UF Matriz', 'ufmatriz'], ['Região', 'reg'],
                 ['Franquia', 'franq'], ['Implantador', 'implat'],
                 ['Local', 'local'], ['Data Start', 'datastart'], ['Próx. Contato', 'prxcontat'], ['Código-C', 'codigoc'],
               ] as [string, keyof EditForm][]).map(([label, key]) => (
@@ -327,13 +334,22 @@ export default function ClientesListPage({ onBack }: { onBack: () => void }) {
                     onChange={e => setEditForm(f => ({ ...f, [key]: e.target.value }))} />
                 </div>
               ))}
+              {/* Grupo — combobox */}
+              <div className="col-12 col-md-6">
+                <label style={labelStyle}>Grupo</label>
+                <select className="form-select mt-1" style={inputStyle}
+                  value={editForm.grupo} onChange={e => setEditForm(f => ({ ...f, grupo: e.target.value }))}>
+                  <option value="">Selecione...</option>
+                  {GRUPO_OPTS.map(o => <option key={o} value={o}>{o}</option>)}
+                </select>
+              </div>
               {/* Sistema */}
               <div className="col-12"><div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.15em', color: '#00B0FA', borderBottom: '1px solid #1a3a6e', paddingBottom: 4, marginBottom: 4, marginTop: 4 }}>Sistema</div></div>
               {([
                 ['Sistema', 'sistema'], ['Versão', 'versao'], ['Versão Atual', 'versaoat'],
                 ['Tipo', 'tipo'], ['Pacote', 'pacote'], ['Qtd. Usuários', 'qtdusers'],
                 ['Qtd. Sistemas', 'qtdsistemas'], ['Linx Web Ver.', 'linxwebver'],
-                ['Últ. Atualização', 'dt_atualiza'], ['Status', 'status'],
+                ['Últ. Atualização', 'dt_atualiza'],
               ] as [string, keyof EditForm][]).map(([label, key]) => (
                 <div key={key} className="col-12 col-md-6">
                   <label style={labelStyle}>{label}</label>
@@ -342,6 +358,15 @@ export default function ClientesListPage({ onBack }: { onBack: () => void }) {
                     onChange={e => setEditForm(f => ({ ...f, [key]: e.target.value }))} />
                 </div>
               ))}
+              {/* Status — combobox */}
+              <div className="col-12 col-md-6">
+                <label style={labelStyle}>Status</label>
+                <select className="form-select mt-1" style={inputStyle}
+                  value={editForm.status} onChange={e => setEditForm(f => ({ ...f, status: e.target.value }))}>
+                  <option value="">Selecione...</option>
+                  {STATUS_OPTS.map(o => <option key={o} value={o}>{o}</option>)}
+                </select>
+              </div>
               {/* Infraestrutura */}
               <div className="col-12"><div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.15em', color: '#00B0FA', borderBottom: '1px solid #1a3a6e', paddingBottom: 4, marginBottom: 4, marginTop: 4 }}>Infraestrutura</div></div>
               {([
