@@ -216,7 +216,7 @@ export default function AgendarAtualizacao({ onBack }: { onBack: () => void }) {
                       <td style={{ ...td, textAlign: 'center', fontWeight: 700 }}>{a.tipo || '—'}</td>
                       <td style={td}>{a.formato || '—'}</td>
                       <td style={td}>{a.pacote || '—'}</td>
-                      <td style={td}>{a.useragend || '—'}</td>
+                      <td style={td}>{a.useragend ? a.useragend.toUpperCase() : '—'}</td>
                       <td style={{ ...td, textAlign: 'center' }}>
                         <span style={{ background: c.bg, color: c.color, borderRadius: 4, padding: '2px 8px', fontWeight: 700, fontSize: 11, border: (c as any).border }}>
                           {String(a.concluido ?? '0').trim()}
