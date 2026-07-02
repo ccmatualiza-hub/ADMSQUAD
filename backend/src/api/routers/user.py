@@ -167,3 +167,25 @@ async def change_password(
     user.password = hash_password(body.new_password)
     await session.commit()
     return {"ok": True}
+
+
+@router.get("/by-role")
+async def get_users_by_role(
+    role: str = "",
+    _: Annotated[dict, Depends(get_current_user)] = None,
+    session: Annotated[AsyncSession, Depends(get_db)] = None,
+) -> list[dict]:
+    try:
+        params: dict = {}
+        where = "WHERE active = 1"
+        if role:
+            where += " AND role = :role"
+            params["role"] = role
+        result = await session.execute(
+            text(f"SELECT id, name FROM users {where} ORDER BY name"),
+            params
+        )
+        rows = result.fetchall()
+        return [{"id": r[0], "name": r[1]} for r in rows]
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))

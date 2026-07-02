@@ -26,7 +26,7 @@ const inputStyle = { background: 'var(--ccm-ink)', border: '1px solid #1a3a6e', 
 const labelStyle = { color: '#9BA4AB', fontSize: 10, fontWeight: 700 as const, textTransform: 'uppercase' as const, letterSpacing: '.14em' };
 
 const SISTEMA_OPTS = ['APOLLO', 'AUTOSHOP', 'BRAVOS', 'HPE', 'APOLLO / HPE', 'APOLLO / BRAVOS'];
-const STIMPLANT_OPTS = ['EM ANDAMENTO', 'AGUARDANDO', 'PAUSADO', 'CONCLUÍDO'];
+const STIMPLANT_OPTS = ['PLANEJAMENTO','ANDAMENTO','MIGRACAO','HOMOLOGACAO','GO-LIVE','ACOMPANHAMENTO','ENCERRAMENTO','CONCLUIDO','CANCELADO'];
 
 function toDateInput(val: string): string {
   if (!val) return '';
@@ -44,6 +44,7 @@ function fromDateInput(val: string): string {
 export default function ClientesPmoPage({ onBack }: { onBack: () => void }) {
   const [clientes, setClientes]   = useState<ClientePmo[]>([]);
   const [franquias, setFranquias] = useState<Franquia[]>([]);
+  const [implantadores, setImplantadores] = useState<{ id: number; name: string }[]>([]);
   const [loading, setLoading]     = useState(true);
   const [search, setSearch]       = useState('');
   const [showModal, setShowModal] = useState(false);
@@ -58,12 +59,14 @@ export default function ClientesPmoPage({ onBack }: { onBack: () => void }) {
     setLoading(true);
     try {
       const params = q ? `?q=${encodeURIComponent(q)}` : '';
-      const [data, frqs] = await Promise.all([
+      const [data, frqs, imps] = await Promise.all([
         http.get<ClientePmo[]>(`/api/pmo/clientes${params}`),
         http.get<Franquia[]>('/api/pmo/franquias'),
+        http.get<{ id: number; name: string }[]>('/api/user/by-role?role=operador_pmo'),
       ]);
       setClientes(data);
       setFranquias(frqs);
+      setImplantadores(imps);
     } catch { toast.error('Erro ao carregar clientes'); }
     finally { setLoading(false); }
   };
@@ -273,8 +276,11 @@ export default function ClientesPmoPage({ onBack }: { onBack: () => void }) {
 
               <div className="col-12 col-md-6">
                 <label style={labelStyle}>Implantador</label>
-                <input type="text" className="form-control mt-1" style={inputStyle}
-                  value={form.implat} onChange={e => setForm(f => ({ ...f, implat: e.target.value }))} placeholder="Nome do implantador" />
+                <select className="form-select mt-1" style={inputStyle}
+                  value={form.implat} onChange={e => setForm(f => ({ ...f, implat: e.target.value }))}>
+                  <option value="">Selecione...</option>
+                  {implantadores.map(u => <option key={u.id} value={u.name}>{u.name}</option>)}
+                </select>
               </div>
 
               <div className="col-12 col-md-6">
