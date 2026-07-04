@@ -31,6 +31,7 @@ const PACOTE_OPTS = [
   { label: 'ESSENCIAL',  value: 'ESS' },
   { label: 'EVOLUTIVO',  value: 'EVO' },
   { label: 'ESPECIAL',   value: 'ESP' },
+  { label: 'DMSWEB',     value: 'WEB' },
 ];
 
 const emptyForm = {
@@ -280,9 +281,14 @@ export default function AgendarAtualizacao({ onBack }: { onBack: () => void }) {
               {/* Data */}
               <div className="col-12 col-md-6">
                 <label style={labelStyle}>Data *</label>
-                <input type="text" className="form-control mt-1" style={inputStyle}
-                  value={form.dt_atualiza} onChange={e => setForm(f => ({ ...f, dt_atualiza: e.target.value }))}
-                  placeholder="dd/mm/yyyy" />
+                <input type="date" className="form-control mt-1" style={inputStyle}
+                  value={form.dt_atualiza
+                    ? (() => { const p = form.dt_atualiza.split('/'); return p.length === 3 ? `${p[2]}-${p[1]}-${p[0]}` : form.dt_atualiza; })()
+                    : ''}
+                  onChange={e => {
+                    const [y, m, d] = e.target.value.split('-');
+                    setForm(f => ({ ...f, dt_atualiza: `${d}/${m}/${y}` }));
+                  }} />
               </div>
 
               {/* Ticket */}
