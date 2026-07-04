@@ -349,6 +349,55 @@ async def create_agendamento(
             )
 
         await session.commit()
+
+        # 4. Buscar registros em tbl_linx onde servidor2 = cliente do agendado
+        #    e agendar com as mesmas informações
+        if row:
+            razao, cliente, sistema, versao, bd, status_linx = row
+            srv2_result = await session.execute(
+                text("SELECT cod, razao, cliente, sistema, versao, bd FROM tbl_linx WHERE servidor2 = :cliente"),
+                {"cliente": cliente or ""}
+            )
+            srv2_rows = srv2_result.fetchall()
+            srv2_keys = list(srv2_result.keys())
+
+            for sr in srv2_rows:
+                sd = dict(zip(srv2_keys, sr))
+                await session.execute(
+                    text("""
+                        UPDATE tbl_linx SET
+                            dt_atualiza  = :dt_atualiza,
+                            ticketupdate = :ticketupdate,
+                            concluido    = 0,
+                            formato      = :formato,
+                            tipo         = :tipo,
+                            pacote       = :pacote,
+                            useragend    = :useragend
+                        WHERE cod = :cod
+                    """),
+                    {
+                        "dt_atualiza": body.dt_atualiza, "ticketupdate": body.ticketupdate,
+                        "formato": formato, "tipo": tipo, "pacote": pacote,
+                        "useragend": useragend, "cod": sd["cod"],
+                    }
+                )
+                await session.execute(
+                    text("""
+                        INSERT INTO tbl_history
+                            (razao, cliente, sistema, versao, data, tipo, pacote, ticket, bd, useragendar, concluido, status)
+                        VALUES
+                            (:razao, :cliente, :sistema, :versao, :data, :tipo, :pacote, :ticket, :bd, :useragendar, 0, 'AGENDADO')
+                    """),
+                    {
+                        "razao": sd["razao"] or "", "cliente": sd["cliente"] or "",
+                        "sistema": sd["sistema"] or "", "versao": sd["versao"] or "",
+                        "data": body.dt_atualiza, "tipo": tipo, "pacote": pacote[:3],
+                        "ticket": body.ticketupdate[:10], "bd": sd["bd"] or "",
+                        "useragendar": useragend.upper(),
+                    }
+                )
+            await session.commit()
+
         return {"updated": result.rowcount, "cod": body.cod}
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
