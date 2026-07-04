@@ -265,7 +265,7 @@ async def clientes_disponiveis(
     session: Annotated[AsyncSession, Depends(get_db)] = None,
 ) -> list[dict]:
     try:
-        where = "status IN ('6 - ATIVO', '7 - ATIVO VPU', '0 - IMPLANTAÇÃO', 'X - ATIVO COMPLEMENTO')"
+        where = "status IN ('6 - ATIVO', '7 - ATIVO VPU', '0 - IMPLANTAÇÃO')"
         params: dict = {}
         if q:
             where += " AND (razao LIKE :q OR cliente LIKE :q)"
