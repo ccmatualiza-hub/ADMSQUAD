@@ -196,7 +196,7 @@ async def list_atualizacoes(
                        useragend, prioridade, horaupdate, concluido
                 FROM tbl_linx
                 WHERE dt_atualiza = DATE_FORMAT(CURDATE(), '%d/%m/%Y')
-                ORDER BY prioridade ASC, razao ASC
+                ORDER BY CAST(concluido AS UNSIGNED) DESC, prioridade ASC, razao ASC
             """)
         )
         rows = result.fetchall()
