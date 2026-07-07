@@ -54,12 +54,14 @@ def row_to_out(row, keys) -> PendenciaOut:
 
 @router.get("/", response_model=list[PendenciaOut])
 async def list_pendencias(
-    _: Annotated[dict, Depends(get_current_user)],
-    session: Annotated[AsyncSession, Depends(get_db)],
+    include_resolvido: bool = False,
+    _: Annotated[dict, Depends(get_current_user)] = None,
+    session: Annotated[AsyncSession, Depends(get_db)] = None,
 ) -> list[PendenciaOut]:
     try:
+        where = "" if include_resolvido else "WHERE status != 'resolvido'"
         result = await session.execute(
-            text("SELECT id, cliente, ticket, descritivo, analista, status, data, DATEDIFF(CURDATE(), data) as dias, created_at FROM tbl_pendencias ORDER BY data DESC, id DESC")
+            text(f"SELECT id, cliente, ticket, descritivo, analista, status, data, DATEDIFF(CURDATE(), data) as dias, created_at FROM tbl_pendencias {where} ORDER BY data ASC, id ASC")
         )
         rows = result.fetchall()
         keys = list(result.keys())

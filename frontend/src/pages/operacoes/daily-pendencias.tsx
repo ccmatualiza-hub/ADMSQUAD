@@ -35,11 +35,12 @@ export default function DailyPendencias({ onBack }: { onBack: () => void }) {
   const [showSugs, setShowSugs]     = useState(false);
   const clienteRef                  = useRef<HTMLDivElement>(null);
 
-  const fetchData = async () => {
+  const fetchData = async (status = filterStatus) => {
     setLoading(true);
     try {
+      const params = status === 'resolvido' ? '?include_resolvido=true' : '';
       const [data, anal] = await Promise.all([
-        http.get<Pendencia[]>('/api/pendencias/'),
+        http.get<Pendencia[]>(`/api/pendencias/${params}`),
         http.get<{ id: number; name: string }[]>('/api/pendencias/analistas'),
       ]);
       setPendencias(data); setAnalistas(anal);
@@ -47,7 +48,7 @@ export default function DailyPendencias({ onBack }: { onBack: () => void }) {
     finally { setLoading(false); }
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { fetchData(''); }, []);
   useEffect(() => {
     const h = (e: MouseEvent) => { if (clienteRef.current && !clienteRef.current.contains(e.target as Node)) setShowSugs(false); };
     document.addEventListener('mousedown', h);
@@ -110,7 +111,7 @@ export default function DailyPendencias({ onBack }: { onBack: () => void }) {
         </div>
         <div style={{ padding:'12px 20px', borderBottom:'1px solid var(--ccm-line)', display:'flex', gap:12, flexWrap:'wrap' }}>
           <input type="text" className="form-control" placeholder="Buscar cliente, ticket, analista..." value={search} onChange={e => setSearch(e.target.value)} style={{ maxWidth:340, fontSize:13 }} />
-          <select className="form-select" value={filterStatus} onChange={e => setFilterStatus(e.target.value)} style={{ maxWidth:180, fontSize:13 }}>
+          <select className="form-select" value={filterStatus} onChange={e => { setFilterStatus(e.target.value); fetchData(e.target.value); }} style={{ maxWidth:180, fontSize:13 }}>
             <option value="">Todos os status</option>
             {STATUS_OPTIONS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
           </select>
