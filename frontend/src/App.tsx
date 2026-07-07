@@ -9,18 +9,25 @@ import OperacoesPage     from './pages/operacoes/operacoes-page';
 import AppLayout         from './components/layout/app-layout';
 import ProtectedRoute    from './components/ui/protected-route';
 
+const ALL    = ['admin', 'gestor', 'operador_cx', 'operador_pmo', 'trcx', 'prcx', 'user'];
+const CX     = ['admin', 'gestor', 'operador_cx', 'trcx'];
+const PMO    = ['admin', 'gestor', 'operador_pmo', 'prcx'];
+const OPS    = ['admin', 'gestor', 'operador_cx', 'operador_pmo', 'trcx', 'prcx'];
+const GEST   = ['admin', 'gestor'];
+const ADM    = ['admin'];
+
 export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/" element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
         <Route index element={<Navigate to="/dashboard" replace />} />
-        <Route path="dashboard"     element={<DashboardPage />} />
-        <Route path="cx"            element={<CxPage />} />
-        <Route path="pmo"           element={<PmoPage />} />
-        <Route path="operacoes"     element={<OperacoesPage />} />
-        <Route path="gestao"        element={<GestaoPage />} />
-        <Route path="configuracoes" element={<ConfiguracoesPage />} />
+        <Route path="dashboard"     element={<ProtectedRoute requiredRoles={ALL}>  <DashboardPage />     </ProtectedRoute>} />
+        <Route path="cx"            element={<ProtectedRoute requiredRoles={CX}>   <CxPage />            </ProtectedRoute>} />
+        <Route path="pmo"           element={<ProtectedRoute requiredRoles={PMO}>  <PmoPage />           </ProtectedRoute>} />
+        <Route path="operacoes"     element={<ProtectedRoute requiredRoles={OPS}>  <OperacoesPage />     </ProtectedRoute>} />
+        <Route path="gestao"        element={<ProtectedRoute requiredRoles={GEST}> <GestaoPage />        </ProtectedRoute>} />
+        <Route path="configuracoes" element={<ProtectedRoute requiredRoles={ADM}>  <ConfiguracoesPage /> </ProtectedRoute>} />
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>

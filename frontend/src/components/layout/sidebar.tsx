@@ -10,9 +10,9 @@ const ALL_ROLES = ['admin', 'gestor', 'operador_cx', 'operador_pmo', 'user'];
 
 const NAV_ITEMS: NavItem[] = [
   { to: '/dashboard',     icon: 'bi-grid-1x2-fill',        label: 'Dashboard',              roles: ALL_ROLES },
-  { to: '/cx',            icon: 'bi-headset',               label: 'CX - Cust. Experience',  roles: ['admin', 'gestor', 'operador_cx'] },
-  { to: '/pmo',           icon: 'bi-building',              label: 'PMO - Implantação',       roles: ['admin', 'gestor', 'operador_pmo'] },
-  { to: '/operacoes',     icon: 'bi-gear-wide-connected',   label: 'Operações',              roles: ['admin', 'gestor', 'operador_cx', 'operador_pmo'] },
+  { to: '/cx',            icon: 'bi-headset',               label: 'CX - Cust. Experience',  roles: ['admin', 'gestor', 'operador_cx', 'trcx'] },
+  { to: '/pmo',           icon: 'bi-building',              label: 'PMO - Implantação',       roles: ['admin', 'gestor', 'operador_pmo', 'prcx'] },
+  { to: '/operacoes',     icon: 'bi-gear-wide-connected',   label: 'Operações',              roles: ['admin', 'gestor', 'operador_cx', 'operador_pmo', 'trcx', 'prcx'] },
   { to: '/gestao',        icon: 'bi-graph-up-arrow',        label: 'Gestão',                 roles: ['admin', 'gestor'] },
   { to: '/configuracoes', icon: 'bi-gear-fill',             label: 'Configurações',          roles: ['admin'] },
 ];

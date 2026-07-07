@@ -17,6 +17,8 @@ const ROLES: Record<string, { label: string; color: string; bg: string }> = {
   gestor:       { label: 'Gestor',         color: '#fff', bg: '#0F6E56' },
   operador_cx:  { label: 'Operador CX',    color: '#fff', bg: '#8A6800' },
   operador_pmo: { label: 'Operador PMO',   color: '#fff', bg: '#7F77DD' },
+  trcx:         { label: 'TRCX',           color: '#fff', bg: '#E74C3C' },
+  prcx:         { label: 'PRCX',           color: '#fff', bg: '#1DB954' },
 };
 
 const ROLE_OPTIONS = [
@@ -24,6 +26,8 @@ const ROLE_OPTIONS = [
   { value: 'gestor',       label: 'Gestor — visualiza tudo, edita pouco' },
   { value: 'operador_cx',  label: 'Operador CX — acesso Customer Experience' },
   { value: 'operador_pmo', label: 'Operador PMO — acesso PMO e Implantação' },
+  { value: 'trcx',         label: 'TRCX — acesso CX e Operações' },
+  { value: 'prcx',         label: 'PRCX — acesso CX e Operações' },
 ];
 
 function fmtDate(d: string | null) {
