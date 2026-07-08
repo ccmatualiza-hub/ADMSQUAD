@@ -12,6 +12,8 @@ interface ClientePmo {
   datprev: string | null;
   stimplant: string | null;
   status: string | null;
+  tsplus: string | null;
+  qtdusersts: number | null;
 }
 
 interface Franquia { cod: number; contato: string | null; nome: string | null; }
@@ -20,6 +22,7 @@ const emptyForm = {
   razao: '', cliente: '', qtdusers: '' as string | number,
   datprev: '', sistema: '', prxcontat: '',
   franq: '', implat: '', stimplant: '',
+  tsplus: 'Nao', qtdusersts: '' as string | number,
 };
 
 const inputStyle = { background: 'var(--ccm-ink)', border: '1px solid #1a3a6e', color: '#fff', fontSize: 13 };
@@ -90,6 +93,8 @@ export default function ClientesPmoPage({ onBack }: { onBack: () => void }) {
       prxcontat: c.prxcontat ?? '',
       franq: c.franq ?? '', implat: c.implat ?? '',
       stimplant: c.stimplant ?? '',
+      tsplus: c.tsplus ?? 'Nao',
+      qtdusersts: c.qtdusersts ?? '',
     });
     setDatprevInput(toDateInput(c.datprev ?? ''));
     setPrxcontatInput(toDateInput(c.prxcontat ?? ''));
@@ -105,6 +110,7 @@ export default function ClientesPmoPage({ onBack }: { onBack: () => void }) {
       const body = {
         ...form,
         qtdusers: form.qtdusers ? Number(form.qtdusers) : null,
+        qtdusersts: form.qtdusersts ? Number(form.qtdusersts) : null,
         datprev: fromDateInput(datprevInput) || form.datprev,
         prxcontat: fromDateInput(prxcontatInput) || form.prxcontat,
       };
@@ -172,6 +178,8 @@ export default function ClientesPmoPage({ onBack }: { onBack: () => void }) {
                   <th style={th}>Implantador</th>
                   <th style={th}>Franqueado</th>
                   <th style={{ ...th, textAlign: 'center' }}>Users</th>
+                  <th style={th}>TS</th>
+                  <th style={{ ...th, textAlign: 'center' }}>Users-TS</th>
                   <th style={th}>Próx. Contato</th>
                   <th style={th}>Prev. Conclusão</th>
                   <th style={th}>Status Impl.</th>
@@ -187,6 +195,8 @@ export default function ClientesPmoPage({ onBack }: { onBack: () => void }) {
                     <td style={td}>{c.implat || '—'}</td>
                     <td style={td}>{c.franq || '—'}</td>
                     <td style={{ ...td, textAlign: 'center', fontWeight: 600 }}>{c.qtdusers ?? '—'}</td>
+                    <td style={td}>{c.tsplus || '—'}</td>
+                    <td style={{ ...td, textAlign: 'center', fontWeight: 600 }}>{c.qtdusersts ?? '—'}</td>
                     <td style={td}>{c.prxcontat || '—'}</td>
                     <td style={td}>{c.datprev || '—'}</td>
                     <td style={td}>
@@ -251,6 +261,21 @@ export default function ClientesPmoPage({ onBack }: { onBack: () => void }) {
                 <label style={labelStyle}>Qtd. Usuários</label>
                 <input type="number" className="form-control mt-1" style={inputStyle}
                   value={form.qtdusers} onChange={e => setForm(f => ({ ...f, qtdusers: e.target.value }))} placeholder="0" />
+              </div>
+
+              <div className="col-12 col-md-6">
+                <label style={labelStyle}>TSPlus</label>
+                <select className="form-select mt-1" style={inputStyle}
+                  value={form.tsplus} onChange={e => setForm(f => ({ ...f, tsplus: e.target.value }))}>
+                  <option value="Nao">Não</option>
+                  <option value="Sim">Sim</option>
+                </select>
+              </div>
+
+              <div className="col-12 col-md-6">
+                <label style={labelStyle}>Qtd. Usuários TS</label>
+                <input type="number" className="form-control mt-1" style={inputStyle}
+                  value={form.qtdusersts} onChange={e => setForm(f => ({ ...f, qtdusersts: e.target.value }))} placeholder="0" />
               </div>
 
               <div className="col-12 col-md-6">

@@ -19,6 +19,8 @@ class ClientePmoItem(BaseModel):
     datprev: str | None = None
     stimplant: str | None = None
     status: str | None = None
+    tsplus: str | None = None
+    qtdusersts: int | None = None
 
 
 class ClientePmoCreate(BaseModel):
@@ -31,6 +33,8 @@ class ClientePmoCreate(BaseModel):
     franq: str | None = None
     implat: str | None = None
     stimplant: str | None = None
+    tsplus: str | None = None
+    qtdusersts: int | None = None
 
 
 class ClientePmoUpdate(BaseModel):
@@ -42,6 +46,8 @@ class ClientePmoUpdate(BaseModel):
     franq: str | None = None
     implat: str | None = None
     stimplant: str | None = None
+    tsplus: str | None = None
+    qtdusersts: int | None = None
 
 
 @router.get("/clientes", response_model=list[ClientePmoItem])
@@ -57,7 +63,7 @@ async def list_clientes_pmo(
             where += " AND (razao LIKE :q OR implat LIKE :q OR franq LIKE :q)"
             params["q"] = f"%{q}%"
         result = await session.execute(
-            text(f"SELECT cod, razao, implat, franq, qtdusers, prxcontat, datprev, stimplant, status FROM tbl_linx {where} ORDER BY razao"),
+            text(f"SELECT cod, razao, implat, franq, qtdusers, prxcontat, datprev, stimplant, status, tsplus, qtdusersts FROM tbl_linx {where} ORDER BY razao"),
             params
         )
         rows = result.fetchall()
@@ -76,8 +82,8 @@ async def create_cliente_pmo(
     try:
         result = await session.execute(
             text("""
-                INSERT INTO tbl_linx (razao, cliente, qtdusers, datprev, sistema, prxcontat, franq, implat, stimplant, status)
-                VALUES (:razao, :cliente, :qtdusers, :datprev, :sistema, :prxcontat, :franq, :implat, :stimplant, '0 - IMPLANTAÇÃO')
+                INSERT INTO tbl_linx (razao, cliente, qtdusers, datprev, sistema, prxcontat, franq, implat, stimplant, tsplus, qtdusersts, status)
+                VALUES (:razao, :cliente, :qtdusers, :datprev, :sistema, :prxcontat, :franq, :implat, :stimplant, :tsplus, :qtdusersts, '0 - IMPLANTAÇÃO')
             """),
             {
                 "razao":     body.razao,
@@ -113,7 +119,9 @@ async def update_cliente_pmo(
         if body.prxcontat is not None: sets.append("prxcontat=:prxcontat"); params["prxcontat"] = body.prxcontat
         if body.franq     is not None: sets.append("franq=:franq");         params["franq"]     = body.franq
         if body.implat    is not None: sets.append("implat=:implat");       params["implat"]    = body.implat
-        if body.stimplant is not None: sets.append("stimplant=:stimplant"); params["stimplant"] = body.stimplant
+        if body.stimplant    is not None: sets.append("stimplant=:stimplant");       params["stimplant"]    = body.stimplant
+        if body.tsplus       is not None: sets.append("tsplus=:tsplus");             params["tsplus"]       = body.tsplus
+        if body.qtdusersts   is not None: sets.append("qtdusersts=:qtdusersts");   params["qtdusersts"]   = body.qtdusersts
         if not sets:
             raise HTTPException(status_code=400, detail="Nada para atualizar")
         await session.execute(text(f"UPDATE tbl_linx SET {', '.join(sets)} WHERE cod = :cod"), params)
