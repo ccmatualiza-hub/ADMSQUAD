@@ -66,6 +66,9 @@ class ClienteDetalhe(BaseModel):
     agtazure: str | None = None
     linxwebver: str | None = None
     doc: str | None = None
+    link1: str | None = None
+    link2: str | None = None
+    link3: str | None = None
 
 
 @router.get("/clientes", response_model=list[ClienteItem])
@@ -117,7 +120,7 @@ async def get_cliente(
                        qtdusers, qtdusersts, qtdsistemas, qtdsrv, status, contatos, telefones, emails,
                        reg, local, grupo, tipo, pacote, dt_atualiza, versaoat, franq, ufmatriz,
                        integracoes, infraprod, infrats, shape, ocpu, mem, tsplus, detalhes,
-                       implat, datastart, prxcontat, cnpj, codigoc, agtazure, linxwebver, doc
+                       implat, datastart, prxcontat, cnpj, codigoc, agtazure, linxwebver, doc, link1, link2, link3
                 FROM tbl_linx WHERE cod = :cod"""),
         {"cod": cod}
     )

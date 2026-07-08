@@ -20,6 +20,7 @@ interface ClienteDetalhe {
   ocpu: string | null; mem: string | null; tsplus: string | null; detalhes: string | null;
   implat: string | null; datastart: string | null; prxcontat: string | null; cnpj: string | null;
   codigoc: string | null; agtazure: string | null; linxwebver: string | null; doc: string | null;
+  link1: string | null; link2: string | null; link3: string | null;
 }
 
 type EditForm = {
@@ -296,6 +297,20 @@ export default function ClientesListPage({ onBack }: { onBack: () => void }) {
                       </div>
                     </div>
                   ))}
+                  {(detalhe.link1 || detalhe.link2 || detalhe.link3) && <>
+                    <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.15em', color: '#00B0FA', borderBottom: '1px solid var(--ccm-line)', paddingBottom: 6, marginBottom: 14, marginTop: 8 }}>Links</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      {[['Link 1', detalhe.link1], ['Link 2', detalhe.link2], ['Link 3', detalhe.link3]].map(([label, val]) => val ? (
+                        <div key={String(label)}>
+                          <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.12em', color: 'var(--ccm-gray-dark)', marginBottom: 2 }}>{label}</div>
+                          <a href={String(val).startsWith('http') ? String(val) : `https://${val}`} target="_blank" rel="noopener noreferrer"
+                            style={{ fontSize: 13, color: '#00B0FA', wordBreak: 'break-all', textDecoration: 'none' }}>
+                            <i className="bi bi-box-arrow-up-right me-1" style={{ fontSize: 11 }} />{val}
+                          </a>
+                        </div>
+                      ) : null)}
+                    </div>
+                  </>}
                   {detalhe.detalhes && <>
                     <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.15em', color: '#00B0FA', borderBottom: '1px solid var(--ccm-line)', paddingBottom: 6, marginBottom: 14, marginTop: 8 }}>Observações</div>
                     <div style={{ fontSize: 13, color: 'var(--ccm-ink)', lineHeight: 1.6, background: '#F7F8FA', padding: '10px 14px', borderRadius: 4 }}>{detalhe.detalhes}</div>
