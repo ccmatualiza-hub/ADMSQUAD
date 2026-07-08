@@ -224,7 +224,7 @@ export default function AdiantarAtendimentos({ onBack }: { onBack: () => void })
               </div>
 
               <div className="col-12 col-md-6">
-                <label style={labelStyle}>Ticket LINX <span style={{ fontSize: 9, opacity: .6 }}>(Branco se Pendente)</span></label>
+                <label style={labelStyle}>Ticket LINX <span style={{ fontSize: 9, opacity: .6 }}>(Vazio se Pendente)</span></label>
                 <input type="text" className="form-control mt-1" style={inputStyle}
                   value={form.ticket_linx} onChange={e => setForm(f => ({ ...f, ticket_linx: e.target.value }))}
                   placeholder="Aguardando..." />
