@@ -5,14 +5,14 @@ import { http } from '../../lib/http-client';
 interface Cliente {
   cod: number; razao: string | null; cliente: string | null;
   sistema: string | null; versao: string | null;
-  qtdusers: number | null; serverbd: string | null;
+  qtdusers: number | null; qtdusersts: number | null; serverbd: string | null;
   codigoc: string | null; grupo: string | null; status: string | null; doc: string | null;
 }
 
 interface ClienteDetalhe {
   cod: number; razao: string | null; cliente: string | null; bandeira: string | null;
   sistema: string | null; versao: string | null; bd: string | null; serverbd: string | null;
-  qtdusers: number | null; qtdsistemas: number | null; qtdsrv: string | null; status: string | null;
+  qtdusers: number | null; qtdusersts: number | null; qtdsistemas: number | null; qtdsrv: string | null; status: string | null;
   contatos: string | null; telefones: string | null; emails: string | null; reg: string | null;
   local: string | null; grupo: string | null; tipo: string | null; pacote: string | null;
   dt_atualiza: string | null; versaoat: string | null; franq: string | null; ufmatriz: string | null;
@@ -110,6 +110,7 @@ export default function ClientesListPage({ onBack }: { onBack: () => void }) {
   const handleKeyDown = (e: React.KeyboardEvent) => { if (e.key === 'Enter') handleSearch(); };
 
   const openDetalhe = async (cod: number) => {
+    setDetalhe(null);
     setLoadingDet(true);
     try {
       const d = await http.get<ClienteDetalhe>(`/api/cx/clientes/${cod}`);
@@ -212,6 +213,7 @@ export default function ClientesListPage({ onBack }: { onBack: () => void }) {
                   <th style={th}>Sistema</th>
                   <th style={th}>Versão</th>
                   <th style={{ ...th, textAlign: 'center' }}>Users</th>
+                  <th style={{ ...th, textAlign: 'center' }}>Users-TS</th>
                   <th style={th}>Server BD</th>
                   <th style={th}>Código-C</th>
                   <th style={th}>Grupo</th>
@@ -229,6 +231,7 @@ export default function ClientesListPage({ onBack }: { onBack: () => void }) {
                     <td style={{ ...td, color: 'var(--ccm-blue)', fontWeight: 600 }}>{c.sistema || '—'}</td>
                     <td style={td}>{c.versao || '—'}</td>
                     <td style={{ ...td, textAlign: 'center', fontWeight: 600 }}>{c.qtdusers ?? '—'}</td>
+                    <td style={{ ...td, textAlign: 'center', fontWeight: 600 }}>{c.qtdusersts ?? '—'}</td>
                     <td style={td}>{c.serverbd || '—'}</td>
                     <td style={td}>{c.codigoc || '—'}</td>
                     <td style={td}>{c.grupo || '—'}</td>
@@ -282,7 +285,7 @@ export default function ClientesListPage({ onBack }: { onBack: () => void }) {
                 <div style={{ padding: '20px 24px' }}>
                   {[
                     { title: 'Identificação', fields: [['Razão Social', detalhe.razao], ['Cliente', detalhe.cliente], ['Bandeira', detalhe.bandeira], ['CNPJ', detalhe.cnpj], ['Grupo', detalhe.grupo], ['UF Matriz', detalhe.ufmatriz], ['Franquia', detalhe.franq], ['Região', detalhe.reg], ['Local', detalhe.local], ['Data Start', detalhe.datastart], ['Documentação', detalhe.doc]] },
-                    { title: 'Sistema', fields: [['Sistema', detalhe.sistema], ['Versão', detalhe.versao], ['Versão Atual', detalhe.versaoat], ['Pacote', detalhe.pacote], ['Tipo', detalhe.tipo], ['Qtd. Users', detalhe.qtdusers], ['Qtd. Sistemas', detalhe.qtdsistemas], ['Linx Web Ver.', detalhe.linxwebver], ['Últ. Atualização', detalhe.dt_atualiza]] },
+                    { title: 'Sistema', fields: [['Sistema', detalhe.sistema], ['Versão', detalhe.versao], ['Versão Atual', detalhe.versaoat], ['Pacote', detalhe.pacote], ['Tipo', detalhe.tipo], ['Qtd. Users', detalhe.qtdusers], ['Qtd. Users-TS', detalhe.qtdusersts], ['Qtd. Sistemas', detalhe.qtdsistemas], ['Linx Web Ver.', detalhe.linxwebver], ['Últ. Atualização', detalhe.dt_atualiza]] },
                     { title: 'Infraestrutura', fields: [['BD', detalhe.bd], ['Server BD', detalhe.serverbd], ['Qtd. Servidores', detalhe.qtdsrv], ['Shape', detalhe.shape], ['oCPU', detalhe.ocpu], ['Memória', detalhe.mem], ['TSPlus', detalhe.tsplus], ['Azure Agent', detalhe.agtazure], ['Infra Prod', detalhe.infraprod], ['Infra TS', detalhe.infrats], ['Integrações', detalhe.integracoes]] },
                     { title: 'Contato', fields: [['Contatos', detalhe.contatos], ['Telefones', detalhe.telefones], ['Emails', detalhe.emails], ['Próx. Contato', detalhe.prxcontat]] },
                   ].map(section => (

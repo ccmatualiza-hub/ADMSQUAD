@@ -16,6 +16,7 @@ class ClienteItem(BaseModel):
     sistema: str | None = None
     versao: str | None = None
     qtdusers: int | None = None
+    qtdusersts: int | None = None
     serverbd: str | None = None
     codigoc: str | None = None
     grupo: str | None = None
@@ -33,6 +34,7 @@ class ClienteDetalhe(BaseModel):
     bd: str | None = None
     serverbd: str | None = None
     qtdusers: int | None = None
+    qtdusersts: int | None = None
     qtdsistemas: int | None = None
     qtdsrv: str | None = None
     status: str | None = None
@@ -83,7 +85,7 @@ async def list_clientes(
             where += " AND status = :status"
             params["status"] = status_filter
         result = await session.execute(
-            text(f"SELECT cod, razao, cliente, sistema, versao, qtdusers, serverbd, codigoc, grupo, status, doc FROM tbl_linx {where} ORDER BY razao"),
+            text(f"SELECT cod, razao, cliente, sistema, versao, qtdusers, qtdusersts, serverbd, codigoc, grupo, status, doc FROM tbl_linx {where} ORDER BY razao"),
             params
         )
         rows = result.fetchall()
@@ -112,7 +114,7 @@ async def get_cliente(
 ) -> ClienteDetalhe:
     result = await session.execute(
         text("""SELECT cod, razao, cliente, bandeira, sistema, versao, bd, serverbd,
-                       qtdusers, qtdsistemas, qtdsrv, status, contatos, telefones, emails,
+                       qtdusers, qtdusersts, qtdsistemas, qtdsrv, status, contatos, telefones, emails,
                        reg, local, grupo, tipo, pacote, dt_atualiza, versaoat, franq, ufmatriz,
                        integracoes, infraprod, infrats, shape, ocpu, mem, tsplus, detalhes,
                        implat, datastart, prxcontat, cnpj, codigoc, agtazure, linxwebver, doc
