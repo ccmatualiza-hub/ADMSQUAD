@@ -169,7 +169,7 @@ async def list_franquias(
             where += " AND (nome LIKE :q OR contato LIKE :q OR cidade LIKE :q)"
             params["q"] = f"%{q}%"
         result = await session.execute(
-            text(f"SELECT cod, nome, contato, celular, email, cidade, modelo, status FROM tbl_franq {where} ORDER BY nome"),
+            text(f"SELECT cod, nome, contato, celular, email, cidade, modelo, status FROM tbl_franq {where} ORDER BY nome ASC"),
             params
         )
         rows = result.fetchall()

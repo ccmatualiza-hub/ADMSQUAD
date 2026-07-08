@@ -270,7 +270,7 @@ export default function ClientesPmoPage({ onBack }: { onBack: () => void }) {
                 <select className="form-select mt-1" style={inputStyle}
                   value={form.franq} onChange={e => setForm(f => ({ ...f, franq: e.target.value }))}>
                   <option value="">Selecione...</option>
-                  {franquias.map(f => (
+                  {[...franquias].sort((a, b) => (a.contato ?? a.nome ?? '').localeCompare(b.contato ?? b.nome ?? '')).map(f => (
                     <option key={f.cod} value={f.contato ?? f.nome ?? ''}>{f.contato || f.nome || '—'}</option>
                   ))}
                 </select>
