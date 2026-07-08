@@ -482,6 +482,7 @@ class AdiantarItem(BaseModel):
     analista: str
     ticket_linx: str
     ticket_ccm: str
+    descritivo: str | None = None
     status: str
     created_at: str | None = None
 
@@ -492,6 +493,7 @@ class AdiantarCreate(BaseModel):
     analista: str
     ticket_linx: str
     ticket_ccm: str = ""
+    descritivo: str = ""
     status: str = "aberto"
 
 
@@ -501,6 +503,7 @@ class AdiantarUpdate(BaseModel):
     analista: str | None = None
     ticket_linx: str | None = None
     ticket_ccm: str | None = None
+    descritivo: str | None = None
     status: str | None = None
 
 
@@ -510,6 +513,7 @@ def row_to_adiantar(row, keys) -> AdiantarItem:
         cod=d["cod"], cliente=d["cliente"],
         data=str(d["data"]), analista=d["analista"],
         ticket_linx=d["ticket_linx"], ticket_ccm=d["ticket_ccm"],
+        descritivo=d.get("descritivo"),
         status=d["status"],
         created_at=str(d["created_at"]) if d.get("created_at") else None,
     )
@@ -522,7 +526,7 @@ async def list_adiantar(
 ) -> list[AdiantarItem]:
     try:
         result = await session.execute(
-            text("SELECT cod, cliente, data, analista, ticket_linx, ticket_ccm, status, created_at FROM tbl_adiantar ORDER BY data DESC, cod DESC")
+            text("SELECT cod, cliente, data, analista, ticket_linx, ticket_ccm, descritivo, status, created_at FROM tbl_adiantar ORDER BY data DESC, cod DESC")
         )
         rows = result.fetchall()
         keys = list(result.keys())
@@ -539,13 +543,13 @@ async def create_adiantar(
 ) -> AdiantarItem:
     try:
         result = await session.execute(
-            text("INSERT INTO tbl_adiantar (cliente, data, analista, ticket_linx, ticket_ccm, status) VALUES (:cliente, :data, :analista, :ticket_linx, :ticket_ccm, :status)"),
+            text("INSERT INTO tbl_adiantar (cliente, data, analista, ticket_linx, ticket_ccm, descritivo, status) VALUES (:cliente, :data, :analista, :ticket_linx, :ticket_ccm, :descritivo, :status)"),
             {"cliente": body.cliente, "data": body.data, "analista": body.analista,
-             "ticket_linx": body.ticket_linx, "ticket_ccm": body.ticket_ccm, "status": body.status}
+             "ticket_linx": body.ticket_linx, "ticket_ccm": body.ticket_ccm, "descritivo": body.descritivo, "status": body.status}
         )
         await session.commit()
         result2 = await session.execute(
-            text("SELECT cod, cliente, data, analista, ticket_linx, ticket_ccm, status, created_at FROM tbl_adiantar WHERE cod = :cod"),
+            text("SELECT cod, cliente, data, analista, ticket_linx, ticket_ccm, descritivo, status, created_at FROM tbl_adiantar WHERE cod = :cod"),
             {"cod": result.lastrowid}
         )
         row = result2.fetchone()
@@ -567,13 +571,14 @@ async def update_adiantar(
         if body.data       is not None: sets.append("data=:data");             params["data"]       = body.data
         if body.analista   is not None: sets.append("analista=:analista");     params["analista"]   = body.analista
         if body.ticket_linx is not None: sets.append("ticket_linx=:ticket_linx"); params["ticket_linx"] = body.ticket_linx
-        if body.ticket_ccm is not None: sets.append("ticket_ccm=:ticket_ccm"); params["ticket_ccm"] = body.ticket_ccm
-        if body.status     is not None: sets.append("status=:status");         params["status"]     = body.status
+        if body.ticket_ccm  is not None: sets.append("ticket_ccm=:ticket_ccm");   params["ticket_ccm"]  = body.ticket_ccm
+        if body.descritivo  is not None: sets.append("descritivo=:descritivo");   params["descritivo"]  = body.descritivo
+        if body.status      is not None: sets.append("status=:status");         params["status"]     = body.status
         if sets:
             await session.execute(text(f"UPDATE tbl_adiantar SET {', '.join(sets)} WHERE cod = :cod"), params)
             await session.commit()
         result = await session.execute(
-            text("SELECT cod, cliente, data, analista, ticket_linx, ticket_ccm, status, created_at FROM tbl_adiantar WHERE cod = :cod"),
+            text("SELECT cod, cliente, data, analista, ticket_linx, ticket_ccm, descritivo, status, created_at FROM tbl_adiantar WHERE cod = :cod"),
             {"cod": cod}
         )
         row = result.fetchone()

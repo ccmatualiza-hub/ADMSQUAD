@@ -9,12 +9,13 @@ interface Adiantar {
   analista: string;
   ticket_linx: string;
   ticket_ccm: string;
+  descritivo: string | null;
   status: string;
 }
 
 const emptyForm = {
   cliente: '', data: new Date().toISOString().split('T')[0],
-  analista: '', ticket_linx: '', ticket_ccm: '', status: 'aberto',
+  analista: '', ticket_linx: '', ticket_ccm: '', descritivo: '', status: 'aberto',
 };
 
 const inputStyle = { background: 'var(--ccm-ink)', border: '1px solid #1a3a6e', color: '#fff', fontSize: 13 };
@@ -60,7 +61,7 @@ export default function AdiantarAtendimentos({ onBack }: { onBack: () => void })
   const openCreate = () => { setEditCod(null); setForm(emptyForm); setShowModal(true); };
   const openEdit = (a: Adiantar) => {
     setEditCod(a.cod);
-    setForm({ cliente: a.cliente, data: a.data, analista: a.analista, ticket_linx: a.ticket_linx, ticket_ccm: a.ticket_ccm, status: a.status });
+    setForm({ cliente: a.cliente, data: a.data, analista: a.analista, ticket_linx: a.ticket_linx, ticket_ccm: a.ticket_ccm, descritivo: a.descritivo ?? '', status: a.status });
     setShowModal(true);
   };
 
@@ -131,8 +132,9 @@ export default function AdiantarAtendimentos({ onBack }: { onBack: () => void })
                   <th style={th}>Cliente</th>
                   <th style={th}>Data</th>
                   <th style={th}>Analista</th>
-                  <th style={th}>Ticket Linx</th>
                   <th style={th}>Ticket CCM</th>
+                  <th style={th}>Ticket LINX</th>
+                  <th style={th}>Descritivo</th>
                   <th style={{ ...th, textAlign: 'center' }}>Status</th>
                   <th style={{ ...th, textAlign: 'center' }}>Ações</th>
                 </tr>
@@ -145,10 +147,11 @@ export default function AdiantarAtendimentos({ onBack }: { onBack: () => void })
                     <td style={{ ...td, fontWeight: 600, color: 'var(--ccm-ink)' }}>{a.cliente}</td>
                     <td style={td}>{new Date(a.data + 'T12:00:00').toLocaleDateString('pt-BR')}</td>
                     <td style={td}>{a.analista || '—'}</td>
-                    <td style={{ ...td, color: 'var(--ccm-blue)', fontWeight: 600 }}>{a.ticket_linx || '—'}</td>
-                    <td style={{ ...td, color: a.ticket_ccm ? '#0F6E56' : 'var(--ccm-gray-medium)', fontWeight: a.ticket_ccm ? 600 : 400 }}>
-                      {a.ticket_ccm || <span style={{ fontStyle: 'italic', fontSize: 11 }}>Aguardando...</span>}
+                    <td style={{ ...td, color: 'var(--ccm-blue)', fontWeight: 600 }}>{a.ticket_ccm || <span style={{ fontStyle: 'italic', fontSize: 11 }}>Aguardando...</span>}</td>
+                    <td style={{ ...td, color: a.ticket_linx ? '#0F6E56' : 'var(--ccm-gray-medium)', fontWeight: a.ticket_linx ? 600 : 400 }}>
+                      {a.ticket_linx || '—'}
                     </td>
+                    <td style={{ ...td, maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis' }}>{a.descritivo || '—'}</td>
                     <td style={{ ...td, textAlign: 'center' }}>
                       <span style={{ background: a.status === 'concluido' ? '#D4F5E2' : '#E8EDF7', color: a.status === 'concluido' ? '#0E7E3B' : '#204294', borderRadius: 99, padding: '2px 9px', fontSize: 10, fontWeight: 700 }}>
                         {a.status === 'concluido' ? 'Concluído' : 'Aberto'}
@@ -214,17 +217,24 @@ export default function AdiantarAtendimentos({ onBack }: { onBack: () => void })
               </div>
 
               <div className="col-12 col-md-6">
-                <label style={labelStyle}>Ticket Linx</label>
+                <label style={labelStyle}>Ticket CCM <span style={{ fontSize: 9, opacity: .6 }}>(deixe em branco se pendente)</span></label>
+                <input type="text" className="form-control mt-1" style={inputStyle}
+                  value={form.ticket_ccm} onChange={e => setForm(f => ({ ...f, ticket_ccm: e.target.value }))}
+                  placeholder="Aguardando..." />
+              </div>
+
+              <div className="col-12 col-md-6">
+                <label style={labelStyle}>Ticket LINX</label>
                 <input type="text" className="form-control mt-1" style={inputStyle}
                   value={form.ticket_linx} onChange={e => setForm(f => ({ ...f, ticket_linx: e.target.value }))}
                   placeholder="Nº ticket Linx" />
               </div>
 
-              <div className="col-12 col-md-6">
-                <label style={labelStyle}>Ticket CCM <span style={{ fontSize: 9, opacity: .6 }}>(deixe em branco se pendente)</span></label>
-                <input type="text" className="form-control mt-1" style={inputStyle}
-                  value={form.ticket_ccm} onChange={e => setForm(f => ({ ...f, ticket_ccm: e.target.value }))}
-                  placeholder="Aguardando..." />
+              <div className="col-12">
+                <label style={labelStyle}>Descritivo</label>
+                <textarea className="form-control mt-1" rows={3} style={{ ...inputStyle, resize: 'vertical' }}
+                  value={form.descritivo} onChange={e => setForm(f => ({ ...f, descritivo: e.target.value }))}
+                  placeholder="Descreva o atendimento..." />
               </div>
 
               <div className="col-12">
