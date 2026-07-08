@@ -147,9 +147,9 @@ export default function AdiantarAtendimentos({ onBack }: { onBack: () => void })
                     <td style={{ ...td, fontWeight: 600, color: 'var(--ccm-ink)' }}>{a.cliente}</td>
                     <td style={td}>{new Date(a.data + 'T12:00:00').toLocaleDateString('pt-BR')}</td>
                     <td style={td}>{a.analista || '—'}</td>
-                    <td style={{ ...td, color: 'var(--ccm-blue)', fontWeight: 600 }}>{a.ticket_ccm || <span style={{ fontStyle: 'italic', fontSize: 11 }}>Aguardando...</span>}</td>
+                    <td style={{ ...td, color: a.ticket_ccm ? 'var(--ccm-blue)' : 'var(--ccm-gray-medium)', fontWeight: a.ticket_ccm ? 600 : 400 }}>{a.ticket_ccm || '—'}</td>
                     <td style={{ ...td, color: a.ticket_linx ? '#0F6E56' : 'var(--ccm-gray-medium)', fontWeight: a.ticket_linx ? 600 : 400 }}>
-                      {a.ticket_linx || '—'}
+                      {a.ticket_linx || <span style={{ fontStyle: 'italic', fontSize: 11 }}>Aguardando...</span>}
                     </td>
                     <td style={{ ...td, maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis' }}>{a.descritivo || '—'}</td>
                     <td style={{ ...td, textAlign: 'center' }}>
@@ -217,17 +217,17 @@ export default function AdiantarAtendimentos({ onBack }: { onBack: () => void })
               </div>
 
               <div className="col-12 col-md-6">
-                <label style={labelStyle}>Ticket CCM <span style={{ fontSize: 9, opacity: .6 }}>(deixe em branco se pendente)</span></label>
+                <label style={labelStyle}>Ticket CCM</label>
                 <input type="text" className="form-control mt-1" style={inputStyle}
                   value={form.ticket_ccm} onChange={e => setForm(f => ({ ...f, ticket_ccm: e.target.value }))}
-                  placeholder="Aguardando..." />
+                  placeholder="Nº ticket CCM" />
               </div>
 
               <div className="col-12 col-md-6">
-                <label style={labelStyle}>Ticket LINX</label>
+                <label style={labelStyle}>Ticket LINX <span style={{ fontSize: 9, opacity: .6 }}>(Branco se Pendente)</span></label>
                 <input type="text" className="form-control mt-1" style={inputStyle}
                   value={form.ticket_linx} onChange={e => setForm(f => ({ ...f, ticket_linx: e.target.value }))}
-                  placeholder="Nº ticket Linx" />
+                  placeholder="Aguardando..." />
               </div>
 
               <div className="col-12">
