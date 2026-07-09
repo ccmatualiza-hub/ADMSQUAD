@@ -314,7 +314,14 @@ export default function AgendarAtualizacao({ onBack }: { onBack: () => void }) {
               <div className="col-12 col-md-4">
                 <label style={labelStyle}>Tipo</label>
                 <select className="form-select mt-1" style={inputStyle}
-                  value={form.tipo} onChange={e => setForm(f => ({ ...f, tipo: e.target.value }))}>
+                  value={form.tipo} onChange={e => {
+                    const t = e.target.value;
+                    setForm(f => ({
+                      ...f,
+                      tipo: t,
+                      pacote: t === 'L' ? 'WEB' : (f.pacote === 'WEB' ? 'EVO' : f.pacote),
+                    }));
+                  }}>
                   {TIPO_OPTS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                 </select>
               </div>
@@ -323,8 +330,8 @@ export default function AgendarAtualizacao({ onBack }: { onBack: () => void }) {
               <div className="col-12 col-md-4">
                 <label style={labelStyle}>Pacote</label>
                 <select className="form-select mt-1" style={inputStyle}
-                  value={form.pacote} onChange={e => setForm(f => ({ ...f, pacote: e.target.value }))}>
-                  {PACOTE_OPTS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  value={form.pacote} disabled={form.tipo === 'L'} onChange={e => setForm(f => ({ ...f, pacote: e.target.value }))}>
+                  {PACOTE_OPTS.filter(o => form.tipo === 'L' ? o.value === 'WEB' : o.value !== 'WEB').map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                 </select>
               </div>
 
