@@ -229,7 +229,7 @@ async def list_smartbooks(
 ) -> list[SmartbookItem]:
     try:
         result = await session.execute(
-            text("SELECT cod, colaborador, trilha, link, qtdcursos, cursosfeitos, concluido, created_at FROM tbl_smartbook ORDER BY colaborador, trilha")
+            text("SELECT cod, colaborador, trilha, link, qtdcursos, cursosfeitos, concluido, created_at FROM tbl_smartbook ORDER BY colaborador ASC, trilha ASC")
         )
         rows = result.fetchall()
         keys = list(result.keys())

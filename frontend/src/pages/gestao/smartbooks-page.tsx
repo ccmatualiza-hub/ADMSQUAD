@@ -120,7 +120,7 @@ export default function SmartbooksPage({ onBack }: { onBack: () => void }) {
                   <th style={th}>Colaborador</th>
                   <th style={th}>Trilha</th>
                   <th style={th}>Link</th>
-                  <th style={{ ...th, textAlign: 'center' }}>Qtd. Cursos</th>
+                  <th style={{ ...th, textAlign: 'center' }}>Blocos</th>
                   <th style={{ ...th, textAlign: 'center' }}>Feitos</th>
                   <th style={{ ...th, textAlign: 'center' }}>Progresso</th>
                   <th style={{ ...th, textAlign: 'center' }}>Concluído</th>
@@ -134,7 +134,7 @@ export default function SmartbooksPage({ onBack }: { onBack: () => void }) {
                   const p = pct(s.cursosfeitos, s.qtdcursos);
                   return (
                     <tr key={s.cod} style={{ background: i % 2 === 0 ? '#fff' : '#F7F8FA', borderBottom: '1px solid var(--ccm-line)' }}>
-                      <td style={{ ...td, fontWeight: 600, color: 'var(--ccm-ink)' }}>{s.colaborador}</td>
+                      <td style={{ ...td, fontWeight: 600, color: 'var(--ccm-ink)' }}>{s.colaborador.toUpperCase()}</td>
                       <td style={td}>{s.trilha}</td>
                       <td style={td}>
                         {s.link ? (
@@ -212,7 +212,7 @@ export default function SmartbooksPage({ onBack }: { onBack: () => void }) {
                   value={form.link} onChange={e => setForm(f => ({ ...f, link: e.target.value }))} placeholder="https://..." />
               </div>
               <div className="col-12 col-md-6">
-                <label style={labelStyle}>Qtd. Cursos</label>
+                <label style={labelStyle}>Blocos</label>
                 <input type="number" className="form-control mt-1" style={inputStyle}
                   value={form.qtdcursos} onChange={e => setForm(f => ({ ...f, qtdcursos: Number(e.target.value) }))} placeholder="0" />
               </div>
