@@ -189,3 +189,105 @@ async def delete_resultado(
         await session.commit()
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
+
+
+# ── Smartbooks ────────────────────────────────────────────────────────────────
+
+class SmartbookItem(BaseModel):
+    cod: int
+    colaborador: str
+    trilha: str
+    link: str | None = None
+    qtdcursos: int
+    cursosfeitos: int
+    concluido: str
+    created_at: str | None = None
+
+
+class SmartbookCreate(BaseModel):
+    colaborador: str
+    trilha: str
+    link: str = ""
+    qtdcursos: int = 0
+    cursosfeitos: int = 0
+    concluido: str = "Nao"
+
+
+class SmartbookUpdate(BaseModel):
+    colaborador: str | None = None
+    trilha: str | None = None
+    link: str | None = None
+    qtdcursos: int | None = None
+    cursosfeitos: int | None = None
+    concluido: str | None = None
+
+
+@router.get("/smartbooks", response_model=list[SmartbookItem])
+async def list_smartbooks(
+    _: Annotated[dict, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> list[SmartbookItem]:
+    try:
+        result = await session.execute(
+            text("SELECT cod, colaborador, trilha, link, qtdcursos, cursosfeitos, concluido, created_at FROM tbl_smartbook ORDER BY colaborador, trilha")
+        )
+        rows = result.fetchall()
+        keys = list(result.keys())
+        return [SmartbookItem(**{k: (str(v) if k == "created_at" and v else v) for k, v in dict(zip(keys, r)).items()}) for r in rows]
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
+@router.post("/smartbooks", status_code=status.HTTP_201_CREATED)
+async def create_smartbook(
+    body: SmartbookCreate,
+    _: Annotated[dict, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> dict:
+    try:
+        result = await session.execute(
+            text("INSERT INTO tbl_smartbook (colaborador, trilha, link, qtdcursos, cursosfeitos, concluido) VALUES (:colaborador, :trilha, :link, :qtdcursos, :cursosfeitos, :concluido)"),
+            {"colaborador": body.colaborador, "trilha": body.trilha, "link": body.link,
+             "qtdcursos": body.qtdcursos, "cursosfeitos": body.cursosfeitos, "concluido": body.concluido}
+        )
+        await session.commit()
+        return {"created": True, "id": result.lastrowid}
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
+@router.put("/smartbooks/{cod}")
+async def update_smartbook(
+    cod: int,
+    body: SmartbookUpdate,
+    _: Annotated[dict, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> dict:
+    try:
+        sets, params = [], {"cod": cod}
+        if body.colaborador  is not None: sets.append("colaborador=:colaborador");   params["colaborador"]  = body.colaborador
+        if body.trilha       is not None: sets.append("trilha=:trilha");             params["trilha"]       = body.trilha
+        if body.link         is not None: sets.append("link=:link");                 params["link"]         = body.link
+        if body.qtdcursos    is not None: sets.append("qtdcursos=:qtdcursos");       params["qtdcursos"]    = body.qtdcursos
+        if body.cursosfeitos is not None: sets.append("cursosfeitos=:cursosfeitos"); params["cursosfeitos"] = body.cursosfeitos
+        if body.concluido    is not None: sets.append("concluido=:concluido");       params["concluido"]    = body.concluido
+        if not sets:
+            raise HTTPException(status_code=400, detail="Nada para atualizar")
+        await session.execute(text(f"UPDATE tbl_smartbook SET {', '.join(sets)} WHERE cod = :cod"), params)
+        await session.commit()
+        return {"updated": True}
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
+@router.delete("/smartbooks/{cod}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_smartbook(
+    cod: int,
+    _: Annotated[dict, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> None:
+    try:
+        await session.execute(text("DELETE FROM tbl_smartbook WHERE cod = :cod"), {"cod": cod})
+        await session.commit()
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))

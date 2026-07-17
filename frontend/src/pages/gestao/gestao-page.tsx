@@ -1,14 +1,16 @@
 import { useState } from 'react';
 import LinksUteisPage  from './links-uteis-page';
 import ResultadosPage  from './resultados-page';
+import SmartbooksPage  from './smartbooks-page';
 
-type SubPage = null | 'links' | 'resultados';
+type SubPage = null | 'links' | 'resultados' | 'smartbooks';
 
 export default function GestaoPage() {
   const [subPage, setSubPage] = useState<SubPage>(null);
 
   if (subPage === 'links')      return <LinksUteisPage onBack={() => setSubPage(null)} />;
-  if (subPage === 'resultados') return <ResultadosPage onBack={() => setSubPage(null)} />;
+  if (subPage === 'resultados')  return <ResultadosPage  onBack={() => setSubPage(null)} />;
+  if (subPage === 'smartbooks')  return <SmartbooksPage   onBack={() => setSubPage(null)} />;
 
   const Card = ({ title, desc, color, bg, icon, onClick }: { title: string; desc: string; color: string; bg: string; icon: string; onClick: () => void }) => (
     <div className="col-12 col-md-4 col-lg-3">
@@ -35,7 +37,8 @@ export default function GestaoPage() {
       <div className="section-title mb-4">Gestão</div>
       <div className="row g-3">
         <Card title="Links Úteis" desc="Gerenciar links e acessos úteis da equipe." color="#7F77DD" bg="#F0EEFF" icon="bi-link-45deg" onClick={() => setSubPage('links')} />
-        <Card title="Resultados" desc="Resultados de quarter da equipe." color="#1DB954" bg="#E8FBF0" icon="bi-bar-chart-fill" onClick={() => setSubPage('resultados')} />
+        <Card title="Resultados"  desc="Resultados de quarter da equipe."  color="#1DB954" bg="#E8FBF0" icon="bi-bar-chart-fill" onClick={() => setSubPage('resultados')} />
+        <Card title="Smartbooks"  desc="Trilhas de aprendizado da equipe."  color="#00B0FA" bg="#E8F7FF" icon="bi-book-fill"       onClick={() => setSubPage('smartbooks')} />
         <div className="col-12 col-md-4 col-lg-3">
           <div style={{ background: '#F7F8FA', border: '1px dashed var(--ccm-line)', borderRadius: 6, padding: '20px 22px', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 120, color: 'var(--ccm-gray-medium)', fontSize: 12, letterSpacing: '.08em' }}>
             <i className="bi bi-plus-circle me-2" />Em breve
