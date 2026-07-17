@@ -18,6 +18,7 @@ function pct(feitos: number, total: number) {
 
 export default function SmartbooksPage({ onBack }: { onBack: () => void }) {
   const [items, setItems]         = useState<Smartbook[]>([]);
+  const [usuarios, setUsuarios]     = useState<{ id: number; name: string }[]>([]);
   const [loading, setLoading]     = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editCod, setEditCod]     = useState<number | null>(null);
@@ -28,8 +29,12 @@ export default function SmartbooksPage({ onBack }: { onBack: () => void }) {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const data = await http.get<Smartbook[]>('/api/gestao/smartbooks');
+      const [data, users] = await Promise.all([
+        http.get<Smartbook[]>('/api/gestao/smartbooks'),
+        http.get<{ id: number; name: string }[]>('/api/user/by-role'),
+      ]);
       setItems(data);
+      setUsuarios(users);
     } catch { toast.error('Erro ao carregar smartbooks'); }
     finally { setLoading(false); }
   };
@@ -188,8 +193,13 @@ export default function SmartbooksPage({ onBack }: { onBack: () => void }) {
             <div className="row g-3">
               <div className="col-12">
                 <label style={labelStyle}>Colaborador *</label>
-                <input type="text" className="form-control mt-1" style={inputStyle}
-                  value={form.colaborador} onChange={e => setForm(f => ({ ...f, colaborador: e.target.value }))} placeholder="Nome do colaborador" />
+                <select className="form-select mt-1" style={inputStyle}
+                  value={form.colaborador} onChange={e => setForm(f => ({ ...f, colaborador: e.target.value }))}>
+                  <option value="">Selecione...</option>
+                  {[...usuarios].sort((a, b) => a.name.localeCompare(b.name)).map(u => (
+                    <option key={u.id} value={u.name}>{u.name}</option>
+                  ))}
+                </select>
               </div>
               <div className="col-12">
                 <label style={labelStyle}>Trilha *</label>
