@@ -57,7 +57,7 @@ export default function ApoiosHelpPage({ onBack }: { onBack: () => void }) {
     setEditCod(a.cod);
     setForm({ requisitante: a.requisitante, tipo: a.tipo, assunto: a.assunto,
               descricao: a.descricao ?? '', squad: a.squad, apoiador: a.apoiador,
-              kb: a.kb ?? '', status: a.status });
+              ticket: a.ticket ?? '', kb: a.kb ?? '', status: a.status });
     setShowModal(true);
   };
 
