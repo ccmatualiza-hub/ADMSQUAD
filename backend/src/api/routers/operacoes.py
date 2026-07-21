@@ -351,3 +351,124 @@ async def cancelar_atividade(
         return {"updated": True}
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
+
+
+# ── Apoios Help ───────────────────────────────────────────────────────────────
+
+class ApoioItem(BaseModel):
+    cod: int
+    requisitante: str
+    tipo: str
+    assunto: str
+    descricao: str | None = None
+    squad: str
+    apoiador: str
+    kb: str | None = None
+    status: str
+    created_at: str | None = None
+
+
+class ApoioCreate(BaseModel):
+    requisitante: str
+    tipo: str
+    assunto: str
+    descricao: str = ""
+    squad: str = ""
+    apoiador: str = ""
+    kb: str = ""
+    status: str = "Aberto"
+
+
+class ApoioUpdate(BaseModel):
+    requisitante: str | None = None
+    tipo: str | None = None
+    assunto: str | None = None
+    descricao: str | None = None
+    squad: str | None = None
+    apoiador: str | None = None
+    kb: str | None = None
+    status: str | None = None
+
+
+@router.get("/apoios", response_model=list[ApoioItem])
+async def list_apoios(
+    _: Annotated[dict, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> list[ApoioItem]:
+    try:
+        result = await session.execute(
+            text("SELECT cod, requisitante, tipo, assunto, descricao, squad, apoiador, kb, status, created_at FROM tbl_apoios ORDER BY created_at DESC")
+        )
+        rows = result.fetchall()
+        keys = list(result.keys())
+        items = []
+        for r in rows:
+            d = dict(zip(keys, r))
+            items.append(ApoioItem(
+                cod=d["cod"], requisitante=d["requisitante"], tipo=d["tipo"],
+                assunto=d["assunto"], descricao=d.get("descricao"),
+                squad=d["squad"], apoiador=d["apoiador"], kb=d.get("kb"),
+                status=d["status"],
+                created_at=str(d["created_at"]) if d.get("created_at") else None,
+            ))
+        return items
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
+@router.post("/apoios", status_code=status.HTTP_201_CREATED)
+async def create_apoio(
+    body: ApoioCreate,
+    _: Annotated[dict, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> dict:
+    try:
+        result = await session.execute(
+            text("INSERT INTO tbl_apoios (requisitante, tipo, assunto, descricao, squad, apoiador, kb, status) VALUES (:requisitante, :tipo, :assunto, :descricao, :squad, :apoiador, :kb, :status)"),
+            {"requisitante": body.requisitante, "tipo": body.tipo, "assunto": body.assunto,
+             "descricao": body.descricao, "squad": body.squad, "apoiador": body.apoiador,
+             "kb": body.kb, "status": body.status}
+        )
+        await session.commit()
+        return {"created": True, "id": result.lastrowid}
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
+@router.put("/apoios/{cod}")
+async def update_apoio(
+    cod: int,
+    body: ApoioUpdate,
+    _: Annotated[dict, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> dict:
+    try:
+        sets, params = [], {"cod": cod}
+        if body.requisitante is not None: sets.append("requisitante=:requisitante"); params["requisitante"] = body.requisitante
+        if body.tipo         is not None: sets.append("tipo=:tipo");                 params["tipo"]         = body.tipo
+        if body.assunto      is not None: sets.append("assunto=:assunto");           params["assunto"]      = body.assunto
+        if body.descricao    is not None: sets.append("descricao=:descricao");       params["descricao"]    = body.descricao
+        if body.squad        is not None: sets.append("squad=:squad");               params["squad"]        = body.squad
+        if body.apoiador     is not None: sets.append("apoiador=:apoiador");         params["apoiador"]     = body.apoiador
+        if body.kb           is not None: sets.append("kb=:kb");                     params["kb"]           = body.kb
+        if body.status       is not None: sets.append("status=:status");             params["status"]       = body.status
+        if not sets:
+            raise HTTPException(status_code=400, detail="Nada para atualizar")
+        await session.execute(text(f"UPDATE tbl_apoios SET {', '.join(sets)} WHERE cod = :cod"), params)
+        await session.commit()
+        return {"updated": True}
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
+@router.delete("/apoios/{cod}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_apoio(
+    cod: int,
+    _: Annotated[dict, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> None:
+    try:
+        await session.execute(text("DELETE FROM tbl_apoios WHERE cod = :cod"), {"cod": cod})
+        await session.commit()
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
