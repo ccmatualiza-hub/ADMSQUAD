@@ -95,7 +95,8 @@ async def create_cliente_pmo(
                 "franq":     body.franq or "",
                 "implat":    body.implat or "",
                 "stimplant": body.stimplant or "",
-            }
+                "tsplus":    body.tsplus or "Nao",
+                "qtdusersts": body.qtdusersts or 0,
         )
         await session.commit()
         return {"created": True, "id": result.lastrowid}
