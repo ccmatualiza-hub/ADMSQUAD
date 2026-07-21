@@ -363,6 +363,7 @@ class ApoioItem(BaseModel):
     descricao: str | None = None
     squad: str
     apoiador: str
+    ticket: str | None = None
     kb: str | None = None
     status: str
     created_at: str | None = None
@@ -375,6 +376,7 @@ class ApoioCreate(BaseModel):
     descricao: str = ""
     squad: str = ""
     apoiador: str = ""
+    ticket: str = ""
     kb: str = ""
     status: str = "Aberto"
 
@@ -386,6 +388,7 @@ class ApoioUpdate(BaseModel):
     descricao: str | None = None
     squad: str | None = None
     apoiador: str | None = None
+    ticket: str | None = None
     kb: str | None = None
     status: str | None = None
 
@@ -397,7 +400,7 @@ async def list_apoios(
 ) -> list[ApoioItem]:
     try:
         result = await session.execute(
-            text("SELECT cod, requisitante, tipo, assunto, descricao, squad, apoiador, kb, status, created_at FROM tbl_apoios ORDER BY created_at DESC")
+            text("SELECT cod, requisitante, tipo, assunto, descricao, squad, apoiador, ticket, kb, status, created_at FROM tbl_apoios ORDER BY created_at DESC")
         )
         rows = result.fetchall()
         keys = list(result.keys())
@@ -407,7 +410,7 @@ async def list_apoios(
             items.append(ApoioItem(
                 cod=d["cod"], requisitante=d["requisitante"], tipo=d["tipo"],
                 assunto=d["assunto"], descricao=d.get("descricao"),
-                squad=d["squad"], apoiador=d["apoiador"], kb=d.get("kb"),
+                squad=d["squad"], apoiador=d["apoiador"], ticket=d.get("ticket"), kb=d.get("kb"),
                 status=d["status"],
                 created_at=str(d["created_at"]) if d.get("created_at") else None,
             ))
@@ -424,10 +427,10 @@ async def create_apoio(
 ) -> dict:
     try:
         result = await session.execute(
-            text("INSERT INTO tbl_apoios (requisitante, tipo, assunto, descricao, squad, apoiador, kb, status) VALUES (:requisitante, :tipo, :assunto, :descricao, :squad, :apoiador, :kb, :status)"),
+            text("INSERT INTO tbl_apoios (requisitante, tipo, assunto, descricao, squad, apoiador, ticket, kb, status) VALUES (:requisitante, :tipo, :assunto, :descricao, :squad, :apoiador, :ticket, :kb, :status)"),
             {"requisitante": body.requisitante, "tipo": body.tipo, "assunto": body.assunto,
              "descricao": body.descricao, "squad": body.squad, "apoiador": body.apoiador,
-             "kb": body.kb, "status": body.status}
+             "ticket": body.ticket, "kb": body.kb, "status": body.status}
         )
         await session.commit()
         return {"created": True, "id": result.lastrowid}
@@ -450,6 +453,7 @@ async def update_apoio(
         if body.descricao    is not None: sets.append("descricao=:descricao");       params["descricao"]    = body.descricao
         if body.squad        is not None: sets.append("squad=:squad");               params["squad"]        = body.squad
         if body.apoiador     is not None: sets.append("apoiador=:apoiador");         params["apoiador"]     = body.apoiador
+        if body.ticket       is not None: sets.append("ticket=:ticket");             params["ticket"]       = body.ticket
         if body.kb           is not None: sets.append("kb=:kb");                     params["kb"]           = body.kb
         if body.status       is not None: sets.append("status=:status");             params["status"]       = body.status
         if not sets:

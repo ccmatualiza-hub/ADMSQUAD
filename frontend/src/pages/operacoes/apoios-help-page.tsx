@@ -5,7 +5,7 @@ import { http } from '../../lib/http-client';
 interface Apoio {
   cod: number; requisitante: string; tipo: string; assunto: string;
   descricao: string | null; squad: string; apoiador: string;
-  kb: string | null; status: string;
+  ticket: string | null; kb: string | null; status: string;
 }
 
 const STATUS_INFO: Record<string, { color: string; bg: string }> = {
@@ -16,12 +16,12 @@ const STATUS_INFO: Record<string, { color: string; bg: string }> = {
 };
 
 const TIPO_OPTS = ['Dúvida', 'Incidente', 'Requisição', 'Melhoria', 'Treinamento', 'Outro'];
-const SQUAD_OPTS = ['CX', 'PMO', 'Operações', 'Gestão', 'TI', 'Comercial', 'Outro'];
+const SQUAD_OPTS = ['BULLS', 'LAKERS', 'ROCKETS', 'WARRIORS', 'ENGENHARIA', 'GRC'];
 const STATUS_OPTS = ['Aberto', 'Em Andamento', 'Concluido', 'Cancelado'];
 
 const emptyForm = {
   requisitante: '', tipo: 'Dúvida', assunto: '', descricao: '',
-  squad: '', apoiador: '', kb: '', status: 'Aberto',
+  squad: '', apoiador: '', ticket: '', kb: '', status: 'Aberto',
 };
 
 const inputStyle = { background: 'var(--ccm-ink)', border: '1px solid #1a3a6e', color: '#fff', fontSize: 13 };
@@ -226,6 +226,12 @@ export default function ApoiosHelpPage({ onBack }: { onBack: () => void }) {
                   {sortedUsers.map(u => <option key={u.id} value={u.name}>{u.name}</option>)}
                 </select>
               </div>
+              <div className="col-12 col-md-6">
+                <label style={labelStyle}>Ticket</label>
+                <input type="text" className="form-control mt-1" style={inputStyle}
+                  value={form.ticket} onChange={e => setForm(f => ({ ...f, ticket: e.target.value }))} placeholder="Nº do ticket" />
+              </div>
+
               <div className="col-12 col-md-6">
                 <label style={labelStyle}>KB (Link)</label>
                 <input type="text" className="form-control mt-1" style={inputStyle}

@@ -109,7 +109,7 @@ export default function MonitorAtualizacoes({ onBack }: { onBack: () => void }) 
           <StatCard label="Concluído"
             value={`${stats?.pct_concluido ?? 0}%`}
             sub={`${stats?.concluido_count ?? 0} registros`}
-            borderColor="#1DB954" loading={loading} />
+            borderColor={stats?.pct_concluido !== undefined && stats.pct_concluido >= 98 && stats.pct_concluido < 100 ? '#E74C3C' : '#1DB954'} loading={loading} />
         </div>
       </div>
 
