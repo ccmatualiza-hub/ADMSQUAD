@@ -29,6 +29,7 @@ interface Atualizacao {
 function concluidoStyle(val: string | number | null): React.CSSProperties {
   const v = String(val ?? '0').trim();
   if (v === '100') return { background: '#1DB954', color: '#fff', borderRadius: 4, padding: '2px 8px', fontWeight: 700, fontSize: 12, display: 'inline-block' };
+  if (v === '98')  return { background: '#E74C3C', color: '#fff', borderRadius: 4, padding: '2px 8px', fontWeight: 700, fontSize: 12, display: 'inline-block' };
   if (v === '0' || v === '')  return { background: '#fff', color: '#333', borderRadius: 4, padding: '2px 8px', fontWeight: 700, fontSize: 12, display: 'inline-block', border: '1px solid #ddd' };
   return { background: '#F9E000', color: '#5a4000', borderRadius: 4, padding: '2px 8px', fontWeight: 700, fontSize: 12, display: 'inline-block' };
 }
