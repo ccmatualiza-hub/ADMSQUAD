@@ -33,6 +33,7 @@ type EditForm = {
   datastart: string; agtazure: string; linxwebver: string;
   shape: string; ocpu: string; mem: string; tsplus: string;
   integracoes: string; infraprod: string; infrats: string; detalhes: string; doc: string;
+  link1: string; link2: string; link3: string;
 };
 
 const STATUS_COLORS: Record<string, { color: string; bg: string }> = {
@@ -76,6 +77,7 @@ const emptyEditForm: EditForm = {
   datastart: '', agtazure: '', linxwebver: '',
   shape: '', ocpu: '', mem: '', tsplus: '',
   integracoes: '', infraprod: '', infrats: '', detalhes: '', doc: '',
+  link1: '', link2: '', link3: '',
 };
 
 export default function ClientesListPage({ onBack }: { onBack: () => void }) {
@@ -141,6 +143,7 @@ export default function ClientesListPage({ onBack }: { onBack: () => void }) {
         ocpu: d.ocpu ?? '', mem: d.mem ?? '', tsplus: d.tsplus ?? '',
         integracoes: d.integracoes ?? '', infraprod: d.infraprod ?? '',
         infrats: d.infrats ?? '', detalhes: d.detalhes ?? '', doc: d.doc ?? '',
+        link1: d.link1 ?? '', link2: d.link2 ?? '', link3: d.link3 ?? '',
       });
     } catch { toast.error('Erro ao carregar dados do cliente'); }
   };
@@ -410,6 +413,17 @@ export default function ClientesListPage({ onBack }: { onBack: () => void }) {
                   <input type="text" className="form-control mt-1" style={inputStyle}
                     value={editForm[key]}
                     onChange={e => setEditForm(f => ({ ...f, [key]: e.target.value }))} />
+                </div>
+              ))}
+              {/* Links */}
+              <div className="col-12"><div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.15em', color: '#00B0FA', borderBottom: '1px solid #1a3a6e', paddingBottom: 4, marginBottom: 4, marginTop: 4 }}>Links</div></div>
+              {([['Link 1', 'link1'], ['Link 2', 'link2'], ['Link 3', 'link3']] as [string, keyof EditForm][]).map(([label, key]) => (
+                <div key={key} className="col-12">
+                  <label style={labelStyle}>{label}</label>
+                  <input type="text" className="form-control mt-1" style={inputStyle}
+                    value={editForm[key]}
+                    onChange={e => setEditForm(f => ({ ...f, [key]: e.target.value }))}
+                    placeholder="https://..." />
                 </div>
               ))}
               <div className="col-12">

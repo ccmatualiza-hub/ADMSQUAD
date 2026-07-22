@@ -607,7 +607,7 @@ async def update_cliente(
                    "tipo", "pacote", "dt_atualiza", "versaoat", "franq", "ufmatriz",
                    "integracoes", "infraprod", "infrats", "shape", "ocpu", "mem",
                    "tsplus", "detalhes", "implat", "datastart", "prxcontat", "cnpj", "codigoc",
-                   "agtazure", "linxwebver", "bandeira", "bd", "doc"]
+                   "agtazure", "linxwebver", "bandeira", "bd", "doc", "link1", "link2", "link3"]
         sets, params = [], {"cod": cod}
         for k, v in body.items():
             if k in allowed:
