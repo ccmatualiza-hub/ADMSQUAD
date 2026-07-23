@@ -125,7 +125,7 @@ export default function DailyPendencias({ onBack }: { onBack: () => void }) {
           {loading ? <div style={{ padding:32, textAlign:'center', color:'var(--ccm-gray-dark)' }}><span className="spinner-border spinner-border-sm me-2" />Carregando...</div> : (
             <table style={{ width:'100%', borderCollapse:'collapse', fontSize:12 }}>
               <thead><tr style={{ background:'var(--ccm-blue)' }}>
-                {['Cliente','Ticket','Analista','Descritivo','Status','Data','Dias','Ações'].map(h => (
+                {['CLIENTE','TICKET','ANALISTA','DESCRITIVO','STATUS','DATA','DIAS','AÇÕES'].map(h => (
                   <th key={h} style={{ color:'#fff', fontWeight:700, textTransform:'uppercase', letterSpacing:'.05em', padding:'10px 12px', textAlign:'left', fontSize:10, whiteSpace:'nowrap' }}>{h}</th>
                 ))}
               </tr></thead>
