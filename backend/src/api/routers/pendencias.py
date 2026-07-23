@@ -17,6 +17,7 @@ class PendenciaOut(BaseModel):
     cliente: str
     ticket: str
     descritivo: str
+    tratativa: str | None = None
     analista: str
     status: str
     data: str
@@ -28,6 +29,7 @@ class PendenciaCreate(BaseModel):
     cliente: str
     ticket: str
     descritivo: str
+    tratativa: str = ""
     analista: str
     status: StatusType = "aberto"
     data: date
@@ -37,6 +39,7 @@ class PendenciaUpdate(BaseModel):
     cliente: str | None = None
     ticket: str | None = None
     descritivo: str | None = None
+    tratativa: str | None = None
     analista: str | None = None
     status: StatusType | None = None
     data: date | None = None
@@ -46,7 +49,7 @@ def row_to_out(row, keys) -> PendenciaOut:
     d = dict(zip(keys, row))
     return PendenciaOut(
         id=d["id"], cliente=d["cliente"], ticket=d["ticket"],
-        descritivo=d["descritivo"], analista=d.get("analista", ""),
+        descritivo=d["descritivo"], tratativa=d.get("tratativa"), analista=d.get("analista", ""),
         status=d["status"], data=str(d["data"]),
         dias=d.get("dias"), created_at=str(d["created_at"]) if d.get("created_at") else None,
     )
@@ -61,7 +64,7 @@ async def list_pendencias(
     try:
         where = "" if include_resolvido else "WHERE status != 'resolvido'"
         result = await session.execute(
-            text(f"SELECT id, cliente, ticket, descritivo, analista, status, data, DATEDIFF(CURDATE(), data) as dias, created_at FROM tbl_pendencias {where} ORDER BY data ASC, id ASC")
+            text(f"SELECT id, cliente, ticket, descritivo, tratativa, analista, status, data, DATEDIFF(CURDATE(), data) as dias, created_at FROM tbl_pendencias {where} ORDER BY data ASC, id ASC")
         )
         rows = result.fetchall()
         keys = list(result.keys())
@@ -112,15 +115,15 @@ async def create_pendencia(
 ) -> PendenciaOut:
     try:
         result = await session.execute(
-            text("INSERT INTO tbl_pendencias (cliente, ticket, descritivo, analista, status, data, created_by) VALUES (:cliente, :ticket, :descritivo, :analista, :status, :data, :created_by)"),
-            {"cliente": body.cliente, "ticket": body.ticket, "descritivo": body.descritivo,
+            text("INSERT INTO tbl_pendencias (cliente, ticket, descritivo, tratativa, analista, status, data, created_by) VALUES (:cliente, :ticket, :descritivo, :tratativa, :analista, :status, :data, :created_by)"),
+            {"cliente": body.cliente, "ticket": body.ticket, "descritivo": body.descritivo, "tratativa": body.tratativa,
              "analista": body.analista, "status": body.status, "data": str(body.data),
              "created_by": int(current_user["sub"])}
         )
         await session.commit()
         new_id = result.lastrowid
         result2 = await session.execute(
-            text("SELECT id, cliente, ticket, descritivo, analista, status, data, DATEDIFF(CURDATE(), data) as dias, created_at FROM tbl_pendencias WHERE id = :id"),
+            text("SELECT id, cliente, ticket, descritivo, tratativa, analista, status, data, DATEDIFF(CURDATE(), data) as dias, created_at FROM tbl_pendencias WHERE id = :id"),
             {"id": new_id}
         )
         row = result2.fetchone()
@@ -140,6 +143,7 @@ async def update_pendencia(
     if body.cliente    is not None: sets.append("cliente=:cliente");       params["cliente"]    = body.cliente
     if body.ticket     is not None: sets.append("ticket=:ticket");         params["ticket"]     = body.ticket
     if body.descritivo is not None: sets.append("descritivo=:descritivo"); params["descritivo"] = body.descritivo
+    if body.tratativa   is not None: sets.append("tratativa=:tratativa");   params["tratativa"]   = body.tratativa
     if body.analista   is not None: sets.append("analista=:analista");     params["analista"]   = body.analista
     if body.status     is not None: sets.append("status=:status");         params["status"]     = body.status
     if body.data       is not None: sets.append("data=:data");             params["data"]       = str(body.data)
@@ -148,7 +152,7 @@ async def update_pendencia(
     await session.execute(text(f"UPDATE tbl_pendencias SET {', '.join(sets)} WHERE id = :id"), params)
     await session.commit()
     result = await session.execute(
-        text("SELECT id, cliente, ticket, descritivo, analista, status, data, DATEDIFF(CURDATE(), data) as dias, created_at FROM tbl_pendencias WHERE id = :id"),
+        text("SELECT id, cliente, ticket, descritivo, tratativa, analista, status, data, DATEDIFF(CURDATE(), data) as dias, created_at FROM tbl_pendencias WHERE id = :id"),
         {"id": pendencia_id}
     )
     row = result.fetchone()
