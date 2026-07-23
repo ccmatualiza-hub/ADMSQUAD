@@ -40,8 +40,8 @@ export default function BiPage({ onBack }: { onBack: () => void }) {
 
       {/* KPI Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 10, marginBottom: 20 }}>
-        <KpiCard label="Clientes Ativos"  value="—" color="var(--ccm-blue)"    />
-        <KpiCard label="PMO"              value="—" color="#F9A825"             />
+        <KpiCard label="Total de Users"   value="—" color="var(--ccm-blue)"    />
+        <KpiCard label="Clientes Ativos"  value="—" color="#1DB954"             />
         <KpiCard label="Cancelados"       value="—" color="#E74C3C"             />
         <KpiCard label="Serv. LINX VPU"  value="—" color="var(--ccm-blue)"    />
         <KpiCard label="Serv. CCM VPU"   value="—" color="var(--ccm-blue)"    />
@@ -57,21 +57,9 @@ export default function BiPage({ onBack }: { onBack: () => void }) {
       </div>
 
       {/* Charts row 2 */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 14 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
         <ChartBox title="Grupos de atualização" />
-
-        {/* Footer info card */}
-        <div style={{ background: '#fff', border: '1px solid var(--ccm-line)', borderRadius: 8, padding: '16px 18px', boxShadow: '0 1px 4px rgba(12,25,33,.06)', display: 'flex', flexDirection: 'column', gap: 20 }}>
-          <div>
-            <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.1em', color: 'var(--ccm-gray-dark)', marginBottom: 6 }}>Total de Users</div>
-            <div style={{ fontSize: 28, fontWeight: 900, color: 'var(--ccm-blue)' }}>—</div>
-            <div style={{ fontSize: 11, color: 'var(--ccm-gray-medium)', marginTop: 4 }}>Atualizado {horaFmt}</div>
-          </div>
-          <div>
-            <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.1em', color: 'var(--ccm-gray-dark)', marginBottom: 6 }}>Clientes Ativos</div>
-            <div style={{ fontSize: 28, fontWeight: 900, color: '#1DB954' }}>—</div>
-          </div>
-        </div>
+        <ChartBox title="Outras consultas" />
       </div>
     </div>
   );
