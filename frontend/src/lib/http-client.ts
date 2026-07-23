@@ -6,7 +6,7 @@ async function request<T>(
   method: string,
   path: string,
   body?: unknown,
-  retries = 2,
+  retries = 3,
 ): Promise<T> {
   const token = useAuthStore.getState().token;
   const headers: Record<string, string> = {
@@ -34,16 +34,20 @@ async function request<T>(
           const json = await res.json();
           detail = json.detail || detail;
         } catch { /* ignore */ }
+        // retry on 500/502/503/504 server errors
+        if ([500, 502, 503, 504].includes(res.status) && attempt < retries) {
+          await new Promise(r => setTimeout(r, 600 * (attempt + 1)));
+          continue;
+        }
         throw new Error(detail);
       }
 
       if (res.status === 204) return undefined as T;
       return res.json() as Promise<T>;
     } catch (err) {
-      const isNetworkError = err instanceof TypeError && err.message === 'Failed to fetch';
+      const isNetworkError = err instanceof TypeError;
       if (isNetworkError && attempt < retries) {
-        // wait 800ms before retry
-        await new Promise(r => setTimeout(r, 800));
+        await new Promise(r => setTimeout(r, 600 * (attempt + 1)));
         continue;
       }
       throw err;
