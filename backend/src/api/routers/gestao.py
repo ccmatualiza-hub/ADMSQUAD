@@ -291,3 +291,21 @@ async def delete_smartbook(
         await session.commit()
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
+
+
+# ── BI Stats ──────────────────────────────────────────────────────────────────
+
+@router.get("/bi/stats")
+async def bi_stats(
+    _: Annotated[dict, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> dict:
+    try:
+        result = await session.execute(
+            text("SELECT COALESCE(SUM(qtdusers), 0) as total_users FROM tbl_linx WHERE status IN ('6 - ATIVO','7 - ATIVO VPU','X - ATIVO COMPLEMENTO')")
+        )
+        row = result.fetchone()
+        total_users = int(row[0]) if row and row[0] else 0
+        return {"total_users": total_users}
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))

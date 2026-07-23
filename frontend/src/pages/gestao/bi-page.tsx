@@ -1,4 +1,15 @@
+import { useEffect, useState } from 'react';
+import { http } from '../../lib/http-client';
+
 export default function BiPage({ onBack }: { onBack: () => void }) {
+  const [totalUsers, setTotalUsers] = useState<number | null>(null);
+
+  useEffect(() => {
+    http.get<{ total_users: number }>('/api/gestao/bi/stats')
+      .then(d => setTotalUsers(d.total_users))
+      .catch(() => {});
+  }, []);
+
   const now = new Date();
   const dataFmt = now.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
 
@@ -32,14 +43,13 @@ export default function BiPage({ onBack }: { onBack: () => void }) {
       </div>
 
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-        <div className="section-title" style={{ margin: 0 }}>B.I. — Estatísticas de Squad</div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: 20 }}>
         <div style={{ fontSize: 12, color: 'var(--ccm-gray-dark)' }}>{dataFmt}</div>
       </div>
 
       {/* KPI Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 10, marginBottom: 20 }}>
-        <KpiCard label="Total de Users"   value="—" color="var(--ccm-blue)"    />
+        <KpiCard label="Total de Users"   value={totalUsers !== null ? totalUsers.toLocaleString('pt-BR') : '…'} color="var(--ccm-blue)"    />
         <KpiCard label="Clientes Ativos"  value="—" color="#1DB954"             />
         <KpiCard label="Cancelados"       value="—" color="#E74C3C"             />
         <KpiCard label="Serv. LINX VPU"  value="—" color="var(--ccm-blue)"    />
