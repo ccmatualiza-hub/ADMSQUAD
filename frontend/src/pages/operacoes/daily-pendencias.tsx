@@ -134,10 +134,10 @@ export default function DailyPendencias({ onBack }: { onBack: () => void }) {
                 : filtered.map((p, i) => {
                   const si = STATUS_INFO[p.status] ?? { label: p.status, color:'#fff', bg:'#888' };
                   return <tr key={p.id} style={{ background: i%2===0?'#fff':'#F7F8FA', borderBottom:'1px solid var(--ccm-line)' }}>
-                    <td style={{ padding:'9px 12px', fontWeight:600, whiteSpace:'nowrap' }}>{p.cliente}</td>
-                    <td style={{ padding:'9px 12px', color:'var(--ccm-blue)', fontWeight:600, whiteSpace:'nowrap' }}>{p.ticket}</td>
-                    <td style={{ padding:'9px 12px', whiteSpace:'nowrap' }}>{p.analista||'—'}</td>
-                    <td style={{ padding:'9px 12px', maxWidth:140, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }} title={p.descritivo}>{p.descritivo}</td>
+                    <td style={{ padding:'9px 12px', fontWeight:600, whiteSpace:'nowrap' }}>{p.cliente.toUpperCase()}</td>
+                    <td style={{ padding:'9px 12px', color:'var(--ccm-blue)', fontWeight:600, whiteSpace:'nowrap' }}>{p.ticket.toUpperCase()}</td>
+                    <td style={{ padding:'9px 12px', whiteSpace:'nowrap' }}>{(p.analista||'—').toUpperCase()}</td>
+                    <td style={{ padding:'9px 12px', maxWidth:140, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }} title={p.descritivo}>{p.descritivo.toUpperCase()}</td>
                     <td style={{ padding:'9px 12px', whiteSpace:'nowrap' }}><span style={{ background:si.bg, color:si.color, borderRadius:99, padding:'3px 9px', fontSize:10, fontWeight:700 }}>{si.label}</span></td>
                     <td style={{ padding:'9px 12px', color:'var(--ccm-gray-dark)', whiteSpace:'nowrap' }}>{new Date(p.data+'T12:00:00').toLocaleDateString('pt-BR')}</td>
                     <td style={{ padding:'9px 12px', fontWeight:700, color:diasColor(p.dias), whiteSpace:'nowrap' }}>{p.dias!==null?`${p.dias}d`:'—'}</td>
