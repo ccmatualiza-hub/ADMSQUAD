@@ -295,6 +295,25 @@ async def delete_smartbook(
 
 # ── BI Stats ──────────────────────────────────────────────────────────────────
 
+@router.get("/bi/vpu-users")
+async def bi_vpu_users(
+    _: Annotated[dict, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> list[dict]:
+    try:
+        result = await session.execute(
+            text(
+                "SELECT razao, COALESCE(qtdusers,0) as qtdusers FROM tbl_linx "
+                "WHERE status IN ('6 - ATIVO','7 - ATIVO VPU') AND qtdusers > 0 "
+                "ORDER BY qtdusers DESC LIMIT 20"
+            )
+        )
+        rows = result.fetchall()
+        return [{"razao": r[0] or "", "qtdusers": int(r[1])} for r in rows]
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
 @router.get("/bi/stats")
 async def bi_stats(
     _: Annotated[dict, Depends(get_current_user)],

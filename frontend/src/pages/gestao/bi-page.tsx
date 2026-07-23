@@ -3,10 +3,14 @@ import { http } from '../../lib/http-client';
 
 export default function BiPage({ onBack }: { onBack: () => void }) {
   const [totalUsers, setTotalUsers] = useState<number | null>(null);
+  const [vpuData, setVpuData]       = useState<{ razao: string; qtdusers: number }[]>([]);
 
   useEffect(() => {
     http.get<{ total_users: number }>('/api/gestao/bi/stats')
       .then(d => setTotalUsers(d.total_users))
+      .catch(() => {});
+    http.get<{ razao: string; qtdusers: number }[]>('/api/gestao/bi/vpu-users')
+      .then(setVpuData)
       .catch(() => {});
   }, []);
 
@@ -19,16 +23,35 @@ export default function BiPage({ onBack }: { onBack: () => void }) {
     </div>
   );
 
-  const ChartBoxTall = ({ title }: { title: string }) => (
-    <div style={{ background: '#fff', border: '1px solid var(--ccm-line)', borderRadius: 8, padding: '16px 18px', boxShadow: '0 1px 4px rgba(12,25,33,.06)', height: '100%', boxSizing: 'border-box' }}>
-      <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ccm-ink)', marginBottom: 12 }}>{title}</div>
-      <div style={{ height: 'calc(100% - 36px)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#F7F8FA', borderRadius: 4, border: '1px dashed var(--ccm-line)' }}>
-        <span style={{ fontSize: 12, color: 'var(--ccm-gray-medium)' }}>
-          <i className="bi bi-bar-chart me-2" />Gráfico em breve
-        </span>
+  const VpuChart = () => {
+    const max = vpuData.length > 0 ? vpuData[0].qtdusers : 1;
+    return (
+      <div style={{ background: '#fff', border: '1px solid var(--ccm-line)', borderRadius: 8, padding: '16px 18px', boxShadow: '0 1px 4px rgba(12,25,33,.06)', height: '100%', boxSizing: 'border-box' }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ccm-ink)', marginBottom: 12 }}>Maiores clientes VPU — nº users</div>
+        {vpuData.length === 0 ? (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 200, background: '#F7F8FA', borderRadius: 4 }}>
+            <span style={{ fontSize: 12, color: 'var(--ccm-gray-medium)' }}><i className="bi bi-bar-chart me-2" />Carregando...</span>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 7, overflowY: 'auto', maxHeight: 420 }}>
+            {vpuData.map((d, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ fontSize: 10, color: 'var(--ccm-gray-dark)', width: 110, textAlign: 'right', flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={d.razao}>
+                  {d.razao.length > 14 ? d.razao.substring(0, 14) + '…' : d.razao}
+                </div>
+                <div style={{ flex: 1, height: 14, background: '#F0F4FA', borderRadius: 99, overflow: 'hidden' }}>
+                  <div style={{ width: `${Math.round((d.qtdusers / max) * 100)}%`, height: '100%', background: 'var(--ccm-blue)', borderRadius: 99 }} />
+                </div>
+                <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--ccm-blue)', width: 40, textAlign: 'left', flexShrink: 0 }}>
+                  {d.qtdusers >= 1000 ? `${(d.qtdusers / 1000).toFixed(1)}K` : d.qtdusers}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
-    </div>
-  );
+    );
+  };
 
   const ChartBox = ({ title }: { title: string }) => (
     <div style={{ background: '#fff', border: '1px solid var(--ccm-line)', borderRadius: 8, padding: '16px 18px', boxShadow: '0 1px 4px rgba(12,25,33,.06)' }}>
@@ -69,7 +92,7 @@ export default function BiPage({ onBack }: { onBack: () => void }) {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gridTemplateRows: 'auto auto', gap: 14 }}>
         {/* Left: tall chart spanning 2 rows */}
         <div style={{ gridRow: '1 / 3' }}>
-          <ChartBoxTall title="Maiores clientes VPU — nº users" />
+          <VpuChart />
         </div>
         {/* Top right: 2 charts */}
         <ChartBox title="Nº clientes / marcas" />
