@@ -138,7 +138,7 @@ export default function DailyPendencias({ onBack }: { onBack: () => void }) {
                     <td style={{ padding:'9px 12px', fontWeight:700, color:diasColor(p.dias), whiteSpace:'nowrap' }}>{p.dias!==null?`${p.dias}d`:'—'}</td>
                     <td style={{ padding:'9px 12px', whiteSpace:'nowrap' }}>
                       <div style={{ display:'flex', gap:5 }}>
-                        <button className="btn btn-sm" style={{ background:'var(--ccm-blue)', color:'#fff', fontSize:10, padding:'3px 9px' }} onClick={() => openEdit(p)}><i className="bi bi-pencil-fill me-1" />Editar</button>
+                        <button className="btn btn-sm" style={{ background: p.tratativa ? '#1DB954' : 'var(--ccm-blue)', color:'#fff', fontSize:10, padding:'3px 9px' }} onClick={() => openEdit(p)}><i className="bi bi-pencil-fill me-1" />Editar</button>
                         <button className="btn btn-sm" style={{ background:'#E74C3C', color:'#fff', fontSize:10, padding:'3px 9px' }} onClick={() => handleDelete(p.id)}><i className="bi bi-trash me-1" />Excluir</button>
                       </div>
                     </td>
