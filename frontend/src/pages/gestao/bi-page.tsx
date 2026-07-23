@@ -11,12 +11,23 @@ export default function BiPage({ onBack }: { onBack: () => void }) {
   }, []);
 
   const now = new Date();
-  const dataFmt = now.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+
 
   const KpiCard = ({ label, value, color }: { label: string; value: string; color: string }) => (
     <div style={{ background: '#fff', border: '1px solid var(--ccm-line)', borderRadius: 6, padding: '14px 16px', textAlign: 'center', boxShadow: '0 1px 4px rgba(12,25,33,.06)' }}>
       <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.1em', color: 'var(--ccm-gray-dark)', marginBottom: 6 }}>{label}</div>
       <div style={{ fontSize: 26, fontWeight: 900, color }}>{value}</div>
+    </div>
+  );
+
+  const ChartBoxTall = ({ title }: { title: string }) => (
+    <div style={{ background: '#fff', border: '1px solid var(--ccm-line)', borderRadius: 8, padding: '16px 18px', boxShadow: '0 1px 4px rgba(12,25,33,.06)', height: '100%', boxSizing: 'border-box' }}>
+      <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ccm-ink)', marginBottom: 12 }}>{title}</div>
+      <div style={{ height: 'calc(100% - 36px)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#F7F8FA', borderRadius: 4, border: '1px dashed var(--ccm-line)' }}>
+        <span style={{ fontSize: 12, color: 'var(--ccm-gray-medium)' }}>
+          <i className="bi bi-bar-chart me-2" />Gráfico em breve
+        </span>
+      </div>
     </div>
   );
 
@@ -42,10 +53,7 @@ export default function BiPage({ onBack }: { onBack: () => void }) {
         <span style={{ color: 'var(--ccm-gray-dark)', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.1em' }}>B.I. — Estatísticas de Squad</span>
       </div>
 
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: 20 }}>
-        <div style={{ fontSize: 12, color: 'var(--ccm-gray-dark)' }}>{dataFmt}</div>
-      </div>
+
 
       {/* KPI Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 10, marginBottom: 20 }}>
@@ -58,15 +66,16 @@ export default function BiPage({ onBack }: { onBack: () => void }) {
         <KpiCard label="SQL Server"      value="—" color="var(--ccm-ink)"     />
       </div>
 
-      {/* Charts row 1 */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14, marginBottom: 14 }}>
-        <ChartBox title="Maiores clientes VPU — nº users" />
+      {/* Charts layout */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gridTemplateRows: 'auto auto', gap: 14 }}>
+        {/* Left: tall chart spanning 2 rows */}
+        <div style={{ gridRow: '1 / 3' }}>
+          <ChartBoxTall title="Maiores clientes VPU — nº users" />
+        </div>
+        {/* Top right: 2 charts */}
         <ChartBox title="Nº clientes / marcas" />
         <ChartBox title="Nº clientes / sistemas" />
-      </div>
-
-      {/* Charts row 2 */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+        {/* Bottom right: 2 charts */}
         <ChartBox title="Grupos de atualização" />
         <ChartBox title="Outras consultas" />
       </div>
