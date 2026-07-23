@@ -305,11 +305,30 @@ async def bi_vpu_users(
             text(
                 "SELECT razao, COALESCE(qtdusers,0) as qtdusers FROM tbl_linx "
                 "WHERE status IN ('6 - ATIVO','7 - ATIVO VPU') AND qtdusers > 0 "
-                "ORDER BY qtdusers DESC LIMIT 20"
+                "ORDER BY qtdusers DESC LIMIT 25"
             )
         )
         rows = result.fetchall()
         return [{"razao": r[0] or "", "qtdusers": int(r[1])} for r in rows]
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
+@router.get("/bi/grupos-atualizacao")
+async def bi_grupos_atualizacao(
+    _: Annotated[dict, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> list[dict]:
+    try:
+        result = await session.execute(
+            text(
+                "SELECT COALESCE(NULLIF(TRIM(grupo),''), 'SEM GRUPO') as grupo, COUNT(*) as total "
+                "FROM tbl_linx WHERE status = '7 - ATIVO VPU' "
+                "GROUP BY grupo ORDER BY total DESC"
+            )
+        )
+        rows = result.fetchall()
+        return [{"grupo": r[0] or "SEM GRUPO", "total": int(r[1])} for r in rows]
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
 

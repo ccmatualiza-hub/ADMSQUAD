@@ -3,7 +3,8 @@ import { http } from '../../lib/http-client';
 
 export default function BiPage({ onBack }: { onBack: () => void }) {
   const [totalUsers, setTotalUsers] = useState<number | null>(null);
-  const [vpuData, setVpuData]       = useState<{ razao: string; qtdusers: number }[]>([]);
+  const [vpuData, setVpuData]         = useState<{ razao: string; qtdusers: number }[]>([]);
+  const [gruposData, setGruposData]   = useState<{ grupo: string; total: number }[]>([]);
 
   useEffect(() => {
     http.get<{ total_users: number }>('/api/gestao/bi/stats')
@@ -11,6 +12,9 @@ export default function BiPage({ onBack }: { onBack: () => void }) {
       .catch(() => {});
     http.get<{ razao: string; qtdusers: number }[]>('/api/gestao/bi/vpu-users')
       .then(setVpuData)
+      .catch(() => {});
+    http.get<{ grupo: string; total: number }[]>('/api/gestao/bi/grupos-atualizacao')
+      .then(setGruposData)
       .catch(() => {});
   }, []);
 
@@ -33,18 +37,44 @@ export default function BiPage({ onBack }: { onBack: () => void }) {
             <span style={{ fontSize: 12, color: 'var(--ccm-gray-medium)' }}><i className="bi bi-bar-chart me-2" />Carregando...</span>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 7, overflowY: 'auto', maxHeight: 420 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 5, overflowY: 'auto', maxHeight: 440 }}>
             {vpuData.map((d, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div style={{ fontSize: 10, color: 'var(--ccm-gray-dark)', width: 110, textAlign: 'right', flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={d.razao}>
-                  {d.razao.length > 14 ? d.razao.substring(0, 14) + '…' : d.razao}
+                <div style={{ fontSize: 9, color: 'var(--ccm-gray-dark)', width: 140, textAlign: 'right', flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={d.razao}>
+                  {d.razao}
                 </div>
-                <div style={{ flex: 1, height: 14, background: '#F0F4FA', borderRadius: 99, overflow: 'hidden' }}>
+                <div style={{ flex: 1, height: 10, background: '#F0F4FA', borderRadius: 99, overflow: 'hidden' }}>
                   <div style={{ width: `${Math.round((d.qtdusers / max) * 100)}%`, height: '100%', background: 'var(--ccm-blue)', borderRadius: 99 }} />
                 </div>
-                <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--ccm-blue)', width: 40, textAlign: 'left', flexShrink: 0 }}>
+                <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--ccm-blue)', width: 34, textAlign: 'left', flexShrink: 0 }}>
                   {d.qtdusers >= 1000 ? `${(d.qtdusers / 1000).toFixed(1)}K` : d.qtdusers}
                 </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const GruposChart = () => {
+    const maxG = gruposData.length > 0 ? gruposData[0].total : 1;
+    return (
+      <div style={{ background: '#fff', border: '1px solid var(--ccm-line)', borderRadius: 8, padding: '16px 18px', boxShadow: '0 1px 4px rgba(12,25,33,.06)' }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ccm-ink)', marginBottom: 12 }}>Grupos de atualização</div>
+        {gruposData.length === 0 ? (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 160, background: '#F7F8FA', borderRadius: 4 }}>
+            <span style={{ fontSize: 12, color: 'var(--ccm-gray-medium)' }}><i className="bi bi-bar-chart me-2" />Carregando...</span>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+            {gruposData.map((d, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ fontSize: 9, color: 'var(--ccm-gray-dark)', width: 60, textAlign: 'right', flexShrink: 0, fontWeight: 700 }}>{d.grupo}</div>
+                <div style={{ flex: 1, height: 16, background: '#F0F4FA', borderRadius: 99, overflow: 'hidden' }}>
+                  <div style={{ width: `${Math.round((d.total / maxG) * 100)}%`, height: '100%', background: '#204294', borderRadius: 99 }} />
+                </div>
+                <div style={{ fontSize: 10, fontWeight: 700, color: '#204294', width: 30, textAlign: 'left', flexShrink: 0 }}>{d.total}</div>
               </div>
             ))}
           </div>
@@ -98,7 +128,7 @@ export default function BiPage({ onBack }: { onBack: () => void }) {
         <ChartBox title="Nº clientes / marcas" />
         <ChartBox title="Nº clientes / sistemas" />
         {/* Bottom right: 2 charts */}
-        <ChartBox title="Grupos de atualização" />
+        <GruposChart />
         <ChartBox title="Outras consultas" />
       </div>
     </div>
