@@ -85,6 +85,11 @@ export default function DailyPendencias({ onBack }: { onBack: () => void }) {
     catch { toast.error('Erro ao excluir'); }
   };
 
+  const handleResolver = async (id: number) => {
+    try { await http.put(`/api/pendencias/${id}`, { status: 'resolvido' }); toast.success('Pendência resolvida!'); fetchData(); }
+    catch { toast.error('Erro ao resolver'); }
+  };
+
   const filtered = pendencias.filter(p =>
     [p.cliente, p.ticket, p.descritivo, p.analista].some(v => v.toLowerCase().includes(search.toLowerCase())) &&
     (filterStatus ? p.status === filterStatus : true)
@@ -139,6 +144,7 @@ export default function DailyPendencias({ onBack }: { onBack: () => void }) {
                     <td style={{ padding:'9px 12px', whiteSpace:'nowrap' }}>
                       <div style={{ display:'flex', gap:5 }}>
                         <button className="btn btn-sm" style={{ background: p.tratativa ? '#1DB954' : 'var(--ccm-blue)', color:'#fff', fontSize:10, padding:'3px 9px' }} onClick={() => openEdit(p)}><i className="bi bi-pencil-fill me-1" />Editar</button>
+                        <button className="btn btn-sm" style={{ background:'#1DB954', color:'#fff', fontSize:10, padding:'3px 9px', display: p.status === 'resolvido' ? 'none' : undefined }} onClick={() => handleResolver(p.id)}><i className="bi bi-check-lg me-1" />Resolver</button>
                         <button className="btn btn-sm" style={{ background:'#E74C3C', color:'#fff', fontSize:10, padding:'3px 9px' }} onClick={() => handleDelete(p.id)}><i className="bi bi-trash me-1" />Excluir</button>
                       </div>
                     </td>
