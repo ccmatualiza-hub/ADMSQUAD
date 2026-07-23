@@ -323,7 +323,7 @@ async def bi_grupos_atualizacao(
         result = await session.execute(
             text(
                 "SELECT COALESCE(NULLIF(TRIM(grupo),''), 'SEM GRUPO') as grupo, COUNT(*) as total "
-                "FROM tbl_linx WHERE status = '6 - ATIVO VPU' "
+                "FROM tbl_linx WHERE status = '6 - ATIVO' "
                 "GROUP BY grupo ORDER BY total DESC"
             )
         )
