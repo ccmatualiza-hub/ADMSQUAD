@@ -143,7 +143,7 @@ export default function DailyPendencias({ onBack }: { onBack: () => void }) {
                     <td style={{ padding:'9px 12px', fontWeight:700, color:diasColor(p.dias), whiteSpace:'nowrap' }}>{p.dias!==null?`${p.dias}d`:'—'}</td>
                     <td style={{ padding:'9px 12px', whiteSpace:'nowrap' }}>
                       <div style={{ display:'flex', gap:5 }}>
-                        <button className="btn btn-sm" style={{ background: p.tratativa ? '#1DB954' : 'var(--ccm-blue)', color:'#fff', fontSize:10, padding:'3px 9px' }} onClick={() => openEdit(p)}><i className="bi bi-pencil-fill me-1" />Editar</button>
+                        <button className="btn btn-sm" style={{ background: p.tratativa ? '#F9A825' : 'var(--ccm-blue)', color: p.tratativa ? '#5a4000' : '#fff', fontSize:10, padding:'3px 9px' }} onClick={() => openEdit(p)}><i className="bi bi-pencil-fill me-1" />Editar</button>
                         <button className="btn btn-sm" style={{ background:'#1DB954', color:'#fff', fontSize:10, padding:'3px 9px', display: p.status === 'resolvido' ? 'none' : undefined }} onClick={() => handleResolver(p.id)}><i className="bi bi-check-lg me-1" />Resolver</button>
                         <button className="btn btn-sm" style={{ background:'#E74C3C', color:'#fff', fontSize:10, padding:'3px 9px' }} onClick={() => handleDelete(p.id)}><i className="bi bi-trash me-1" />Excluir</button>
                       </div>
