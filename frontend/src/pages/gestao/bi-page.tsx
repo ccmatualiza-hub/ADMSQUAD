@@ -10,7 +10,6 @@ export default function BiPage({ onBack }: { onBack: () => void }) {
       .catch(() => {});
   }, []);
 
-  const now = new Date();
 
 
   const KpiCard = ({ label, value, color }: { label: string; value: string; color: string }) => (
