@@ -1,7 +1,6 @@
 export default function BiPage({ onBack }: { onBack: () => void }) {
   const now = new Date();
   const dataFmt = now.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
-  const horaFmt = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
   const KpiCard = ({ label, value, color }: { label: string; value: string; color: string }) => (
     <div style={{ background: '#fff', border: '1px solid var(--ccm-line)', borderRadius: 6, padding: '14px 16px', textAlign: 'center', boxShadow: '0 1px 4px rgba(12,25,33,.06)' }}>
