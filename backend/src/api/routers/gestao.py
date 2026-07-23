@@ -333,6 +333,35 @@ async def bi_grupos_atualizacao(
         raise HTTPException(status_code=500, detail=str(exc))
 
 
+@router.get("/bi/faixas-users")
+async def bi_faixas_users(
+    _: Annotated[dict, Depends(get_current_user)],
+    session: Annotated[AsyncSession, Depends(get_db)],
+) -> list[dict]:
+    try:
+        result = await session.execute(
+            text(
+                "SELECT "
+                "  SUM(CASE WHEN qtdusers BETWEEN 1   AND 30   THEN 1 ELSE 0 END) as f1_30, "
+                "  SUM(CASE WHEN qtdusers BETWEEN 31  AND 50   THEN 1 ELSE 0 END) as f31_50, "
+                "  SUM(CASE WHEN qtdusers BETWEEN 51  AND 100  THEN 1 ELSE 0 END) as f51_100, "
+                "  SUM(CASE WHEN qtdusers BETWEEN 101 AND 300  THEN 1 ELSE 0 END) as f101_300, "
+                "  SUM(CASE WHEN qtdusers BETWEEN 301 AND 1200 THEN 1 ELSE 0 END) as f301_1200 "
+                "FROM tbl_linx WHERE status = '6 - ATIVO' AND qtdusers > 0"
+            )
+        )
+        row = result.fetchone()
+        return [
+            {"faixa": "01 - 30",    "total": int(row[0] or 0)},
+            {"faixa": "31 - 50",    "total": int(row[1] or 0)},
+            {"faixa": "51 - 100",   "total": int(row[2] or 0)},
+            {"faixa": "101 - 300",  "total": int(row[3] or 0)},
+            {"faixa": "301 - 1200", "total": int(row[4] or 0)},
+        ]
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
 @router.get("/bi/stats")
 async def bi_stats(
     _: Annotated[dict, Depends(get_current_user)],
